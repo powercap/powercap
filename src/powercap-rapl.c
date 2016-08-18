@@ -18,6 +18,13 @@
 
 #define POWERCAP_BASEDIR "/sys/class/powercap"
 
+#ifndef POWERCAP_RAPL_CONSTRAINT_LONG
+  #define POWERCAP_RAPL_CONSTRAINT_LONG 0
+#endif
+#ifndef POWERCAP_RAPL_CONSTRAINT_SHORT
+  #define POWERCAP_RAPL_CONSTRAINT_SHORT 1
+#endif
+
 static int open_zone_file(uint32_t pkg, uint32_t pp, int is_pp, powercap_zone_file type, int flags, int* fd) {
   assert(fd != NULL);
   char buf[128];
@@ -93,13 +100,33 @@ static int open_constraint(uint32_t pkg, uint32_t pp, int is_pp, uint32_t constr
          open_constraint_file(pkg, pp, is_pp, POWERCAP_CONSTRAINT_FILE_NAME, constraint, O_RDONLY, &fds->name);
 }
 
+static int is_wrong_constraint(const powercap_constraint* fds, const char* expected_name) {
+  assert(fds != NULL);
+  assert(expected_name != NULL);
+  char buf[32] = { '\0' };
+  // assume constraint is wrong unless we can prove it's correct
+  return powercap_constraint_get_name(fds, buf, sizeof(buf)) <= 0 ||
+         strncmp(buf, expected_name, sizeof(buf)) != 0;
+}
+
 static int open_all(uint32_t pkg, uint32_t pp, int is_pp, powercap_rapl_zone_files* fds, int ro) {
   assert(fds != NULL);
-  // constraint files - constraint value is "0" for long_term constraints, "1" for short_term constraints
-  // TODO: Verify at runtime we are using the correct constraint values?
-  return open_zone(pkg, pp, is_pp, &fds->zone, ro) ||
-         open_constraint(pkg, pp, is_pp, 0, &fds->constraint_long, ro) ||
-         open_constraint(pkg, pp, is_pp, 1, &fds->constraint_short, ro);
+  powercap_constraint tmp;
+  if (open_zone(pkg, pp, is_pp, &fds->zone, ro) ||
+      open_constraint(pkg, pp, is_pp, POWERCAP_RAPL_CONSTRAINT_LONG, &fds->constraint_long, ro) ||
+      open_constraint(pkg, pp, is_pp, POWERCAP_RAPL_CONSTRAINT_SHORT, &fds->constraint_short, ro)) {
+    return 1;
+  }
+  // verify that constraints aren't reversed
+  // note: never actually seen this problem, but not 100% sure it can't happen, so check anyway...
+  if (is_wrong_constraint(&fds->constraint_long, "long_term") &&
+      is_wrong_constraint(&fds->constraint_short, "short_term")) {
+    // fprintf(stderr, "Warning: long and short term constraints are out of order for pkg %"PRIu32"\n", pkg);
+    memcpy(&tmp, &fds->constraint_short, sizeof(powercap_constraint));
+    memcpy(&fds->constraint_short, &fds->constraint_long, sizeof(powercap_constraint));
+    memcpy(&fds->constraint_long, &tmp, sizeof(powercap_constraint));
+  }
+  return 0;
 }
 
 static const powercap_rapl_zone_files* get_files(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone) {
