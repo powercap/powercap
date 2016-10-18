@@ -246,7 +246,8 @@ static inline uint32_t get_num_power_planes(uint32_t pkg) {
   snprintf(buf, sizeof(buf), POWERCAP_BASEDIR"/intel-rapl:%"PRIu32, pkg);
   DIR* dir = opendir(buf);
   for (errno = 0; dir != NULL && (entry = readdir(dir)) != NULL;) {
-    snprintf(buf, sizeof(buf), "intel-rapl:%"PRIu32":%"PRIu32, pkg, count);
+    // no order guarantee from readdir, just count 'intel-rapl:pkg:#' entries
+    snprintf(buf, sizeof(buf), "intel-rapl:%"PRIu32":", pkg);
     count += strncmp(entry->d_name, buf, strlen(buf)) ? 0 : 1;
   }
   err_save = errno; // from opendir or readdir
