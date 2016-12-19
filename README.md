@@ -90,3 +90,11 @@ Basic lifecycle example:
 
 Note that the interfaces do not guarantee that values are actually accepted by the kernel, they only notice errors if I/O operations fail.
 It is recommended that, at least during development/debugging, users read back to see if their write operations were successful.
+
+
+## Project Source
+
+Find this and related project sources at the [powercap organization on GitHub](https://github.com/powercap).  
+This project originates at: https://github.com/powercap/powercap
+
+Bug reports and pull requests for bug fixes and enhancements are welcome.

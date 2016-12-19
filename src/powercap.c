@@ -12,17 +12,16 @@
 #include "powercap.h"
 
 /**
- * Expects the content of the file to be a string representation of a 64-bit unsigned value.
+ * Expects and trusts the content of the file to be a string representation of a 64-bit unsigned value.
  * Read and load this value into the provided pointer.
  */
 static int read_u64(int fd, uint64_t* val) {
-  int ret = -1;
-  char data[24] = {'\0'};
+  char data[24];
   if (pread(fd, data, sizeof(data), 0) > 0) {
     *val = strtoull(data, NULL, 0);
-    ret = 0;
+    return 0;
   }
-  return ret;
+  return -1;
 }
 
 /**
@@ -36,17 +35,16 @@ static int write_u64(int fd, uint64_t val) {
 }
 
 /**
- * Expects the content of the file to be a string representation of an int.
+ * Expects and trusts the content of the file to be a string representation of an int.
  * Read and load this value into the provided pointer.
  */
 static int read_int(int fd, int* val) {
-  int ret = -1;
-  char data[16] = {'\0'};
+  char data[12];
   if (pread(fd, data, sizeof(data), 0) > 0) {
     *val = atoi(data);
-    ret = 0;
+    return 0;
   }
-  return ret;
+  return -1;
 }
 
 /**
@@ -63,8 +61,7 @@ static int write_int(int fd, int val) {
  * Read the contents of the file as a string up to 'size' chars.
  */
 static ssize_t read_string(int fd, char* buf, size_t size) {
-  ssize_t ret;
-  ret = pread(fd, buf, size, 0);
+  ssize_t ret = pread(fd, buf, size, 0);
   if (ret > 0) {
     // force a terminating character in the buffer
     if ((size_t) ret < size) {

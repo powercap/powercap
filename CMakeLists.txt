@@ -13,6 +13,9 @@ add_library(powercap src/powercap.c src/powercap-rapl.c)
 
 # Tests
 
+add_executable(powercap-test test/powercap-test.c)
+target_link_libraries(powercap-test powercap)
+
 add_executable(powercap-rapl-test test/powercap-rapl-test.c)
 target_link_libraries(powercap-rapl-test powercap)
 
@@ -21,7 +24,9 @@ macro(add_unit_test target)
   add_test(${target} ${EXECUTABLE_OUTPUT_PATH}/${target})
 endmacro(add_unit_test)
 
-add_unit_test(powercap-rapl-test)
+add_unit_test(powercap-test)
+# Requires a real system with root privileges
+# add_unit_test(powercap-rapl-test)
 
 # pkg-config
 

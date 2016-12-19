@@ -29,7 +29,6 @@ extern "C" {
 typedef struct powercap_rapl_zone_files {
   powercap_zone zone;
   powercap_constraint constraint_long;
-  // Note: not all zones have short constraints
   powercap_constraint constraint_short;
 } powercap_rapl_zone_files;
 

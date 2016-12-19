@@ -17,29 +17,33 @@
 #include "powercap.h"
 
 #define POWERCAP_BASEDIR "/sys/class/powercap"
+#define RAPL_PREFIX "intel-rapl:"
 
-#ifndef POWERCAP_RAPL_CONSTRAINT_LONG
-  #define POWERCAP_RAPL_CONSTRAINT_LONG 0
-#endif
-#ifndef POWERCAP_RAPL_CONSTRAINT_SHORT
-  #define POWERCAP_RAPL_CONSTRAINT_SHORT 1
-#endif
+#define CONSTRAINT_NUM_LONG 0
+#define CONSTRAINT_NUM_SHORT 1
+
+#define CONSTRAINT_NAME_LONG "long_term"
+#define CONSTRAINT_NAME_SHORT "short_term"
+
+#define PP_NAME_CORE "core"
+#define PP_NAME_UNCORE "uncore"
+#define PP_NAME_DRAM "dram"
+#define PP_NAME_PSYS "psys"
 
 static int open_zone_file(uint32_t pkg, uint32_t pp, int is_pp, powercap_zone_file type, int flags, int* fd) {
   assert(fd != NULL);
   char buf[128];
-  char file[40];
-  // get the filename based on the type
-  powercap_zone_file_get_name(type, file, sizeof(file));
-  // get the full file path
+  // first get the directory
   if (is_pp) {
     // a power plane - subdirectory of package
-    snprintf(buf, sizeof(buf), POWERCAP_BASEDIR"/intel-rapl:%"PRIu32"/intel-rapl:%"PRIu32":%"PRIu32"/%s",
-             pkg, pkg, pp, file);
+    snprintf(buf, sizeof(buf), POWERCAP_BASEDIR"/intel-rapl:%"PRIu32"/intel-rapl:%"PRIu32":%"PRIu32"/", pkg, pkg, pp);
   } else {
     // package-level only
-    snprintf(buf, sizeof(buf), POWERCAP_BASEDIR"/intel-rapl:%"PRIu32"/%s", pkg, file);
+    snprintf(buf, sizeof(buf), POWERCAP_BASEDIR"/intel-rapl:%"PRIu32"/", pkg);
   }
+  size_t len = strlen(buf);
+  // now append the filename based on the type
+  powercap_zone_file_get_name(type, buf + len, sizeof(buf) - len);
   // only try to open if file exists, otherwise set fd to 0
   if (access(buf, F_OK) != -1) {
     *fd = open(buf, flags);
@@ -58,18 +62,17 @@ static int open_zone_file(uint32_t pkg, uint32_t pp, int is_pp, powercap_zone_fi
 static int open_constraint_file(uint32_t pkg, uint32_t pp, int is_pp, powercap_constraint_file type, uint32_t constraint, int flags, int* fd) {
   assert(fd != NULL);
   char buf[128];
-  char file[40];
-  // get the filename based on the type and constraint
-  powercap_constraint_file_get_name(type, constraint, file, sizeof(file));
-  // get the full file path
+  // first get the directory
   if (is_pp) {
     // a power plane - subdirectory of package
-    snprintf(buf, sizeof(buf), POWERCAP_BASEDIR"/intel-rapl:%"PRIu32"/intel-rapl:%"PRIu32":%"PRIu32"/%s",
-             pkg, pkg, pp, file);
+    snprintf(buf, sizeof(buf), POWERCAP_BASEDIR"/intel-rapl:%"PRIu32"/intel-rapl:%"PRIu32":%"PRIu32"/", pkg, pkg, pp);
   } else {
     // package-level only
-    snprintf(buf, sizeof(buf), POWERCAP_BASEDIR"/intel-rapl:%"PRIu32"/%s", pkg, file);
+    snprintf(buf, sizeof(buf), POWERCAP_BASEDIR"/intel-rapl:%"PRIu32"/", pkg);
   }
+  // now append the filename based on the type and constraint
+  size_t len = strlen(buf);
+  powercap_constraint_file_get_name(type, constraint, buf + len, sizeof(buf) - len);
   // only try to open if file exists, otherwise set fd to 0
   if (access(buf, F_OK) != -1) {
     *fd = open(buf, flags);
@@ -103,7 +106,7 @@ static int open_constraint(uint32_t pkg, uint32_t pp, int is_pp, uint32_t constr
 static int is_wrong_constraint(const powercap_constraint* fds, const char* expected_name) {
   assert(fds != NULL);
   assert(expected_name != NULL);
-  char buf[32] = { '\0' };
+  char buf[32];
   // assume constraint is wrong unless we can prove it's correct
   return powercap_constraint_get_name(fds, buf, sizeof(buf)) <= 0 ||
          strncmp(buf, expected_name, sizeof(buf)) != 0;
@@ -113,14 +116,14 @@ static int open_all(uint32_t pkg, uint32_t pp, int is_pp, powercap_rapl_zone_fil
   assert(fds != NULL);
   powercap_constraint tmp;
   if (open_zone(pkg, pp, is_pp, &fds->zone, ro) ||
-      open_constraint(pkg, pp, is_pp, POWERCAP_RAPL_CONSTRAINT_LONG, &fds->constraint_long, ro) ||
-      open_constraint(pkg, pp, is_pp, POWERCAP_RAPL_CONSTRAINT_SHORT, &fds->constraint_short, ro)) {
+      open_constraint(pkg, pp, is_pp, CONSTRAINT_NUM_LONG, &fds->constraint_long, ro) ||
+      open_constraint(pkg, pp, is_pp, CONSTRAINT_NUM_SHORT, &fds->constraint_short, ro)) {
     return 1;
   }
   // verify that constraints aren't reversed
   // note: never actually seen this problem, but not 100% sure it can't happen, so check anyway...
-  if (is_wrong_constraint(&fds->constraint_long, "long_term") &&
-      is_wrong_constraint(&fds->constraint_short, "short_term")) {
+  if (is_wrong_constraint(&fds->constraint_long, CONSTRAINT_NAME_LONG) &&
+      is_wrong_constraint(&fds->constraint_short, CONSTRAINT_NAME_SHORT)) {
     // fprintf(stderr, "Warning: long and short term constraints are out of order for pkg %"PRIu32"\n", pkg);
     memcpy(&tmp, &fds->constraint_short, sizeof(powercap_constraint));
     memcpy(&fds->constraint_short, &fds->constraint_long, sizeof(powercap_constraint));
@@ -173,8 +176,12 @@ static const powercap_constraint* get_constraint_files(const powercap_rapl_pkg* 
   }
 }
 
-static int get_fd_for_zone_file(const powercap_zone* fds, powercap_zone_file file) {
-  assert(fds != NULL);
+static inline int get_zone_fd(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, powercap_zone_file file) {
+  assert(pkg != NULL);
+  const powercap_zone* fds = get_zone_files(pkg, zone);
+  if (fds == NULL) {
+    return -1;
+  }
   switch (file) {
     case POWERCAP_ZONE_FILE_MAX_ENERGY_RANGE_UJ:
       return fds->max_energy_range_uj;
@@ -194,8 +201,12 @@ static int get_fd_for_zone_file(const powercap_zone* fds, powercap_zone_file fil
   }
 }
 
-static inline int get_fd_for_constraint_file(const powercap_constraint* fds, powercap_constraint_file file) {
-  assert(fds != NULL);
+static inline int get_constraint_fd(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, powercap_rapl_constraint constraint, powercap_constraint_file file) {
+  assert(pkg != NULL);
+  const powercap_constraint* fds = get_constraint_files(pkg, zone, constraint);
+  if (fds == NULL) {
+    return -1;
+  }
   switch (file) {
     case POWERCAP_CONSTRAINT_FILE_POWER_LIMIT_UW:
       return fds->power_limit_uw;
@@ -217,26 +228,6 @@ static inline int get_fd_for_constraint_file(const powercap_constraint* fds, pow
   }
 }
 
-static inline int get_zone_fd(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, powercap_zone_file file) {
-  assert(pkg != NULL);
-  const powercap_zone* fds = get_zone_files(pkg, zone);
-  if (fds == NULL) {
-    errno = EINVAL;
-    return -1;
-  }
-  return get_fd_for_zone_file(fds, file);
-}
-
-static inline int get_constraint_fd(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, powercap_rapl_constraint constraint, powercap_constraint_file file) {
-  assert(pkg != NULL);
-  const powercap_constraint* fds = get_constraint_files(pkg, zone, constraint);
-  if (fds == NULL) {
-    errno = EINVAL;
-    return -1;
-  }
-  return get_fd_for_constraint_file(fds, file);
-}
-
 static inline uint32_t get_num_power_planes(uint32_t pkg) {
   // scan the sysfs directory
   uint32_t count = 0;
@@ -247,6 +238,7 @@ static inline uint32_t get_num_power_planes(uint32_t pkg) {
   DIR* dir = opendir(buf);
   for (errno = 0; dir != NULL && (entry = readdir(dir)) != NULL;) {
     // no order guarantee from readdir, just count 'intel-rapl:pkg:#' entries
+    // strlen(buf) really is what we want, rather than sizeof(buf), so we ignore the trailing numerals in entry->d_name
     snprintf(buf, sizeof(buf), "intel-rapl:%"PRIu32":", pkg);
     count += strncmp(entry->d_name, buf, strlen(buf)) ? 0 : 1;
   }
@@ -260,54 +252,24 @@ static inline uint32_t get_num_power_planes(uint32_t pkg) {
 
 static inline int get_pp_type(uint32_t pkg, uint32_t pp, powercap_rapl_zone* zone) {
   assert(zone != NULL);
-  // optionally define at compile time
-#ifdef PP_CORE
-  if (pp == PP_CORE) {
-    *zone = POWERCAP_RAPL_ZONE_CORE;
-    return 0;
-  }
-#endif
-#ifdef PP_UNCORE
-  if (pp == PP_UNCORE) {
-    *zone = POWERCAP_RAPL_ZONE_UNCORE;
-    return 0;
-  }
-#endif
-#ifdef PP_DRAM
-  if (pp == PP_DRAM) {
-    *zone = POWERCAP_RAPL_ZONE_DRAM;
-    return 0
-  }
-#endif
-#ifdef PP_PSYS
-  if (pp == PP_PSYS) {
-    *zone = POWERCAP_RAPL_ZONE_PSYS;
-    return 0
-  }
-#endif
-  // if not defined at compile time, try and look up the name
-  static const char* const NAME_CORE = "core";
-  static const char* const NAME_UNCORE = "uncore";
-  static const char* const NAME_DRAM = "dram";
-  static const char* const NAME_PSYS = "psys";
   char buf[128];
-  char name[8] = {'\0'};
+  char name[8];
   int ret = -1;
-  // try the name file
   snprintf(buf, sizeof(buf), POWERCAP_BASEDIR"/intel-rapl:%"PRIu32"/intel-rapl:%"PRIu32":%"PRIu32"/name", pkg, pkg, pp);
   FILE* f = fopen(buf, "r");
   if (f != NULL) {
     if (fgets(name, sizeof(name), f) != NULL) {
-      if (!strncmp(name, NAME_CORE, strlen(NAME_CORE))) {
+      // we use "sizeof(...)-1" as max number of chars to compare so we ignore newline characters in the name buffer
+      if (!strncmp(name, PP_NAME_CORE, sizeof(PP_NAME_CORE) - 1)) {
         *zone = POWERCAP_RAPL_ZONE_CORE;
         ret = 0;
-      } else if (!strncmp(name, NAME_UNCORE, strlen(NAME_UNCORE))) {
+      } else if (!strncmp(name, PP_NAME_UNCORE, sizeof(PP_NAME_UNCORE) - 1)) {
         *zone = POWERCAP_RAPL_ZONE_UNCORE;
         ret = 0;
-      } else if (!strncmp(name, NAME_DRAM, strlen(NAME_DRAM))) {
+      } else if (!strncmp(name, PP_NAME_DRAM, sizeof(PP_NAME_DRAM) - 1)) {
         *zone = POWERCAP_RAPL_ZONE_DRAM;
         ret = 0;
-      } else if (!strncmp(name, NAME_PSYS, strlen(NAME_PSYS))) {
+      } else if (!strncmp(name, PP_NAME_PSYS, sizeof(PP_NAME_PSYS) - 1)) {
         *zone = POWERCAP_RAPL_ZONE_PSYS;
         ret = 0;
       }
@@ -322,17 +284,19 @@ uint32_t powercap_rapl_get_num_packages(void) {
   uint32_t count = 0;
   int err_save;
   struct dirent* entry;
-  char buf[24];
   DIR* dir = opendir(POWERCAP_BASEDIR);
-  for (errno = 0; dir != NULL && (entry = readdir(dir)) != NULL;) {
-    snprintf(buf, sizeof(buf), "intel-rapl:%"PRIu32, count);
-    count += strncmp(entry->d_name, buf, strlen(buf)) ? 0 : 1;
-  }
-  err_save = errno; // from opendir or readdir
   if (dir != NULL) {
+    for (errno = 0; (entry = readdir(dir)) != NULL;) {
+      // no order guarantee from readdir, so just count directories of the form "intel-rapl:#", but not "intel-rapl:#:#"
+      if (strncmp(entry->d_name, RAPL_PREFIX, sizeof(RAPL_PREFIX) - 1) == 0 &&
+          strchr(entry->d_name + sizeof(RAPL_PREFIX) - 1, ':') == NULL) {
+        count++;
+      }
+    }
+    err_save = errno; // from opendir or readdir
     closedir(dir);
+    errno = err_save;
   }
-  errno = err_save;
   return errno ? 0 : count;
 }
 
@@ -428,15 +392,13 @@ static int fds_destroy_all(powercap_rapl_zone_files* files) {
 
 int powercap_rapl_destroy(powercap_rapl_pkg* pkg) {
   int ret = 0;
-  if (pkg == NULL) {
-    errno = EINVAL;
-    return -1;
+  if (pkg != NULL) {
+    ret |= fds_destroy_all(&pkg->pkg);
+    ret |= fds_destroy_all(&pkg->core);
+    ret |= fds_destroy_all(&pkg->uncore);
+    ret |= fds_destroy_all(&pkg->dram);
+    ret |= fds_destroy_all(&pkg->psys);
   }
-  ret |= fds_destroy_all(&pkg->pkg);
-  ret |= fds_destroy_all(&pkg->core);
-  ret |= fds_destroy_all(&pkg->uncore);
-  ret |= fds_destroy_all(&pkg->dram);
-  ret |= fds_destroy_all(&pkg->psys);
   return ret;
 }
 
@@ -470,7 +432,7 @@ int powercap_rapl_is_constraint_file_supported(const powercap_rapl_pkg* pkg, pow
 
 ssize_t powercap_rapl_get_name(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, char* buf, size_t size) {
   const powercap_zone* fds = get_zone_files(pkg, zone);
-  return fds == NULL ? - 1 : powercap_zone_get_name(fds, buf, size);
+  return fds == NULL ? -1 : powercap_zone_get_name(fds, buf, size);
 }
 
 int powercap_rapl_is_enabled(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone) {
@@ -480,80 +442,79 @@ int powercap_rapl_is_enabled(const powercap_rapl_pkg* pkg, powercap_rapl_zone zo
     powercap_zone_get_enabled(fds, &enabled);
   }
   return enabled;
-
 }
 
 int powercap_rapl_set_enabled(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, int enabled) {
   const powercap_zone* fds = get_zone_files(pkg, zone);
-  return fds == NULL ? - 1 : powercap_zone_set_enabled(fds, enabled);
+  return fds == NULL ? -1 : powercap_zone_set_enabled(fds, enabled);
 }
 
 int powercap_rapl_get_max_energy_range_uj(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, uint64_t* val) {
   const powercap_zone* fds = get_zone_files(pkg, zone);
-  return fds == NULL ? - 1 : powercap_zone_get_max_energy_range_uj(fds, val);
+  return fds == NULL ? -1 : powercap_zone_get_max_energy_range_uj(fds, val);
 }
 
 int powercap_rapl_get_energy_uj(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, uint64_t* val) {
   const powercap_zone* fds = get_zone_files(pkg, zone);
-  return fds == NULL ? - 1 : powercap_zone_get_energy_uj(fds, val);
+  return fds == NULL ? -1 : powercap_zone_get_energy_uj(fds, val);
 }
 
 int powercap_rapl_reset_energy_uj(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone) {
   const powercap_zone* fds = get_zone_files(pkg, zone);
-  return fds == NULL ? - 1 : powercap_zone_reset_energy_uj(fds);
+  return fds == NULL ? -1 : powercap_zone_reset_energy_uj(fds);
 }
 
 int powercap_rapl_get_max_power_range_uw(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, uint64_t* val) {
   const powercap_zone* fds = get_zone_files(pkg, zone);
-  return fds == NULL ? - 1 : powercap_zone_get_max_power_range_uw(fds, val);
+  return fds == NULL ? -1 : powercap_zone_get_max_power_range_uw(fds, val);
 }
 
 int powercap_rapl_get_power_uw(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, uint64_t* val) {
   const powercap_zone* fds = get_zone_files(pkg, zone);
-  return fds == NULL ? - 1 : powercap_zone_get_power_uw(fds, val);
+  return fds == NULL ? -1 : powercap_zone_get_power_uw(fds, val);
 }
 
 int powercap_rapl_get_max_power_uw(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, powercap_rapl_constraint constraint, uint64_t* val) {
   const powercap_constraint* fds = get_constraint_files(pkg, zone, constraint);
-  return fds == NULL ? - 1 : powercap_constraint_get_max_power_uw(fds, val);
+  return fds == NULL ? -1 : powercap_constraint_get_max_power_uw(fds, val);
 }
 
 int powercap_rapl_get_min_power_uw(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, powercap_rapl_constraint constraint, uint64_t* val) {
   const powercap_constraint* fds = get_constraint_files(pkg, zone, constraint);
-  return fds == NULL ? - 1 : powercap_constraint_get_min_power_uw(fds, val);
+  return fds == NULL ? -1 : powercap_constraint_get_min_power_uw(fds, val);
 }
 
 int powercap_rapl_get_power_limit_uw(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, powercap_rapl_constraint constraint, uint64_t* val) {
   const powercap_constraint* fds = get_constraint_files(pkg, zone, constraint);
-  return fds == NULL ? - 1 : powercap_constraint_get_power_limit_uw(fds, val);
+  return fds == NULL ? -1 : powercap_constraint_get_power_limit_uw(fds, val);
 }
 
 int powercap_rapl_set_power_limit_uw(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, powercap_rapl_constraint constraint, uint64_t val) {
   const powercap_constraint* fds = get_constraint_files(pkg, zone, constraint);
-  return fds == NULL ? - 1 : powercap_constraint_set_power_limit_uw(fds, val);
+  return fds == NULL ? -1 : powercap_constraint_set_power_limit_uw(fds, val);
 }
 
 int powercap_rapl_get_max_time_window_us(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, powercap_rapl_constraint constraint, uint64_t* val) {
   const powercap_constraint* fds = get_constraint_files(pkg, zone, constraint);
-  return fds == NULL ? - 1 : powercap_constraint_get_max_time_window_us(fds, val);
+  return fds == NULL ? -1 : powercap_constraint_get_max_time_window_us(fds, val);
 }
 
 int powercap_rapl_get_min_time_window_us(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, powercap_rapl_constraint constraint, uint64_t* val) {
   const powercap_constraint* fds = get_constraint_files(pkg, zone, constraint);
-  return fds == NULL ? - 1 : powercap_constraint_get_min_time_window_us(fds, val);
+  return fds == NULL ? -1 : powercap_constraint_get_min_time_window_us(fds, val);
 }
 
 int powercap_rapl_get_time_window_us(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, powercap_rapl_constraint constraint, uint64_t* val) {
   const powercap_constraint* fds = get_constraint_files(pkg, zone, constraint);
-  return fds == NULL ? - 1 : powercap_constraint_get_time_window_us(fds, val);
+  return fds == NULL ? -1 : powercap_constraint_get_time_window_us(fds, val);
 }
 
 int powercap_rapl_set_time_window_us(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, powercap_rapl_constraint constraint, uint64_t val) {
   const powercap_constraint* fds = get_constraint_files(pkg, zone, constraint);
-  return fds == NULL ? - 1 : powercap_constraint_set_time_window_us(fds, val);
+  return fds == NULL ? -1 : powercap_constraint_set_time_window_us(fds, val);
 }
 
 ssize_t powercap_rapl_get_constraint_name(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, powercap_rapl_constraint constraint, char* buf, size_t size) {
   const powercap_constraint* fds = get_constraint_files(pkg, zone, constraint);
-  return fds == NULL ? - 1 : powercap_constraint_get_name(fds, buf, size);
+  return fds == NULL ? -1 : powercap_constraint_get_name(fds, buf, size);
 }
