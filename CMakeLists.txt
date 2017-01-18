@@ -32,7 +32,7 @@ add_unit_test(powercap-test)
 
 set(PKG_CONFIG_EXEC_PREFIX "\${prefix}")
 set(PKG_CONFIG_LIBDIR "\${prefix}/lib")
-set(PKG_CONFIG_INCLUDEDIR "\${prefix}/include")
+set(PKG_CONFIG_INCLUDEDIR "\${prefix}/include/${PROJECT_NAME}")
 set(PKG_CONFIG_CFLAGS "-I\${includedir}")
 
 set(PKG_CONFIG_NAME "${PROJECT_NAME}")
@@ -47,7 +47,7 @@ configure_file(
 # Install
 
 install(TARGETS powercap DESTINATION lib)
-install(FILES inc/powercap.h inc/powercap-rapl.h DESTINATION include)
+install(FILES inc/powercap.h inc/powercap-rapl.h DESTINATION include/${PROJECT_NAME})
 install(DIRECTORY ${CMAKE_BINARY_DIR}/pkgconfig/ DESTINATION lib/pkgconfig)
 
 # Uninstall
