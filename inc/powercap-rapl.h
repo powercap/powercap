@@ -19,9 +19,9 @@
 extern "C" {
 #endif
 
-#include <powercap.h>
 #include <stdint.h>
 #include <unistd.h>
+#include "powercap.h"
 
 /**
  * Files for each zone.
