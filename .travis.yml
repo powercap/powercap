@@ -10,6 +10,10 @@ addons:
 
 language: c
 
+compiler:
+  - gcc
+  - clang
+
 script:
   - mkdir _build
   - cd _build
