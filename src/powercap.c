@@ -4,11 +4,12 @@
  * @author Connor Imes
  * @date 2016-06-01
  */
+// for pread, pwrite
+#define _POSIX_C_SOURCE 200809L
 #include <errno.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include "powercap.h"
 
 /**

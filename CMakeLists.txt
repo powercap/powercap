@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8.9)
 project(powercap)
 set(PROJECT_VERSION 0.1.0)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99")
 
 include_directories(${PROJECT_SOURCE_DIR}/inc)
 

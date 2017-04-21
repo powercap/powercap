@@ -4,6 +4,8 @@
  * @author Connor Imes
  * @date 2016-05-12
  */
+// for opendir
+#define _POSIX_C_SOURCE 200809L
 #include <assert.h>
 #include <dirent.h>
 #include <errno.h>
