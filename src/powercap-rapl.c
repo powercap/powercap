@@ -15,8 +15,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "powercap-rapl.h"
 #include "powercap.h"
+#include "powercap-common.h"
+#include "powercap-rapl.h"
 
 #define POWERCAP_BASEDIR "/sys/class/powercap"
 #define RAPL_PREFIX "intel-rapl:"
@@ -51,11 +52,20 @@ static int open_zone_file(uint32_t pkg, uint32_t pp, int is_pp, powercap_zone_fi
     *fd = open(buf, flags);
     // special case for energy_uj (it's sometimes read-only):
     // TODO: Using "access(buf, W_OK) == 0" as superuser seems to always be true, so we had to try to open instead
-    if (*fd < 0 && errno == EACCES && type == POWERCAP_ZONE_FILE_ENERGY_UJ) {
-      errno = 0;
-      *fd = open(buf, O_RDONLY);
+    if (*fd < 0) {
+      if (errno == EACCES && type == POWERCAP_ZONE_FILE_ENERGY_UJ) {
+        errno = 0;
+        *fd = open(buf, O_RDONLY);
+        if (*fd < 0) {
+          LOG(ERROR, "open_zone_file: open (RO): %s: %s\n", buf, strerror(errno));
+        }
+      } else {
+        LOG(ERROR, "open_zone_file: open: %s: %s\n", buf, strerror(errno));
+      }
     }
   } else {
+    // No such file or directory
+    LOG(DEBUG, "open_zone_file: access: %s: %s\n", buf, strerror(errno));
     *fd = 0;
   }
   return *fd < 0;
@@ -78,7 +88,12 @@ static int open_constraint_file(uint32_t pkg, uint32_t pp, int is_pp, powercap_c
   // only try to open if file exists, otherwise set fd to 0
   if (access(buf, F_OK) != -1) {
     *fd = open(buf, flags);
+    if (*fd < 0) {
+      LOG(ERROR, "open_constraint_file: open: %s: %s\n", buf, strerror(errno));
+    }
   } else {
+    // No such file or directory
+    LOG(DEBUG, "open_constraint_file: access: %s: %s\n", buf, strerror(errno));
     *fd = 0;
   }
   return *fd < 0;
@@ -126,7 +141,7 @@ static int open_all(uint32_t pkg, uint32_t pp, int is_pp, powercap_rapl_zone_fil
   // note: never actually seen this problem, but not 100% sure it can't happen, so check anyway...
   if (is_wrong_constraint(&fds->constraint_long, CONSTRAINT_NAME_LONG) &&
       is_wrong_constraint(&fds->constraint_short, CONSTRAINT_NAME_SHORT)) {
-    // fprintf(stderr, "Warning: long and short term constraints are out of order for pkg %"PRIu32"\n", pkg);
+    LOG(WARN, "open_all: long and short term constraints are out of order for pkg %"PRIu32"\n", pkg);
     memcpy(&tmp, &fds->constraint_short, sizeof(powercap_constraint));
     memcpy(&fds->constraint_short, &fds->constraint_long, sizeof(powercap_constraint));
     memcpy(&fds->constraint_long, &tmp, sizeof(powercap_constraint));
@@ -149,6 +164,7 @@ static const powercap_rapl_zone_files* get_files(const powercap_rapl_pkg* pkg, p
       return &pkg->psys;
     default:
       // somebody passed a bad zone type
+      LOG(ERROR, "get_files: Bad powercap_rapl_zone: %d\n", zone);
       errno = EINVAL;
       return NULL;
   }
@@ -173,12 +189,13 @@ static const powercap_constraint* get_constraint_files(const powercap_rapl_pkg* 
       return &fds->constraint_short;
     default:
       // somebody passed a bad constraint type
+      LOG(ERROR, "get_constraint_files: Bad powercap_rapl_constraint: %d\n", constraint);
       errno = EINVAL;
       return NULL;
   }
 }
 
-static inline int get_zone_fd(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, powercap_zone_file file) {
+static int get_zone_fd(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, powercap_zone_file file) {
   assert(pkg != NULL);
   const powercap_zone* fds = get_zone_files(pkg, zone);
   if (fds == NULL) {
@@ -198,12 +215,13 @@ static inline int get_zone_fd(const powercap_rapl_pkg* pkg, powercap_rapl_zone z
     case POWERCAP_ZONE_FILE_NAME:
       return fds->name;
     default:
+      LOG(ERROR, "get_zone_fd: Bad powercap_zone_file: %d\n", file);
       errno = EINVAL;
       return -1;
   }
 }
 
-static inline int get_constraint_fd(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, powercap_rapl_constraint constraint, powercap_constraint_file file) {
+static int get_constraint_fd(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, powercap_rapl_constraint constraint, powercap_constraint_file file) {
   assert(pkg != NULL);
   const powercap_constraint* fds = get_constraint_files(pkg, zone, constraint);
   if (fds == NULL) {
@@ -225,12 +243,13 @@ static inline int get_constraint_fd(const powercap_rapl_pkg* pkg, powercap_rapl_
     case POWERCAP_CONSTRAINT_FILE_NAME:
       return fds->name;
     default:
+      LOG(ERROR, "get_constraint_fd: Bad powercap_constraint_file: %d\n", file);
       errno = EINVAL;
       return -1;
   }
 }
 
-static inline uint32_t get_num_power_planes(uint32_t pkg) {
+static uint32_t get_num_power_planes(uint32_t pkg) {
   // scan the sysfs directory
   uint32_t count = 0;
   int err_save;
@@ -238,29 +257,39 @@ static inline uint32_t get_num_power_planes(uint32_t pkg) {
   char buf[64];
   snprintf(buf, sizeof(buf), POWERCAP_BASEDIR"/intel-rapl:%"PRIu32, pkg);
   DIR* dir = opendir(buf);
-  for (errno = 0; dir != NULL && (entry = readdir(dir)) != NULL;) {
-    // no order guarantee from readdir, just count 'intel-rapl:pkg:#' entries
-    // strlen(buf) really is what we want, rather than sizeof(buf), so we ignore the trailing numerals in entry->d_name
-    snprintf(buf, sizeof(buf), "intel-rapl:%"PRIu32":", pkg);
-    count += strncmp(entry->d_name, buf, strlen(buf)) ? 0 : 1;
+  if (dir == NULL) {
+    LOG(ERROR, "get_num_power_planes: opendir: %s: %s\n", buf, strerror(errno));
+  } else {
+    for (errno = 0; (entry = readdir(dir)) != NULL;) {
+      // no order guarantee from readdir, just count 'intel-rapl:pkg:#' entries
+      // strlen(buf) really is what we want, rather than sizeof(buf), so we ignore the trailing numerals in entry->d_name
+      snprintf(buf, sizeof(buf), "intel-rapl:%"PRIu32":", pkg);
+      count += strncmp(entry->d_name, buf, strlen(buf)) ? 0 : 1;
+    }
+    err_save = errno; // from readdir
+    if (closedir(dir)) {
+      LOG(WARN, "get_num_power_planes: closedir: %s: %s\n", buf, strerror(errno));
+    }
+    errno = err_save;
   }
-  err_save = errno; // from opendir or readdir
-  if (dir != NULL) {
-    closedir(dir);
-  }
-  errno = err_save;
   return errno ? 0 : count;
 }
 
-static inline int get_pp_type(uint32_t pkg, uint32_t pp, powercap_rapl_zone* zone) {
+static int get_pp_type(uint32_t pkg, uint32_t pp, powercap_rapl_zone* zone) {
   assert(zone != NULL);
   char buf[128];
   char name[8];
   int ret = -1;
+  int err_save;
   snprintf(buf, sizeof(buf), POWERCAP_BASEDIR"/intel-rapl:%"PRIu32"/intel-rapl:%"PRIu32":%"PRIu32"/name", pkg, pkg, pp);
   FILE* f = fopen(buf, "r");
-  if (f != NULL) {
-    if (fgets(name, sizeof(name), f) != NULL) {
+  if (f == NULL) {
+    LOG(ERROR, "get_pp_type: fopen: %s: %s\n", buf, strerror(errno));
+  } else {
+    if (fgets(name, sizeof(name), f) == NULL) {
+      errno = ENODATA;
+      LOG(ERROR, "get_pp_type: fgets: %s: %s\n", buf, strerror(errno));
+    } else {
       // we use "sizeof(...)-1" as max number of chars to compare so we ignore newline characters in the name buffer
       if (!strncmp(name, PP_NAME_CORE, sizeof(PP_NAME_CORE) - 1)) {
         *zone = POWERCAP_RAPL_ZONE_CORE;
@@ -276,7 +305,11 @@ static inline int get_pp_type(uint32_t pkg, uint32_t pp, powercap_rapl_zone* zon
         ret = 0;
       }
     }
-    fclose(f);
+    err_save = errno;
+    if (fclose(f)) {
+      LOG(WARN, "get_pp_type: fclose: %s: %s\n", buf, strerror(errno));
+    }
+    errno = err_save;
   }
   return ret;
 }
@@ -287,7 +320,9 @@ uint32_t powercap_rapl_get_num_packages(void) {
   int err_save;
   struct dirent* entry;
   DIR* dir = opendir(POWERCAP_BASEDIR);
-  if (dir != NULL) {
+  if (dir == NULL) {
+    LOG(ERROR, "powercap_rapl_get_num_packages: opendir: %s: %s\n", POWERCAP_BASEDIR, strerror(errno));
+  } else {
     for (errno = 0; (entry = readdir(dir)) != NULL;) {
       // no order guarantee from readdir, so just count directories of the form "intel-rapl:#", but not "intel-rapl:#:#"
       if (strncmp(entry->d_name, RAPL_PREFIX, sizeof(RAPL_PREFIX) - 1) == 0 &&
@@ -295,8 +330,10 @@ uint32_t powercap_rapl_get_num_packages(void) {
         count++;
       }
     }
-    err_save = errno; // from opendir or readdir
-    closedir(dir);
+    err_save = errno; // from readdir
+    if (closedir(dir)) {
+      LOG(WARN, "powercap_rapl_get_num_packages: closedir: %s: %s\n", POWERCAP_BASEDIR, strerror(errno));
+    }
     errno = err_save;
   }
   return errno ? 0 : count;
@@ -354,7 +391,7 @@ int powercap_rapl_init(uint32_t package, powercap_rapl_pkg* pkg, int read_only) 
   return ret;
 }
 
-static inline int powercap_rapl_close(int fd) {
+static int powercap_rapl_close(int fd) {
   return fd > 0 ? close(fd) : 0;
 }
 
