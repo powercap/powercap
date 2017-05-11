@@ -64,7 +64,7 @@ typedef enum powercap_rapl_constraint {
 
 /**
  * Get the number of packages/sockets found.
- * Returns 0 if no packages are found, and errno is set if there was an error in searching.
+ * Returns 0 and sets errno if none are found.
  */
 uint32_t powercap_rapl_get_num_packages(void);
 

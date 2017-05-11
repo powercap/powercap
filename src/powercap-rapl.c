@@ -335,6 +335,10 @@ uint32_t powercap_rapl_get_num_packages(void) {
       LOG(WARN, "powercap_rapl_get_num_packages: closedir: %s: %s\n", POWERCAP_BASEDIR, strerror(errno));
     }
     errno = err_save;
+    if (count == 0 && !errno) {
+      LOG(ERROR, "powercap_rapl_get_num_packages: No packages found - is the intel_rapl kernel module loaded?\n");
+      errno = ENOENT;
+    }
   }
   return errno ? 0 : count;
 }
