@@ -3,6 +3,9 @@
 This project provides the `powercap` library -- a generic C interface to the Linux powercap sysfs interface.
 It includes an implementation for working with Intel Running Average Power Limit (RAPL).
 
+These bindings were originally created for use with [RAPLCap](https://github.com/powercap/raplcap), but can be used independently.
+See the RAPLCap project for a more general interface for managing RAPL power caps, including command line utilities.
+
 ## Prerequisites
 
 Powercap (with the RAPL implementation) was released with Linux kernel 3.13.
@@ -62,9 +65,7 @@ Basic lifecycle example:
   uint32_t npackages = powercap_rapl_get_num_packages();
   if (npackages == 0) {
     // no packages found (maybe the kernel module isn't loaded?)
-    if (errno) {
-      perror("powercap_rapl_get_num_packages")
-    }
+    perror("powercap_rapl_get_num_packages")
     return -1;
   }
   powercap_rapl_pkg* pkgs = malloc(npackages * sizeof(powercap_rapl_pkg));
