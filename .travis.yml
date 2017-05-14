@@ -1,13 +1,6 @@
 os:
   - linux
 
-addons:
-  apt:
-    sources:
-      - kubuntu-backports
-    packages:
-      - cmake
-
 language: c
 
 compiler:
@@ -18,5 +11,5 @@ script:
   - mkdir _build
   - cd _build
   - cmake ..
-  - make
-  - make test
+  - cmake --build .
+  - ctest --verbose
