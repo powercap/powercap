@@ -33,10 +33,10 @@ typedef enum powercap_loglevel {
   (severity) == WARN  ? "[WARN] " : \
                         "[ERROR]"
 
-#define LOG(severity, args...) \
+#define LOG(severity, ...) \
   do { if ((severity) >= POWERCAP_LOG_LEVEL) { \
       fprintf(TO_FILE((severity)), "%s [powercap] ", TO_LOG_PREFIX((severity))); \
-      fprintf(TO_FILE((severity)), args); \
+      fprintf(TO_FILE((severity)), __VA_ARGS__); \
     } } while (0)
 
 #ifdef __cplusplus

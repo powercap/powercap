@@ -10,6 +10,11 @@ compiler:
 script:
   - mkdir _build
   - cd _build
-  - cmake ..
+  # Test build with stricter flags
+  - export CFLAGS="-D_FORTIFY_SOURCE=2 -fstack-protector -g3 -pedantic -W -Wall -Wbad-function-cast -Wcast-align
+      -Wcast-qual -Wdisabled-optimization -Wendif-labels -Wfloat-equal -Wformat=2 -Wformat-nonliteral -Winline
+      -Wmissing-declarations -Wmissing-prototypes -Wnested-externs -Wno-unused-parameter -Wpointer-arith -Wshadow
+      -Wstrict-prototypes -Wstack-protector -Wswitch -Wundef -Wwrite-strings -std=c99"
+  - cmake .. -DCMAKE_C_FLAGS="$CFLAGS"
   - cmake --build .
   - ctest --verbose
