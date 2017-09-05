@@ -1,0 +1,98 @@
+.TH "rapl-info" "1" "2017" "rapl-info" "rapl-info"
+.SH "NAME"
+.LP
+rapl\-info \- get RAPL configurations
+.SH "SYNPOSIS"
+.LP
+\fBrapl\-info\fB [\fIOPTION\fP]...
+.SH "DESCRIPTION"
+.LP
+Prints out Intel Running Average Power Limit (RAPL) configurations.
+.TP
+Since RAPL does not implement all capabilities defined in the powercap interface, only a subset of the options seen powercap-info(1) are available.  Additionally, the \-p and \-z options are different.
+.SH "OPTIONS"
+.LP
+.TP
+\fB\-h,\fR \fB\-\-help\fR
+Prints out the help screen
+.TP
+\fB\-v,\fR \fB\-\-verbose\fR
+Print errors when files are not available
+.TP
+\fB\-p,\fR \fB\-\-package\fR=\fIPACKAGE\fP
+The package number to use. Ending with a colon prevents output for subzones. E.g. for package 0, but not subzones:
+.br
+\fB\-p 0:\fP
+.TP
+\fB\-z,\fR \fB\-\-subzone=\fR\fISUBZONE\fP
+The subzone number to use
+.TP
+\fB\-c,\fR \fB\-\-constraint\fR=\fICONSTRAINT\fP
+The constraint number to use
+.TP
+All remaining options below are mutually exclusive:
+.TP
+\fB\-n,\fR \fB\-\-npackages\fR
+Print the number of packages found
+.TP
+The following are zone-level arguments:
+.TP
+\fB\-j,\fR \fB\-\-z\-energy\fR
+Print zone energy counter
+.TP
+\fB\-J,\fR \fB\-\-z\-max\-energy\-range\fR
+Print zone maximum energy counter range
+.TP
+\fB\-e,\fR \fB\-\-z\-enabled\fR
+Print zone enable/disabled status
+.TP
+\fB\-x,\fR \fB\-\-z\-name\fR
+Print zone name
+.TP
+The following are constraint-level arguments and require \-c/\-\-constraint:
+.TP
+\fB\-l,\fR \fB\-\-c\-power\-limit\fR
+Print constraint power limit
+.TP
+\fB\-s,\fR \fB\-\-c\-time\-window\fR
+Print constraint time window
+.TP
+\fB\-U,\fR \fB\-\-c\-max\-power\fR
+Print constraint maximum allowed power
+.TP
+\fB\-y,\fR \fB\-\-c\-name\fR
+Print constraint name
+.SH "REMARKS"
+.LP
+Subzones are a package's child domains, including power planes.
+.LP
+If no subzone/constraint-specific outputs are requested, all available zones and constraints will be shown.
+.LP
+Energy units: microjoules (uJ)
+.br
+Power units: microwatts (uW)
+.br
+Time units: microseconds (us)
+.SH "BUGS"
+.LP
+Values returned by the kernel sometimes lose accuracy from the actual values stored in Model-Specific Registers due to integer rounding.
+For example, the kernel may return a time window value of 7812 us, when in fact the actual stored value is 7812.5 us.
+Writing back a value returned by the kernel, e.g. using rapl\-set(1), may cause unexpected changes to its value due to these rounding problems.
+.LP
+The constraint max_power_uw file, e.g. constraint_0_max_power_uw, is known to receive an ENODATA (No data available) error from the kernel for zones other than "package".
+So even though the file exists, a value may not be printed for it.
+.LP
+Report bugs upstream at <https://github.com/powercap/powercap>
+.SH "FILES"
+.nf
+\fI/sys/devices/virtual/powercap/intel\-rapl/*\fP
+.nf
+\fI/sys/class/powercap/intel\-rapl/*\fP
+.fi
+.SH "AUTHORS"
+.nf
+Connor Imes <connor.k.imes@gmail.com>
+.fi
+.SH "SEE ALSO"
+.LP
+rapl\-set(1), powercap-info(1), powercap-set(1)

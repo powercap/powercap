@@ -1,10 +1,17 @@
-# Powercap Sysfs C Bindings
+# Powercap Sysfs C Bindings and Utilities
 
-This project provides the `powercap` library -- a generic C interface to the Linux powercap sysfs interface.
+This project provides the `powercap` library -- a generic C interface to the Linux power capping framework (sysfs interface).
 It includes an implementation for working with Intel Running Average Power Limit (RAPL).
 
+It also provides the following applications:
+
+* `powercap-info` - view powercap control type hierarchies or zone/constraint-specific configurations
+* `powercap-set` - set powercap control zone/constraint-specific configurations
+* `rapl-info` - view Intel RAPL hierarchies or zone/constraint-specific configurations
+* `rapl-set` - set Intel RAPL zone/constraint-specific configurations
+
 These bindings were originally created for use with [RAPLCap](https://github.com/powercap/raplcap), but can be used independently.
-See the RAPLCap project for a more general interface for managing RAPL power caps, including command line utilities.
+See the RAPLCap project for a more general interface for managing RAPL power caps, including other command line utilities.
 
 ## Prerequisites
 
@@ -17,40 +24,18 @@ If the `intel_rapl` kernel module is not loaded at startup, run with proper priv
 modprobe intel_rapl
 ```
 
-## Building
-
-This project uses CMake.
-
-To build, run:
-
-``` sh
-mkdir _build
-cd _build
-cmake ..
-make
-```
-
-## Installing
-
-To install, run with proper privileges:
-
-``` sh
-make install
-```
-
-On Linux, installation typically places libraries in `/usr/local/lib` and
-header files in `/usr/local/include`.
-
-## Uninstalling
-
-Install must be run before uninstalling in order to have a manifest.
-To uninstall, run with proper privileges:
-
-``` sh
-make uninstall
-```
 
 ## Usage
+
+### Applications
+
+See the man pages or run the applications with the `-h` or `--help` option for instructions.
+
+### Library
+
+First, there are the `powercap-sysfs.h` and `powercap-rapl-sysfs.h` interfaces for reading/writing to sysfs without the need to maintain state.
+These are reasonable for simple use cases.
+See the header files for documentation.
 
 The `powercap.h` interface provides read/write functions for generic powercap `zone` and `constraint` file sets.
 Users are responsible for managing memory and populating the structs with file descriptors (e.g. code that wrap this interface performs zone/constraint discovery and file descriptor management).
@@ -91,6 +76,43 @@ Basic lifecycle example:
 
 Note that the interfaces do not guarantee that values are actually accepted by the kernel, they only notice errors if I/O operations fail.
 It is recommended that, at least during development/debugging, users read back to see if their write operations were successful.
+
+
+## Building
+
+### Compiling
+
+This project uses CMake.
+
+To build, run:
+
+``` sh
+mkdir _build
+cd _build
+cmake ..
+make
+```
+
+
+### Installing
+
+To install, run with proper privileges:
+
+``` sh
+make install
+```
+
+On Linux, installation typically places libraries in `/usr/local/lib` and
+header files in `/usr/local/include`.
+
+### Uninstalling
+
+Install must be run before uninstalling in order to have a manifest.
+To uninstall, run with proper privileges:
+
+``` sh
+make uninstall
+```
 
 
 ## Project Source

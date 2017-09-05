@@ -7,9 +7,11 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99")
 
 include_directories(${PROJECT_SOURCE_DIR}/inc)
 
+add_subdirectory(utils)
+
 # Libraries
 
-add_library(powercap src/powercap.c src/powercap-rapl.c)
+add_library(powercap src/powercap.c src/powercap-sysfs.c src/powercap-rapl.c src/powercap-rapl-sysfs.c)
 
 # Tests
 
@@ -19,6 +21,9 @@ target_link_libraries(powercap-test powercap)
 add_executable(powercap-rapl-test test/powercap-rapl-test.c)
 target_link_libraries(powercap-rapl-test powercap)
 
+add_executable(powercap-sysfs-test test/powercap-sysfs-test.c)
+target_link_libraries(powercap-sysfs-test powercap)
+
 enable_testing()
 macro(add_unit_test target)
   add_test(${target} ${EXECUTABLE_OUTPUT_PATH}/${target})
@@ -27,6 +32,7 @@ endmacro(add_unit_test)
 add_unit_test(powercap-test)
 # Requires a real system with root privileges
 # add_unit_test(powercap-rapl-test)
+add_unit_test(powercap-sysfs-test)
 
 # pkg-config
 
@@ -47,7 +53,7 @@ configure_file(
 # Install
 
 install(TARGETS powercap DESTINATION lib)
-install(FILES inc/powercap.h inc/powercap-rapl.h DESTINATION include/${PROJECT_NAME})
+install(FILES inc/powercap.h inc/powercap-sysfs.h inc/powercap-rapl.h inc/powercap-rapl-sysfs.h DESTINATION include/${PROJECT_NAME})
 install(DIRECTORY ${CMAKE_BINARY_DIR}/pkgconfig/ DESTINATION lib/pkgconfig)
 
 # Uninstall
