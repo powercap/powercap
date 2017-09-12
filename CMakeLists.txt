@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 
 project(powercap)
-set(PROJECT_VERSION 0.1.0)
+set(VERSION_MAJOR 0)
+set(VERSION_MINOR 1)
+set(VERSION_PATCH 1)
+set(PROJECT_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99")
 
@@ -12,6 +15,10 @@ add_subdirectory(utils)
 # Libraries
 
 add_library(powercap src/powercap.c src/powercap-sysfs.c src/powercap-rapl.c src/powercap-rapl-sysfs.c)
+if (BUILD_SHARED_LIBS)
+  set_target_properties(powercap PROPERTIES VERSION ${PROJECT_VERSION}
+                                            SOVERSION ${VERSION_MAJOR})
+endif()
 
 # Tests
 
