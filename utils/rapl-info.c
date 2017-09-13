@@ -16,12 +16,14 @@
 static void analyze_constraint(uint32_t pkg, uint32_t sz, int is_sz, uint32_t constraint, int verbose) {
   char name[MAX_NAME_SIZE];
   uint64_t val64;
+  ssize_t sret;
   int ret;
 
   indent(is_sz + 1);
   printf("Constraint %"PRIu32"\n", constraint);
 
-  ret = rapl_sysfs_constraint_get_name(pkg, sz, is_sz, constraint, name, sizeof(name)) <= 0;
+  sret = rapl_sysfs_constraint_get_name(pkg, sz, is_sz, constraint, name, sizeof(name));
+  ret = sret > 0 ? 0 : (int) sret;
   str_or_verbose(verbose, is_sz + 2, "name", name, ret);
 
   ret = rapl_sysfs_constraint_get_power_limit_uw(pkg, sz, is_sz, constraint, &val64);
@@ -38,6 +40,7 @@ static void analyze_zone(uint32_t pkg, uint32_t sz, int is_sz, int verbose) {
   char name[MAX_NAME_SIZE];
   uint64_t val64;
   uint32_t val32;
+  ssize_t sret;
   int ret;
 
   if (is_sz) {
@@ -45,7 +48,8 @@ static void analyze_zone(uint32_t pkg, uint32_t sz, int is_sz, int verbose) {
     printf("Subzone %"PRIu32"\n", sz);
   }
 
-  ret = rapl_sysfs_zone_get_name(pkg, sz, is_sz, name, sizeof(name)) <= 0;
+  sret = rapl_sysfs_zone_get_name(pkg, sz, is_sz, name, sizeof(name));
+  ret = sret > 0 ? 0 : (int) sret;
   str_or_verbose(verbose, is_sz + 1, "name", name, ret);
 
   ret = rapl_sysfs_zone_get_enabled(pkg, sz, is_sz, &val32);
@@ -86,11 +90,19 @@ static void print_num_packages(void) {
   printf("%"PRIu32"\n", pkg);
 }
 
+static void print_num_subzones(uint32_t pkg) {
+  uint32_t sz = 0;
+  while (!rapl_sysfs_sz_exists(pkg, sz)) {
+    sz++;
+  }
+  printf("%"PRIu32"\n", sz);
+}
+
 static const char short_options[] = "hvnp:z:c:jJexlsUy";
 static const struct option long_options[] = {
   {"help",                no_argument,        NULL, 'h'},
   {"verbose",             no_argument,        NULL, 'v'},
-  {"npackages",           no_argument,        NULL, 'n'},
+  {"nzones",              no_argument,        NULL, 'n'},
   {"package",             required_argument,  NULL, 'p'},
   {"subzone",             required_argument,  NULL, 'z'},
   {"constraint",          required_argument,  NULL, 'c'},
@@ -109,24 +121,27 @@ static void print_usage(void) {
   printf("Options:\n");
   printf("  -h, --help                   Print this message and exit\n");
   printf("  -v, --verbose                Print errors when files are not available\n");
-  printf("  -p, --package=PACKAGE        The package number to use\n");
+  printf("  -p, --package=PACKAGE        The package number (none by default; 0 by default\n");
+  printf("                               if using -z/--subzone and/or -c/--constraint)\n");
   printf("                               Ending with a colon prevents output for subzones\n");
-  printf("                               E.g. for package 0, but not subzones: \"-p 0:\"\n");
-  printf("  -z, --subzone=SUBZONE        The subzone number to use\n");
-  printf("  -c, --constraint=CONSTRAINT  The constraint number to use\n");
+  printf("                               E.g., for package 0, but not subzones: \"-p 0:\"\n");
+  printf("  -z, --subzone=SUBZONE        The package subzone number (none by default)\n");
+  printf("  -c, --constraint=CONSTRAINT  The constraint number (none by default)\n");
   printf("All remaining options below are mutually exclusive:\n");
-  printf("  -n, --npackages              Print the number of packages found\n");
-  printf("The following are zone-level arguments:\n");
+  printf("  -n, --nzones                 Print the number of packages found, or the number\n");
+  printf("                               of subzones found if -p/--package is set\n");
+  printf("The following are zone-level arguments (-z/--subzone is optional):\n");
   printf("  -j, --z-energy               Print zone energy counter\n");
   printf("  -J, --z-max-energy-range     Print zone maximum energy counter range\n");
   printf("  -e, --z-enabled              Print zone enabled/disabled status\n");
   printf("  -x, --z-name                 Print zone name\n");
-  printf("The following are constraint-level arguments and require -c/--constraint:\n");
+  printf("The following are constraint-level arguments and require -c/--constraint (-z/--subzone is optional):\n");
   printf("  -l, --c-power-limit          Print constraint power limit\n");
   printf("  -s, --c-time-window          Print constraint time window\n");
   printf("  -U, --c-max-power            Print constraint maximum allowed power\n");
   printf("  -y, --c-name                 Print constraint name\n");
-  printf("\nSubzones are a package's child domains, including power planes.\n");
+  printf("\nA package is a zone with constraints.\n");
+  printf("Subzones are a package's child domains, including power planes.\n");
   printf("If no subzone/constraint-specific outputs are requested, all available zones and constraints will be shown.\n");
   printf("\nEnergy units: microjoules (uJ)\n");
   printf("Power units: microwatts (uW)\n");
@@ -135,9 +150,8 @@ static void print_usage(void) {
 
 static void print_common_help(void) {
   printf("Considerations for common errors:\n");
-  printf("- Ensure that the intel_rapl kernel module loaded.\n");
-  printf("- On some systems, the kernel always returns an error when reading constraint max power (-U/--c-max-power).\n");
-  printf("- Some files may simply not exist.\n");
+  printf("- Ensure that the intel_rapl kernel module is loaded\n");
+  printf("- On some systems, the kernel always returns an error when reading constraint max power (-U/--c-max-power)\n");
 }
 
 int main(int argc, char** argv) {
@@ -189,7 +203,7 @@ int main(int argc, char** argv) {
     case 'U':
     case 'y':
       if (unique_set) {
-        fprintf(stderr, "Only one of -n/--npackages, a zone-level argument, or a constraint-level argument is allowed at a time\n");
+        fprintf(stderr, "Only one of -n/--nzones, a zone-level argument, or a constraint-level argument is allowed at a time\n");
         cont = 0;
         ret = -EINVAL;
         break;
@@ -207,11 +221,11 @@ int main(int argc, char** argv) {
   /* Verify argument combinations */
   if (ret) {
     fprintf(stderr, "Unknown or duplicate arguments\n");
-  } else if (unique_set) {
+  } else {
     switch (unique_set) {
     case 'n':
-      if (package.set || subzone.set || constraint.set) {
-        fprintf(stderr, "-n/--npackages cannot be used with -p/--package, -z/--subzone, or -c/--constraint\n");
+      if (subzone.set || constraint.set) {
+        fprintf(stderr, "-n/--nzones cannot be used with -z/--subzone or -c/--constraint\n");
         ret = -EINVAL;
       }
       break;
@@ -236,12 +250,25 @@ int main(int argc, char** argv) {
       }
       break;
     }
-  } else if (!package.set && (subzone.set || constraint.set)) {
-    fprintf(stderr, "-z/--subzone and -c/--constraint cannot be used without -p/--package\n");
-    ret = -EINVAL;
   }
   if (ret) {
     print_usage();
+    return ret;
+  }
+
+  /* Check if package/subzone/constraint exist */
+  if (rapl_sysfs_pkg_exists(package.val)) {
+    fprintf(stderr, "Package does not exist\n");
+    ret = -EINVAL;
+  } else if (subzone.set && rapl_sysfs_sz_exists(package.val, subzone.val)) {
+    fprintf(stderr, "Subzone does not exist\n");
+    ret = -EINVAL;
+  } else if (constraint.set && rapl_sysfs_constraint_exists(package.val, subzone.val, subzone.set, constraint.val)) {
+    fprintf(stderr, "Constraint does not exist\n");
+    ret = -EINVAL;
+  }
+  if (ret) {
+    print_common_help();
     return ret;
   }
 
@@ -249,8 +276,12 @@ int main(int argc, char** argv) {
   if (unique_set) {
     switch (unique_set) {
     case 'n':
-      /* Print number of packages */
-      print_num_packages();
+      /* Print number of packages or subzones */
+      if (package.set) {
+        print_num_subzones(package.val);
+      } else {
+        print_num_packages();
+      }
       break;
     case 'j':
       /* Get zone energy */
@@ -278,7 +309,7 @@ int main(int argc, char** argv) {
       break;
     case 'x':
       /* Get zone name */
-      if (rapl_sysfs_zone_get_name(package.val, subzone.val, subzone.set, name, sizeof(name)) > 1) {
+      if (rapl_sysfs_zone_get_name(package.val, subzone.val, subzone.set, name, sizeof(name)) > 0) {
         printf("%s\n", name);
       } else {
         ret = -errno;
@@ -311,7 +342,7 @@ int main(int argc, char** argv) {
       break;
     case 'y':
       /* Get constraint name */
-      if (rapl_sysfs_constraint_get_name(package.val, subzone.val, subzone.set, constraint.val, name, sizeof(name)) > 1) {
+      if (rapl_sysfs_constraint_get_name(package.val, subzone.val, subzone.set, constraint.val, name, sizeof(name)) > 0) {
         printf("%s\n", name);
       } else {
         ret = -errno;
@@ -319,27 +350,14 @@ int main(int argc, char** argv) {
       }
       break;
     }
-  } else if (package.set) {
+  } else if (package.set || subzone.set || constraint.set) {
     /* Print summary of package, zone, or constraint */
-    if (rapl_sysfs_pkg_exists(package.val)) {
-      fprintf(stderr, "Package does not exist\n");
-      ret = -EINVAL;
-    } else if (constraint.set) {
-      if (rapl_sysfs_constraint_exists(package.val, subzone.val, subzone.set, constraint.val)) {
-        fprintf(stderr, "Constraint does not exist\n");
-        ret = -EINVAL;
-      } else {
-        /* print constraint */
-        analyze_constraint(package.val, subzone.val, subzone.set, constraint.val, verbose);
-      }
+    if (constraint.set) {
+      /* print constraint */
+      analyze_constraint(package.val, subzone.val, subzone.set, constraint.val, verbose);
     } else if (subzone.set) {
-      if (rapl_sysfs_sz_exists(package.val, subzone.val)) {
-        fprintf(stderr, "Subzone does not exist\n");
-        ret = -EINVAL;
-      } else {
-        /* print zone */
-        analyze_zone(package.val, subzone.val, subzone.set, verbose);
-      }
+      /* print zone */
+      analyze_zone(package.val, subzone.val, subzone.set, verbose);
     } else {
       /* print package */
       if (recurse) {

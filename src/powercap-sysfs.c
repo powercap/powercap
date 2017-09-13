@@ -74,9 +74,7 @@ static const char* CONSTRAINT_FILE_SUFFIX[CONSTRAINT_FILE_COUNT] = {
 /* buf must not be NULL and size >= 1 */
 static ssize_t read_string_safe(int fd, char* buf, size_t size) {
   ssize_t ret;
-  if (!(ret = read(fd, buf, size - 1))) {
-    errno = ENODATA;
-  } else if (ret > 0) {
+  if ((ret = read(fd, buf, size - 1)) > 0) {
     /* force a terminating character in the buffer */
     if (buf[ret - 1] == '\n') {
       /* also remove newline character */
@@ -84,6 +82,11 @@ static ssize_t read_string_safe(int fd, char* buf, size_t size) {
     } else {
       buf[ret] = '\0';
     }
+  } else if (ret < 0) {
+    ret = -errno;
+  } else {
+    errno = ENODATA;
+    ret = -errno;
   }
   return ret;
 }

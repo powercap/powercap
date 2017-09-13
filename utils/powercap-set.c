@@ -32,15 +32,16 @@ static void print_usage(void) {
   printf("  -h, --help                   Print this message and exit\n");
   printf("  -p, --control-type=NAME      [REQUIRED] The name of the control type\n");
   printf("                               Must not be empty or contain a '.' or '/'\n");
-  printf("  -z, --zone=ZONE(S)           The zone numbers in the powercap hierarchy to use\n");
+  printf("  -z, --zone=ZONE(S)           [REQUIRED] The zone/subzone numbers in the\n");
+  printf("                               control type's powercap tree\n");
   printf("                               Separate zones/subzones with a colon\n");
-  printf("                               E.g. for zone 0, subzone 2: \"-z 0:2\"\n");
-  printf("  -c, --constraint=CONSTRAINT  The constraint number to use (none by default)\n");
+  printf("                               E.g., for zone 0, subzone 2: \"-z 0:2\"\n");
+  printf("  -c, --constraint=CONSTRAINT  The constraint number (none by default)\n");
   printf("The following zone-level arguments may be used together:\n");
   printf("  -j, --z-energy=UJ            Set zone energy counter\n");
   printf("                               0 is probably the only allowable value\n");
   printf("  -e, --z-enabled=1|0          Enable/disable a zone\n");
-  printf("The following constraint-level arguments may be used together. The -c/--constraint option is required:\n");
+  printf("The following constraint-level arguments may be used together and require -c/--constraint:\n");
   printf("  -l, --c-power-limit=UW       Set constraint power limit\n");
   printf("  -s, --c-time-window=US       Set constraint time window\n");
   printf("\nEnergy units: microjoules (uJ)\n");
@@ -50,13 +51,13 @@ static void print_usage(void) {
 
 static void print_common_help(void) {
   printf("Considerations for common errors:\n");
+  printf("- Ensure that the control type exists (may require loading a kernel module, e.g., intel_rapl)\n");
   printf("- Ensure that you run with administrative (super-user) privileges\n");
-  printf("- Ensure that the control type exists (may require loading a kernel module, e.g. intel_rapl).\n");
 }
 
 int main(int argc, char** argv) {
   const char* control_type = NULL;
-  uint32_t zones[MAX_ZONE_DEPTH];
+  uint32_t zones[MAX_ZONE_DEPTH] = { 0 };
   uint32_t depth = 0;
   u32_param constraint = {0, 0};
   u64_param energy = {0, 0};
@@ -129,6 +130,22 @@ int main(int argc, char** argv) {
   }
   if (ret) {
     print_usage();
+    return ret;
+  }
+
+  /* Check if control type/zones/constraint exist */
+  if (powercap_sysfs_control_type_exists(control_type)) {
+    fprintf(stderr, "Control type does not exist\n");
+    ret = -EINVAL;
+  } else if (depth && powercap_sysfs_zone_exists(control_type, zones, depth)) {
+    fprintf(stderr, "Zone does not exist\n");
+    ret = -EINVAL;
+  } else if (constraint.set && powercap_sysfs_constraint_exists(control_type, zones, depth, constraint.val)) {
+    fprintf(stderr, "Constraint does not exist\n");
+    ret = -EINVAL;
+  }
+  if (ret) {
+    print_common_help();
     return ret;
   }
 

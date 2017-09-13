@@ -28,23 +28,24 @@ static void print_usage(void) {
   printf("Usage: rapl-set [OPTION]...\n");
   printf("Options:\n");
   printf("  -h, --help                   Print this message and exit\n");
-  printf("  -p, --package=PACKAGE        The package number to use (0 by default)\n");
-  printf("  -z, --subzone=SUBZONE        The subzone number to use (none by default)\n");
-  printf("  -c, --constraint=CONSTRAINT  The constraint number to use (none by default)\n");
-  printf("The following is a zone-level argument. You may also specify -z/--subzone for a subzone:\n");
+  printf("  -p, --package=PACKAGE        The package number (0 by default)\n");
+  printf("  -z, --subzone=SUBZONE        The package subzone number (none by default)\n");
+  printf("  -c, --constraint=CONSTRAINT  The constraint number (none by default)\n");
+  printf("The following is a zone-level argument (-z/--subzone is optional):\n");
   printf("  -e, --z-enabled=1|0          Enable/disable a zone\n");
-  printf("The following constraint-level arguments may be used together. The -c/--constraint option is required. You may also specify -z/--subzone for a subzone:\n");
+  printf("The following constraint-level arguments may be used together and require -c/--constraint (-z/--subzone is optional):\n");
   printf("  -l, --c-power-limit=UW       Set constraint power limit\n");
   printf("  -s, --c-time-window=US       Set constraint time window\n");
-  printf("\nSubzones are a package's child domains, including power planes.\n");
+  printf("\nA package is a zone with constraints.\n");
+  printf("Subzones are a package's child domains, including power planes.\n");
   printf("\nPower units: microwatts (uW)\n");
   printf("Time units: microseconds (us)\n");
 }
 
 static void print_common_help(void) {
   printf("Considerations for common errors:\n");
+  printf("- Ensure that the intel_rapl kernel module is loaded\n");
   printf("- Ensure that you run with administrative (super-user) privileges\n");
-  printf("- Ensure that the intel_rapl kernel module loaded.\n");
 }
 
 int main(int argc, char** argv) {
@@ -109,6 +110,22 @@ int main(int argc, char** argv) {
   }
   if (ret) {
     print_usage();
+    return ret;
+  }
+
+  /* Check if package/subzone/constraint exist */
+  if (rapl_sysfs_pkg_exists(package.val)) {
+    fprintf(stderr, "Package does not exist\n");
+    ret = -EINVAL;
+  } else if (subzone.set && rapl_sysfs_sz_exists(package.val, subzone.val)) {
+    fprintf(stderr, "Subzone does not exist\n");
+    ret = -EINVAL;
+  } else if (constraint.set && rapl_sysfs_constraint_exists(package.val, subzone.val, subzone.set, constraint.val)) {
+    fprintf(stderr, "Constraint does not exist\n");
+    ret = -EINVAL;
+  }
+  if (ret) {
+    print_common_help();
     return ret;
   }
 

@@ -38,9 +38,9 @@ These are reasonable for simple use cases.
 See the header files for documentation.
 
 The `powercap.h` interface provides read/write functions for generic powercap `zone` and `constraint` file sets.
-Users are responsible for managing memory and populating the structs with file descriptors (e.g. code that wrap this interface performs zone/constraint discovery and file descriptor management).
+Users are responsible for managing memory and populating the structs with file descriptors (e.g., code that wrap this interface performs zone/constraint discovery and file descriptor management).
 
-The `powercap-rapl.h` interface discovers RAPL packages, power zones, and constraints (i.e. long\_term and short\_term constraints).
+The `powercap-rapl.h` interface discovers RAPL packages, power zones, and constraints (i.e., long\_term and short\_term constraints).
 Users are responsible for managing memory, but the library will manage discovering, opening, and closing files within packages.
 
 Basic lifecycle example:
@@ -64,7 +64,7 @@ Basic lifecycle example:
     }
   }
   // do a bunch of stuff with the interface here,
-  // e.g. enable desired packages or power planes and get/set power caps...
+  // e.g., enable desired packages or power planes and get/set power caps...
   // now cleanup
   for (i = 0; i < npackages; i++) {
     if (powercap_rapl_destroy(&pkgs[i])) {

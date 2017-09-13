@@ -16,12 +16,14 @@
 static void analyze_constraint(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint, int verbose) {
   char name[MAX_NAME_SIZE];
   uint64_t val64;
+  ssize_t sret;
   int ret;
 
   indent(depth);
   printf("Constraint %"PRIu32"\n", constraint);
 
-  ret = powercap_sysfs_constraint_get_name(control_type, zones, depth, constraint, name, sizeof(name)) <= 0;
+  sret = powercap_sysfs_constraint_get_name(control_type, zones, depth, constraint, name, sizeof(name));
+  ret = sret > 0 ? 0 : (int) sret;
   str_or_verbose(verbose, depth + 1, "name", name, ret);
 
   ret = powercap_sysfs_constraint_get_power_limit_uw(control_type, zones, depth, constraint, &val64);
@@ -47,6 +49,7 @@ static void analyze_zone(const char* control_type, uint32_t* zones, uint32_t dep
   char name[MAX_NAME_SIZE];
   uint64_t val64;
   uint32_t val32;
+  ssize_t sret;
   int ret;
 
   indent(depth - 1);
@@ -56,7 +59,8 @@ static void analyze_zone(const char* control_type, uint32_t* zones, uint32_t dep
   }
   printf("\n");
 
-  ret = powercap_sysfs_zone_get_name(control_type, zones, depth, name, sizeof(name)) <= 0;
+  sret = powercap_sysfs_zone_get_name(control_type, zones, depth, name, sizeof(name));
+  ret = sret > 0 ? 0 : (int) sret;
   str_or_verbose(verbose, depth, "name", name, ret);
 
   ret = powercap_sysfs_zone_get_enabled(control_type, zones, depth, &val32);
@@ -79,6 +83,7 @@ static void analyze_zone(const char* control_type, uint32_t* zones, uint32_t dep
   }
 }
 
+/* depth must be > 0 */
 static void analyze_all_zones_recurse(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t max_depth, int verbose) {
   if (!powercap_sysfs_zone_exists(control_type, zones, depth)) {
     /* Analyze this zone */
@@ -91,6 +96,18 @@ static void analyze_all_zones_recurse(const char* control_type, uint32_t* zones,
     /* Analyze next sibling zone */
     zones[depth - 1]++;
     analyze_all_zones_recurse(control_type, zones, depth, max_depth, verbose);
+  }
+}
+
+static void analyze_zone_recurse(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t max_depth, int verbose) {
+  if (!powercap_sysfs_zone_exists(control_type, zones, depth)) {
+    /* Analyze this zone */
+    analyze_zone(control_type, zones, depth, verbose);
+    if (depth < max_depth) {
+      /* Analyze subzones */
+      zones[depth] = 0;
+      analyze_all_zones_recurse(control_type, zones, depth + 1, max_depth, verbose);
+    }
   }
 }
 
@@ -132,23 +149,24 @@ static void print_usage(void) {
   printf("  -v, --verbose                Print errors when files are not available\n");
   printf("  -p, --control-type=NAME      [REQUIRED] The name of the control type\n");
   printf("                               Must not be empty or contain a '.' or '/'\n");
-  printf("  -z, --zone=ZONE(S)           The zone numbers in the powercap hierarchy to use\n");
+  printf("  -z, --zone=ZONE(S)           The zone/subzone numbers in the control type's\n");
+  printf("                               powercap tree (control type's root by default)\n");
   printf("                               Separate zones/subzones with a colon\n");
-  printf("                               E.g. for zone 0, subzone 2: \"-z 0:2\"\n");
+  printf("                               E.g., for zone 0, subzone 2: \"-z 0:2\"\n");
   printf("                               Ending with a colon prevents output for subzones\n");
-  printf("                               E.g. for zone 0, but not subzones: \"-z 0:\"\n");
-  printf("  -c, --constraint=CONSTRAINT  The constraint number to use\n");
+  printf("                               E.g., for zone 0, but not subzones: \"-z 0:\"\n");
+  printf("  -c, --constraint=CONSTRAINT  The constraint number\n");
   printf("All remaining options below are mutually exclusive:\n");
-  printf("  -n, --nzones                 Print number of zones at the -z/--zone level\n");
-  printf("                               (top-level by default)\n");
-  printf("The following are zone-level arguments:\n");
+  printf("  -n, --nzones                 Print the number of zones (control type's root by\n");
+  printf("                               default; within the -z/--zone level, if set)\n");
+  printf("The following are zone-level arguments and require -z/--zone:\n");
   printf("  -j, --z-energy               Print zone energy counter\n");
   printf("  -J, --z-max-energy-range     Print zone maximum energy counter range\n");
   printf("  -w, --z-power                Print zone current power\n");
   printf("  -W, --z-max-power-range      Print zone maximum current power range\n");
   printf("  -e, --z-enabled              Print zone enabled/disabled status\n");
   printf("  -x, --z-name                 Print zone name\n");
-  printf("The following are constraint-level arguments and require -c/--constraint:\n");
+  printf("The following are constraint-level arguments and require -z/--zone and -c/--constraint:\n");
   printf("  -l, --c-power-limit          Print constraint power limit\n");
   printf("  -s, --c-time-window          Print constraint time window\n");
   printf("  -U, --c-max-power            Print constraint maximum allowed power\n");
@@ -163,9 +181,15 @@ static void print_usage(void) {
   printf("Time units: microseconds (us)\n");
 }
 
+static void print_common_help(void) {
+  printf("Considerations for common errors:\n");
+  printf("- Ensure that the control type exists (may require loading a kernel module, e.g., intel_rapl)\n");
+  printf("- Some files may simply not exist\n");
+}
+
 int main(int argc, char** argv) {
   const char* control_type = NULL;
-  uint32_t zones[MAX_ZONE_DEPTH];
+  uint32_t zones[MAX_ZONE_DEPTH] = { 0 };
   u32_param constraint = {0, 0};
   uint32_t depth = 0;
   int recurse = 1;
@@ -245,41 +269,64 @@ int main(int argc, char** argv) {
   } else if (!depth && constraint.set) {
     fprintf(stderr, "Must specify -z/--zone with -c/--constraint\n");
     ret = -EINVAL;
-  } else {
-    switch (unique_set) {
-    case 'n':
+  } else if (unique_set) {
+    if (unique_set == 'n') {
       if (constraint.set) {
         fprintf(stderr, "-n/--nzones cannot be used with -c/--constraint\n");
         ret = -EINVAL;
       }
-      break;
-    case 'j':
-    case 'J':
-    case 'w':
-    case 'W':
-    case 'e':
-    case 'x':
-      if (constraint.set) {
-        fprintf(stderr, "-c/--constraint cannot be set for zone-level arguments\n");
-        ret = -EINVAL;
+    } else if (!depth) {
+      fprintf(stderr, "-z/--zone must be set for zone-level and constraint-level arguments\n");
+      ret = -EINVAL;
+    } else {
+      switch (unique_set) {
+      case 'n':
+        /* special case handled above */
+        break;
+      case 'j':
+      case 'J':
+      case 'w':
+      case 'W':
+      case 'e':
+      case 'x':
+        if (constraint.set) {
+          fprintf(stderr, "-c/--constraint cannot be set for zone-level arguments\n");
+          ret = -EINVAL;
+        }
+        break;
+      case 'l':
+      case 's':
+      case 'U':
+      case 'u':
+      case 'T':
+      case 't':
+      case 'y':
+        if (!constraint.set) {
+          fprintf(stderr, "-c/--constraint must be set for constraint-level arguments\n");
+          ret = -EINVAL;
+        }
+        break;
       }
-      break;
-    case 'l':
-    case 's':
-    case 'U':
-    case 'u':
-    case 'T':
-    case 't':
-    case 'y':
-      if (!constraint.set) {
-        fprintf(stderr, "-c/--constraint must be set for constraint-level arguments\n");
-        ret = -EINVAL;
-      }
-      break;
     }
   }
   if (ret) {
     print_usage();
+    return ret;
+  }
+
+  /* Check if control type/zones/constraint exist */
+  if (powercap_sysfs_control_type_exists(control_type)) {
+    fprintf(stderr, "Control type does not exist\n");
+    ret = -EINVAL;
+  } else if (depth && powercap_sysfs_zone_exists(control_type, zones, depth)) {
+    fprintf(stderr, "Zone does not exist\n");
+    ret = -EINVAL;
+  } else if (constraint.set && powercap_sysfs_constraint_exists(control_type, zones, depth, constraint.val)) {
+    fprintf(stderr, "Constraint does not exist\n");
+    ret = -EINVAL;
+  }
+  if (ret) {
+    print_common_help();
     return ret;
   }
 
@@ -332,7 +379,7 @@ int main(int argc, char** argv) {
       break;
     case 'x':
       /* Get zone name */
-      if (powercap_sysfs_zone_get_name(control_type, zones, depth, name, sizeof(name)) > 1) {
+      if (powercap_sysfs_zone_get_name(control_type, zones, depth, name, sizeof(name)) > 0) {
         printf("%s\n", name);
       } else {
         ret = -errno;
@@ -389,7 +436,7 @@ int main(int argc, char** argv) {
       break;
     case 'y':
       /* Get constraint name */
-      if (powercap_sysfs_constraint_get_name(control_type, zones, depth, constraint.val, name, sizeof(name)) > 1) {
+      if (powercap_sysfs_constraint_get_name(control_type, zones, depth, constraint.val, name, sizeof(name)) > 0) {
         printf("%s\n", name);
       } else {
         ret = -errno;
@@ -397,36 +444,25 @@ int main(int argc, char** argv) {
       }
       break;
     }
-  }
-  else if (depth > 0) {
-    /* Print summary of package, zone, or constraint */
-    if (powercap_sysfs_zone_exists(control_type, zones, depth)) {
-      fprintf(stderr, "Zone does not exist\n");
-      ret = -EINVAL;
-    } else if (constraint.set) {
-      if (powercap_sysfs_constraint_exists(control_type, zones, depth, constraint.val)) {
-        fprintf(stderr, "Constraint does not exist\n");
-        ret = -EINVAL;
-      } else {
-        /* print constraint */
-        analyze_constraint(control_type, zones, depth, constraint.val, verbose);
-      }
+  } else if (depth > 0) {
+    /* Print summary of zone or constraint */
+    if (constraint.set) {
+      /* print constraint */
+      analyze_constraint(control_type, zones, depth, constraint.val, verbose);
     } else {
       /* print zone */
       if (recurse) {
-        analyze_all_zones_recurse(control_type, zones, depth, MAX_ZONE_DEPTH, verbose);
+        analyze_zone_recurse(control_type, zones, depth, MAX_ZONE_DEPTH, verbose);
       } else {
         analyze_zone(control_type, zones, depth, verbose);
       }
     }
   } else {
     /* print all zones */
-    if (powercap_sysfs_control_type_exists(control_type)) {
-      fprintf(stderr, "Control type does not exist\n");
-      ret = -EINVAL;
-    } else {
-      analyze_all_zones_recurse(control_type, zones, 1, MAX_ZONE_DEPTH, verbose);
-    }
+    analyze_all_zones_recurse(control_type, zones, 1, MAX_ZONE_DEPTH, verbose);
+  }
+  if (ret) {
+    print_common_help();
   }
 
   return ret;

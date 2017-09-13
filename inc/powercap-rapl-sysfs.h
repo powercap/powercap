@@ -28,7 +28,7 @@ extern "C" {
  * Determine if a package exists.
  *
  * @param pkg
- * @return 0 if package exists, -ENOSYS otherwise.
+ * @return 0 if package exists, a negative error code otherwise.
  */
 int rapl_sysfs_pkg_exists(uint32_t pkg);
 
@@ -37,7 +37,7 @@ int rapl_sysfs_pkg_exists(uint32_t pkg);
  *
  * @param pkg
  * @param sz
- * @return 0 if subzone exists, -ENOSYS otherwise.
+ * @return 0 if subzone exists, a negative error code otherwise.
  */
 int rapl_sysfs_sz_exists(uint32_t pkg, uint32_t sz);
 
@@ -48,7 +48,7 @@ int rapl_sysfs_sz_exists(uint32_t pkg, uint32_t sz);
  * @param sz
  * @param is_sz
  * @param constraint
- * @return 0 if constraint exists, -ENOSYS otherwise.
+ * @return 0 if constraint exists, a negative error code otherwise.
  */
 int rapl_sysfs_constraint_exists(uint32_t pkg, uint32_t sz, int is_sz, uint32_t constraint);
 

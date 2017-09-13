@@ -8,6 +8,9 @@ set(PROJECT_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99")
 
+# See powercap-common.h for enumeration
+set(POWERCAP_LOG_LEVEL 2 CACHE STRING "Set the log level: 0=DEBUG, 1=INFO, 2=WARN (default), 3=ERROR, 4=OFF")
+
 include_directories(${PROJECT_SOURCE_DIR}/inc)
 
 add_subdirectory(utils)
@@ -15,6 +18,7 @@ add_subdirectory(utils)
 # Libraries
 
 add_library(powercap src/powercap.c src/powercap-sysfs.c src/powercap-rapl.c src/powercap-rapl-sysfs.c)
+target_compile_definitions(powercap PRIVATE POWERCAP_LOG_LEVEL=${POWERCAP_LOG_LEVEL})
 if (BUILD_SHARED_LIBS)
   set_target_properties(powercap PROPERTIES VERSION ${PROJECT_VERSION}
                                             SOVERSION ${VERSION_MAJOR})

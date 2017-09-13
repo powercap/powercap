@@ -2,7 +2,7 @@
  * Read/write powercap sysfs files.
  *
  * The "control_type" parameter to functions is the name of the control type as it appears in the filesystem at
- * /sys/class/powercap, excluding zone/subzone identifiers, e.g. "intel-rapl".
+ * /sys/class/powercap, excluding zone/subzone identifiers, e.g., "intel-rapl".
  * The parameter cannot be NULL, empty, or contain any '.' or '/' characters.
  *
  * It is assumed that the folder tree structure includes the control type name at each directory level, then appends
@@ -149,7 +149,7 @@ int powercap_sysfs_zone_get_enabled(const char* control_type, uint32_t* zones, u
  * @param depth
  * @param buf
  * @param size
- * @return number of bytes read, a negative error code otherwise.
+ * @return number of bytes read (always > 0), a negative error code otherwise.
  */
 ssize_t powercap_sysfs_zone_get_name(const char* control_type, uint32_t* zones, uint32_t depth, char* buf, size_t size);
 
@@ -258,7 +258,7 @@ int powercap_sysfs_constraint_get_min_time_window_us(const char* control_type, u
  * @param constraint
  * @param buf
  * @param size
- * @return number of bytes read, a negative error code otherwise.
+ * @return number of bytes read (always > 0), a negative error code otherwise.
  */
 ssize_t powercap_sysfs_constraint_get_name(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint, char* buf, size_t size);
 

@@ -4,7 +4,7 @@
 powercap\-info \- get information from the Linux power capping framework
 .SH "SYNPOSIS"
 .LP
-\fBpowercap\-info\fB [\fIOPTION\fP]...
+\fBpowercap\-info\fP [\fIOPTION\fP]...
 .SH "DESCRIPTION"
 .LP
 Prints configurations for a powercap control type.
@@ -21,23 +21,23 @@ Print errors when files are not available
 [REQUIRED] The name of the control type. Must not be empty or contain a '.' or '/'.
 .TP
 \fB\-z,\fR \fB\-\-zone=\fR\fIZONE(S)\fP
-The zone numbers in the powercap hierarchy to use. Separate zones/subzones with a colon. E.g. for zone 0, subzone 2:
+The zone/subzone numbers in the control type's powercap tree (control type's root by default). Separate zones/subzones with a colon. E.g., for zone 0, subzone 2:
 .br
 \fB\-z 0:2\fP
 .br
-Ending with a colon prevents output for subzones. E.g. for zone 0, but not subzones:
+Ending with a colon prevents output for subzones. E.g., for zone 0, but not subzones:
 .br
 \fB\-z 0:\fP
 .TP
 \fB\-c,\fR \fB\-\-constraint\fR=\fICONSTRAINT\fP
-The constraint number to use
+The constraint number
 .TP
 All remaining options below are mutually exclusive:
 .TP
 \fB\-n,\fR \fB\-\-nzones\fR
-Print the number of zones found at the \-z/\-\-zone level (top-level by default)
+Print the number of zones (control type's root by default; within the \-z/\-\-zone level, if set)
 .TP
-The following are zone-level arguments:
+The following are zone-level arguments and require \-z/\-\-zone:
 .TP
 \fB\-j,\fR \fB\-\-z\-energy\fR
 Print zone energy counter
@@ -57,7 +57,7 @@ Print zone enable/disabled status
 \fB\-x,\fR \fB\-\-z\-name\fR
 Print zone name
 .TP
-The following are constraint-level arguments and require \-c/\-\-constraint:
+The following are constraint-level arguments and require \-z/\-\-zone and \-c/\-\-constraint:
 .TP
 \fB\-l,\fR \fB\-\-c\-power\-limit\fR
 Print constraint power limit
@@ -81,8 +81,7 @@ Print constraint minimum allowed time window
 Print constraint name
 .SH "EXAMPLES"
 .LP
-.TP
-To use Intel RAPL, the control type is "intel\-rapl".
+These examples use Intel RAPL, for which the control type is "intel\-rapl".
 .TP
 To print all RAPL zones:
 \fBpowercap\-info \-p intel\-rapl\fP
