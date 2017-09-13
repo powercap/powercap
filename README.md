@@ -121,3 +121,13 @@ Find this and related project sources at the [powercap organization on GitHub](h
 This project originates at: https://github.com/powercap/powercap
 
 Bug reports and pull requests for bug fixes and enhancements are welcome.
+
+
+## License
+
+This project is developed by Connor Imes.
+It is released under the 3-Clause BSD License.
+
+## Thanks
+
+Special thanks to Henry Hoffmann (University of Chicago) and Steven Hofmeyr (Lawrence Berkeley National Laboratory) for advising and supporting projects that this code was originally developed for.
