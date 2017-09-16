@@ -24,13 +24,14 @@ static const struct option long_options[] = {
   {"z-enabled",           required_argument,  NULL, 'e'},
   {"c-power-limit",       required_argument,  NULL, 'l'},
   {"c-time-window",       required_argument,  NULL, 's'},
+  {0, 0, 0, 0}
 };
 
 static void print_usage(void) {
   printf("Usage: powercap-set [OPTION]...\n");
   printf("Options:\n");
   printf("  -h, --help                   Print this message and exit\n");
-  printf("  -p, --control-type=NAME      [REQUIRED] The name of the control type\n");
+  printf("  -p, --control-type=NAME      [REQUIRED] The powercap control type name\n");
   printf("                               Must not be empty or contain a '.' or '/'\n");
   printf("  -z, --zone=ZONE(S)           [REQUIRED] The zone/subzone numbers in the\n");
   printf("                               control type's powercap tree\n");

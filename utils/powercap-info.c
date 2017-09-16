@@ -13,7 +13,20 @@
 #include "powercap-sysfs.h"
 #include "util-common.h"
 
-static void analyze_constraint(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint, int verbose) {
+static void print_parent_headers(const uint32_t* zones, uint32_t depth_start, uint32_t depth) {
+  uint32_t i;
+  uint32_t j;
+  for (i = depth_start; i <= depth; i++) {
+    indent(i - 1);
+    printf("Zone %"PRIu32, zones[0]);
+    for (j = 1; j < i; j++) {
+      printf(":%"PRIu32, zones[j]);
+    }
+    printf("\n");
+  }
+}
+
+static void analyze_constraint(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint, int verbose) {
   char name[MAX_NAME_SIZE];
   uint64_t val64;
   ssize_t sret;
@@ -45,19 +58,14 @@ static void analyze_constraint(const char* control_type, uint32_t* zones, uint32
   u64_or_verbose(verbose, depth + 1, "max_time_window_us", val64, ret);
 }
 
-static void analyze_zone(const char* control_type, uint32_t* zones, uint32_t depth, int verbose) {
+static void analyze_zone(const char* control_type, const uint32_t* zones, uint32_t depth, int verbose) {
   char name[MAX_NAME_SIZE];
   uint64_t val64;
   uint32_t val32;
   ssize_t sret;
   int ret;
 
-  indent(depth - 1);
-  printf("Zone %"PRIu32, zones[0]);
-  for (val32 = 1; val32 < depth; val32++) {
-    printf(":%"PRIu32, zones[val32]);
-  }
-  printf("\n");
+  print_parent_headers(zones, depth, depth);
 
   sret = powercap_sysfs_zone_get_name(control_type, zones, depth, name, sizeof(name));
   ret = sret > 0 ? 0 : (int) sret;
@@ -140,6 +148,7 @@ static const struct option long_options[] = {
   {"c-max-time-window",   no_argument,        NULL, 'T'},
   {"c-min-time-window",   no_argument,        NULL, 't'},
   {"c-name",              no_argument,        NULL, 'y'},
+  {0, 0, 0, 0}
 };
 
 static void print_usage(void) {
@@ -147,7 +156,7 @@ static void print_usage(void) {
   printf("Options:\n");
   printf("  -h, --help                   Print this message and exit\n");
   printf("  -v, --verbose                Print errors when files are not available\n");
-  printf("  -p, --control-type=NAME      [REQUIRED] The name of the control type\n");
+  printf("  -p, --control-type=NAME      [REQUIRED] The powercap control type name\n");
   printf("                               Must not be empty or contain a '.' or '/'\n");
   printf("  -z, --zone=ZONE(S)           The zone/subzone numbers in the control type's\n");
   printf("                               powercap tree (control type's root by default)\n");
@@ -448,9 +457,11 @@ int main(int argc, char** argv) {
     /* Print summary of zone or constraint */
     if (constraint.set) {
       /* print constraint */
+      print_parent_headers(zones, 1, depth);
       analyze_constraint(control_type, zones, depth, constraint.val, verbose);
     } else {
       /* print zone */
+      print_parent_headers(zones, 1, depth - 1);
       if (recurse) {
         analyze_zone_recurse(control_type, zones, depth, MAX_ZONE_DEPTH, verbose);
       } else {

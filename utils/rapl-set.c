@@ -22,6 +22,7 @@ static const struct option long_options[] = {
   {"z-enabled",           required_argument,  NULL, 'e'},
   {"c-power-limit",       required_argument,  NULL, 'l'},
   {"c-time-window",       required_argument,  NULL, 's'},
+  {0, 0, 0, 0}
 };
 
 static void print_usage(void) {

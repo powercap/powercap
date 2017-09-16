@@ -13,6 +13,16 @@
 #include "powercap-rapl-sysfs.h"
 #include "util-common.h"
 
+static void print_headers(uint32_t pkg, uint32_t do_pkg, uint32_t sz, int is_sz) {
+  if (do_pkg) {
+    printf("Package %"PRIu32"\n", pkg);
+  }
+  if (is_sz) {
+    indent(1);
+    printf("Subzone %"PRIu32"\n", sz);
+  }
+}
+
 static void analyze_constraint(uint32_t pkg, uint32_t sz, int is_sz, uint32_t constraint, int verbose) {
   char name[MAX_NAME_SIZE];
   uint64_t val64;
@@ -43,10 +53,7 @@ static void analyze_zone(uint32_t pkg, uint32_t sz, int is_sz, int verbose) {
   ssize_t sret;
   int ret;
 
-  if (is_sz) {
-    indent(is_sz);
-    printf("Subzone %"PRIu32"\n", sz);
-  }
+  print_headers(0, 0, sz, is_sz);
 
   sret = rapl_sysfs_zone_get_name(pkg, sz, is_sz, name, sizeof(name));
   ret = sret > 0 ? 0 : (int) sret;
@@ -68,7 +75,7 @@ static void analyze_zone(uint32_t pkg, uint32_t sz, int is_sz, int verbose) {
 
 static void analyze_pkg(uint32_t pkg, int verbose) {
   uint32_t sz;
-  printf("Package %"PRIu32"\n", pkg);
+  print_headers(pkg, 1, 0, 0);
   analyze_zone(pkg, 0, 0, verbose);
   for (sz = 0; !rapl_sysfs_sz_exists(pkg, sz); sz++) {
     analyze_zone(pkg, sz, 1, verbose);
@@ -114,6 +121,7 @@ static const struct option long_options[] = {
   {"c-time-window",       no_argument,        NULL, 's'},
   {"c-max-power",         no_argument,        NULL, 'U'},
   {"c-name",              no_argument,        NULL, 'y'},
+  {0, 0, 0, 0}
 };
 
 static void print_usage(void) {
@@ -354,9 +362,11 @@ int main(int argc, char** argv) {
     /* Print summary of package, zone, or constraint */
     if (constraint.set) {
       /* print constraint */
+      print_headers(package.val, 1, subzone.val, subzone.set);
       analyze_constraint(package.val, subzone.val, subzone.set, constraint.val, verbose);
     } else if (subzone.set) {
       /* print zone */
+      print_headers(package.val, 1, 0, 0);
       analyze_zone(package.val, subzone.val, subzone.set, verbose);
     } else {
       /* print package */
