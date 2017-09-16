@@ -50,7 +50,7 @@ int powercap_sysfs_control_type_exists(const char* control_type);
  * @param depth
  * @return 0 if zone exists, a negative error code otherwise.
  */
-int powercap_sysfs_zone_exists(const char* control_type, uint32_t* zones, uint32_t depth);
+int powercap_sysfs_zone_exists(const char* control_type, const uint32_t* zones, uint32_t depth);
 
 /**
  * Determine if a constraint exists.
@@ -61,7 +61,7 @@ int powercap_sysfs_zone_exists(const char* control_type, uint32_t* zones, uint32
  * @param constraint
  * @return 0 if constraint exists, a negative error code otherwise.
  */
-int powercap_sysfs_constraint_exists(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint);
+int powercap_sysfs_constraint_exists(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint);
 
 /**
  * Get max_energy_range_uj for a zone.
@@ -72,7 +72,7 @@ int powercap_sysfs_constraint_exists(const char* control_type, uint32_t* zones, 
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
-int powercap_sysfs_zone_get_max_energy_range_uj(const char* control_type, uint32_t* zones, uint32_t depth, uint64_t* val);
+int powercap_sysfs_zone_get_max_energy_range_uj(const char* control_type, const uint32_t* zones, uint32_t depth, uint64_t* val);
 
 /**
  * Set energy_uj for a zone.
@@ -83,7 +83,7 @@ int powercap_sysfs_zone_get_max_energy_range_uj(const char* control_type, uint32
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
-int powercap_sysfs_zone_set_energy_uj(const char* control_type, uint32_t* zones, uint32_t depth, uint64_t val);
+int powercap_sysfs_zone_set_energy_uj(const char* control_type, const uint32_t* zones, uint32_t depth, uint64_t val);
 
 /**
  * Get energy_uj for a zone.
@@ -94,7 +94,7 @@ int powercap_sysfs_zone_set_energy_uj(const char* control_type, uint32_t* zones,
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
-int powercap_sysfs_zone_get_energy_uj(const char* control_type, uint32_t* zones, uint32_t depth, uint64_t* val);
+int powercap_sysfs_zone_get_energy_uj(const char* control_type, const uint32_t* zones, uint32_t depth, uint64_t* val);
 
 
 /**
@@ -106,7 +106,7 @@ int powercap_sysfs_zone_get_energy_uj(const char* control_type, uint32_t* zones,
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
-int powercap_sysfs_zone_get_max_power_range_uw(const char* control_type, uint32_t* zones, uint32_t depth, uint64_t* val);
+int powercap_sysfs_zone_get_max_power_range_uw(const char* control_type, const uint32_t* zones, uint32_t depth, uint64_t* val);
 
 /**
  * Get power_uw for a zone.
@@ -117,7 +117,7 @@ int powercap_sysfs_zone_get_max_power_range_uw(const char* control_type, uint32_
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
-int powercap_sysfs_zone_get_power_uw(const char* control_type, uint32_t* zones, uint32_t depth, uint64_t* val);
+int powercap_sysfs_zone_get_power_uw(const char* control_type, const uint32_t* zones, uint32_t depth, uint64_t* val);
 
 /**
  * Enable/disable a zone.
@@ -128,7 +128,7 @@ int powercap_sysfs_zone_get_power_uw(const char* control_type, uint32_t* zones, 
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
-int powercap_sysfs_zone_set_enabled(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t val);
+int powercap_sysfs_zone_set_enabled(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t val);
 
 /**
  * Get whether a zone is enabled or disabled.
@@ -139,7 +139,7 @@ int powercap_sysfs_zone_set_enabled(const char* control_type, uint32_t* zones, u
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
-int powercap_sysfs_zone_get_enabled(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t* val);
+int powercap_sysfs_zone_get_enabled(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t* val);
 
 /**
  * Get name for a zone.
@@ -151,7 +151,7 @@ int powercap_sysfs_zone_get_enabled(const char* control_type, uint32_t* zones, u
  * @param size
  * @return number of bytes read (always > 0), a negative error code otherwise.
  */
-ssize_t powercap_sysfs_zone_get_name(const char* control_type, uint32_t* zones, uint32_t depth, char* buf, size_t size);
+ssize_t powercap_sysfs_zone_get_name(const char* control_type, const uint32_t* zones, uint32_t depth, char* buf, size_t size);
 
 /**
  * Set power_limit_uw for a constraint.
@@ -163,7 +163,7 @@ ssize_t powercap_sysfs_zone_get_name(const char* control_type, uint32_t* zones, 
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
-int powercap_sysfs_constraint_set_power_limit_uw(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t val);
+int powercap_sysfs_constraint_set_power_limit_uw(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t val);
 
 /**
  * Get power_limit_uw for a constraint.
@@ -175,7 +175,7 @@ int powercap_sysfs_constraint_set_power_limit_uw(const char* control_type, uint3
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
-int powercap_sysfs_constraint_get_power_limit_uw(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t* val);
+int powercap_sysfs_constraint_get_power_limit_uw(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t* val);
 
 /**
  * Set time_window_us for a constraint.
@@ -187,7 +187,7 @@ int powercap_sysfs_constraint_get_power_limit_uw(const char* control_type, uint3
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
-int powercap_sysfs_constraint_set_time_window_us(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t val);
+int powercap_sysfs_constraint_set_time_window_us(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t val);
 
 /**
  * Get time_window_us for a constraint.
@@ -199,7 +199,7 @@ int powercap_sysfs_constraint_set_time_window_us(const char* control_type, uint3
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
-int powercap_sysfs_constraint_get_time_window_us(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t* val);
+int powercap_sysfs_constraint_get_time_window_us(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t* val);
 
 /**
  * Get max_power_uw for a constraint.
@@ -211,7 +211,7 @@ int powercap_sysfs_constraint_get_time_window_us(const char* control_type, uint3
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
-int powercap_sysfs_constraint_get_max_power_uw(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t* val);
+int powercap_sysfs_constraint_get_max_power_uw(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t* val);
 
 /**
  * Get get_min_power_uw for a constraint.
@@ -223,7 +223,7 @@ int powercap_sysfs_constraint_get_max_power_uw(const char* control_type, uint32_
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
-int powercap_sysfs_constraint_get_min_power_uw(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t* val);
+int powercap_sysfs_constraint_get_min_power_uw(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t* val);
 
 /**
  * Get max_time_window_us for a constraint.
@@ -235,7 +235,7 @@ int powercap_sysfs_constraint_get_min_power_uw(const char* control_type, uint32_
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
-int powercap_sysfs_constraint_get_max_time_window_us(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t* val);
+int powercap_sysfs_constraint_get_max_time_window_us(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t* val);
 
 /**
  * Get min_time_window_us for a constraint.
@@ -247,7 +247,7 @@ int powercap_sysfs_constraint_get_max_time_window_us(const char* control_type, u
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
-int powercap_sysfs_constraint_get_min_time_window_us(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t* val);
+int powercap_sysfs_constraint_get_min_time_window_us(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t* val);
 
 /**
  * Get name for a constraint.
@@ -260,7 +260,7 @@ int powercap_sysfs_constraint_get_min_time_window_us(const char* control_type, u
  * @param size
  * @return number of bytes read (always > 0), a negative error code otherwise.
  */
-ssize_t powercap_sysfs_constraint_get_name(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint, char* buf, size_t size);
+ssize_t powercap_sysfs_constraint_get_name(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint, char* buf, size_t size);
 
 #ifdef __cplusplus
 }

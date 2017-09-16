@@ -133,7 +133,7 @@ static int write_u64(int fd, uint64_t val) {
 }
 
 /* Returns 0 on failure like insufficient buffer size */
-static size_t append_zone_dir(const char* control_type, uint32_t* zones, uint32_t depth, char* path, size_t size) {
+static size_t append_zone_dir(const char* control_type, const uint32_t* zones, uint32_t depth, char* path, size_t size) {
   size_t written;
   int n;
   uint32_t i;
@@ -158,7 +158,7 @@ static size_t append_zone_dir(const char* control_type, uint32_t* zones, uint32_
  * Returns 0 on failure like insufficient buffer size or if control_type is NULL.
  * zones can be NULL only if depth is 0; path must not be NULL.
  */
-static size_t get_base_path(const char* control_type, uint32_t* zones, uint32_t depth, char* path, size_t size) {
+static size_t get_base_path(const char* control_type, const uint32_t* zones, uint32_t depth, char* path, size_t size) {
   size_t written;
   int n;
   uint32_t i;
@@ -188,7 +188,7 @@ static size_t get_base_path(const char* control_type, uint32_t* zones, uint32_t 
 }
 
 /* Returns 0 on failure like insufficient buffer size */
-static size_t get_zone_file_path(const char* control_type, uint32_t* zones, uint32_t depth, unsigned int which,
+static size_t get_zone_file_path(const char* control_type, const uint32_t* zones, uint32_t depth, unsigned int which,
                                  char* path, size_t size) {
   size_t written;
   int n;
@@ -204,7 +204,7 @@ static size_t get_zone_file_path(const char* control_type, uint32_t* zones, uint
 }
 
 /* Returns 0 on failure like insufficient buffer size */
-static size_t get_constraint_file_path(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint,
+static size_t get_constraint_file_path(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint,
                                        unsigned int which, char* path, size_t size) {
   size_t written;
   int n;
@@ -220,7 +220,7 @@ static size_t get_constraint_file_path(const char* control_type, uint32_t* zones
   return written;
 }
 
-static int open_zone_file(const char* control_type, uint32_t* zones, uint32_t depth, unsigned int which, int flags) {
+static int open_zone_file(const char* control_type, const uint32_t* zones, uint32_t depth, unsigned int which, int flags) {
   char path[PATH_MAX];
   if (!get_zone_file_path(control_type, zones, depth, which, path, sizeof(path))) {
     return -errno;
@@ -228,7 +228,7 @@ static int open_zone_file(const char* control_type, uint32_t* zones, uint32_t de
   return open(path, flags);
 }
 
-static int open_constraint_file(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint,
+static int open_constraint_file(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint,
                                 unsigned int which, int flags) {
   char path[PATH_MAX];
   if (!get_constraint_file_path(control_type, zones, depth, constraint, which, path, sizeof(path))) {
@@ -237,7 +237,7 @@ static int open_constraint_file(const char* control_type, uint32_t* zones, uint3
   return open(path, flags);
 }
 
-static int zone_read_u64(const char* control_type, uint32_t* zones, uint32_t depth, uint64_t* val,
+static int zone_read_u64(const char* control_type, const uint32_t* zones, uint32_t depth, uint64_t* val,
                          unsigned int which) {
   int ret;
   int fd;
@@ -249,7 +249,7 @@ static int zone_read_u64(const char* control_type, uint32_t* zones, uint32_t dep
   return ret;
 }
 
-static int constraint_read_u64(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint,
+static int constraint_read_u64(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint,
                                uint64_t* val, unsigned int which) {
   int ret;
   int fd;
@@ -261,7 +261,7 @@ static int constraint_read_u64(const char* control_type, uint32_t* zones, uint32
   return ret;
 }
 
-static int constraint_write_u64(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint,
+static int constraint_write_u64(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint,
                                 uint64_t val, unsigned int which) {
   int ret;
   int fd;
@@ -277,7 +277,7 @@ int powercap_sysfs_control_type_exists(const char* control_type) {
   return powercap_sysfs_zone_exists(control_type, NULL, 0);
 }
 
-int powercap_sysfs_zone_exists(const char* control_type, uint32_t* zones, uint32_t depth) {
+int powercap_sysfs_zone_exists(const char* control_type, const uint32_t* zones, uint32_t depth) {
   char path[PATH_MAX];
   struct stat ss;
   if (!get_base_path(control_type, zones, depth, path, sizeof(path))) {
@@ -290,7 +290,7 @@ int powercap_sysfs_zone_exists(const char* control_type, uint32_t* zones, uint32
   return 0;
 }
 
-int powercap_sysfs_constraint_exists(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint) {
+int powercap_sysfs_constraint_exists(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint) {
   char path[PATH_MAX];
   struct stat ss;
   /* power_limit_uw file must exist */
@@ -304,11 +304,11 @@ int powercap_sysfs_constraint_exists(const char* control_type, uint32_t* zones, 
   return 0;
 }
 
-int powercap_sysfs_zone_get_max_energy_range_uj(const char* control_type, uint32_t* zones, uint32_t depth, uint64_t* val) {
+int powercap_sysfs_zone_get_max_energy_range_uj(const char* control_type, const uint32_t* zones, uint32_t depth, uint64_t* val) {
   return zone_read_u64(control_type, zones, depth, val, ZONE_MAX_ENERGY_RANGE_UJ);
 }
 
-int powercap_sysfs_zone_set_energy_uj(const char* control_type, uint32_t* zones, uint32_t depth, uint64_t val) {
+int powercap_sysfs_zone_set_energy_uj(const char* control_type, const uint32_t* zones, uint32_t depth, uint64_t val) {
   int ret;
   int fd;
   if ((fd = open_zone_file(control_type, zones, depth, ZONE_ENERGY_UJ, O_WRONLY)) < 0) {
@@ -319,19 +319,19 @@ int powercap_sysfs_zone_set_energy_uj(const char* control_type, uint32_t* zones,
   return ret;
 }
 
-int powercap_sysfs_zone_get_energy_uj(const char* control_type, uint32_t* zones, uint32_t depth, uint64_t* val) {
+int powercap_sysfs_zone_get_energy_uj(const char* control_type, const uint32_t* zones, uint32_t depth, uint64_t* val) {
   return zone_read_u64(control_type, zones, depth, val, ZONE_ENERGY_UJ);
 }
 
-int powercap_sysfs_zone_get_max_power_range_uw(const char* control_type, uint32_t* zones, uint32_t depth, uint64_t* val) {
+int powercap_sysfs_zone_get_max_power_range_uw(const char* control_type, const uint32_t* zones, uint32_t depth, uint64_t* val) {
   return zone_read_u64(control_type, zones, depth, val, ZONE_MAX_POWER_RANGE_UW);
 }
 
-int powercap_sysfs_zone_get_power_uw(const char* control_type, uint32_t* zones, uint32_t depth, uint64_t* val) {
+int powercap_sysfs_zone_get_power_uw(const char* control_type, const uint32_t* zones, uint32_t depth, uint64_t* val) {
   return zone_read_u64(control_type, zones, depth, val, ZONE_POWER_UW);
 }
 
-int powercap_sysfs_zone_set_enabled(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t val) {
+int powercap_sysfs_zone_set_enabled(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t val) {
   int ret;
   int fd;
   if ((fd = open_zone_file(control_type, zones, depth, ZONE_ENABLED, O_WRONLY)) < 0) {
@@ -342,7 +342,7 @@ int powercap_sysfs_zone_set_enabled(const char* control_type, uint32_t* zones, u
   return ret;
 }
 
-int powercap_sysfs_zone_get_enabled(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t* val) {
+int powercap_sysfs_zone_get_enabled(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t* val) {
   uint64_t enabled;
   int ret;
   if (val) {
@@ -356,7 +356,7 @@ int powercap_sysfs_zone_get_enabled(const char* control_type, uint32_t* zones, u
   return ret;
 }
 
-ssize_t powercap_sysfs_zone_get_name(const char* control_type, uint32_t* zones, uint32_t depth, char* buf, size_t size) {
+ssize_t powercap_sysfs_zone_get_name(const char* control_type, const uint32_t* zones, uint32_t depth, char* buf, size_t size) {
   ssize_t ret;
   int fd;
   if ((fd = open_zone_file(control_type, zones, depth, ZONE_NAME, O_RDONLY)) < 0) {
@@ -367,39 +367,39 @@ ssize_t powercap_sysfs_zone_get_name(const char* control_type, uint32_t* zones, 
   return ret;
 }
 
-int powercap_sysfs_constraint_set_power_limit_uw(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t val) {
+int powercap_sysfs_constraint_set_power_limit_uw(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t val) {
   return constraint_write_u64(control_type, zones, depth, constraint, val, CONSTRAINT_POWER_LIMIT_UW);
 }
 
-int powercap_sysfs_constraint_get_power_limit_uw(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t* val) {
+int powercap_sysfs_constraint_get_power_limit_uw(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t* val) {
   return constraint_read_u64(control_type, zones, depth, constraint, val, CONSTRAINT_POWER_LIMIT_UW);
 }
 
-int powercap_sysfs_constraint_set_time_window_us(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t val) {
+int powercap_sysfs_constraint_set_time_window_us(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t val) {
   return constraint_write_u64(control_type, zones, depth, constraint, val, CONSTRAINT_TIME_WINDOW_US);
 }
 
-int powercap_sysfs_constraint_get_time_window_us(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t* val) {
+int powercap_sysfs_constraint_get_time_window_us(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t* val) {
   return constraint_read_u64(control_type, zones, depth, constraint, val, CONSTRAINT_TIME_WINDOW_US);
 }
 
-int powercap_sysfs_constraint_get_max_power_uw(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t* val) {
+int powercap_sysfs_constraint_get_max_power_uw(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t* val) {
   return constraint_read_u64(control_type, zones, depth, constraint, val, CONSTRAINT_MAX_POWER_UW);
 }
 
-int powercap_sysfs_constraint_get_min_power_uw(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t* val) {
+int powercap_sysfs_constraint_get_min_power_uw(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t* val) {
   return constraint_read_u64(control_type, zones, depth, constraint, val, CONSTRAINT_MIN_POWER_UW);
 }
 
-int powercap_sysfs_constraint_get_max_time_window_us(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t* val) {
+int powercap_sysfs_constraint_get_max_time_window_us(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t* val) {
   return constraint_read_u64(control_type, zones, depth, constraint, val, CONSTRAINT_MAX_TIME_WINDOW_US);
 }
 
-int powercap_sysfs_constraint_get_min_time_window_us(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t* val) {
+int powercap_sysfs_constraint_get_min_time_window_us(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint, uint64_t* val) {
   return constraint_read_u64(control_type, zones, depth, constraint, val, CONSTRAINT_MIN_TIME_WINDOW_US);
 }
 
-ssize_t powercap_sysfs_constraint_get_name(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t constraint, char* buf, size_t size) {
+ssize_t powercap_sysfs_constraint_get_name(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint, char* buf, size_t size) {
   ssize_t ret;
   int fd;
   if ((fd = open_constraint_file(control_type, zones, depth, constraint, CONSTRAINT_NAME, O_RDONLY)) < 0) {
