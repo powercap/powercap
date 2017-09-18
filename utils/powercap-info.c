@@ -4,7 +4,6 @@
  * @author Connor Imes
  * @date 2017-08-24
  */
-#define _GNU_SOURCE
 #include <errno.h>
 #include <getopt.h>
 #include <inttypes.h>

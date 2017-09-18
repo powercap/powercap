@@ -3,7 +3,6 @@
  * No way to test good ones without a functioning powercap implementation, which isn't guaranteed to exist.
  */
 /* force assertions */
-#define _GNU_SOURCE
 #undef NDEBUG
 #include <assert.h>
 #include <errno.h>
