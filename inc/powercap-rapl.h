@@ -136,20 +136,20 @@ int powercap_rapl_get_energy_uj(const powercap_rapl_pkg* pkg, powercap_rapl_zone
 
 /**
  * Reset the energy_uj value to 0.
- * This is only allowed if the file is writable.
  * Returns 0 on success, a negative value in case of error.
+ * NOTE: As of this writing, RAPL does not support resetting the energy counter.
  */
 int powercap_rapl_reset_energy_uj(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone);
 
 /**
  * Get the max power range in microwatts.
- * NOTE: As of this writing, this file is not known to actually be supported with RAPL.
+ * NOTE: As of this writing, RAPL does not support this file.
  */
 int powercap_rapl_get_max_power_range_uw(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, uint64_t* val);
 
 /**
  * Get the current power in microwatts.
- * NOTE: As of this writing, this file is not known to actually be supported with RAPL.
+ * NOTE: As of this writing, RAPL does not support this file.
  */
 int powercap_rapl_get_power_uw(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, uint64_t* val);
 
@@ -160,6 +160,7 @@ int powercap_rapl_get_max_power_uw(const powercap_rapl_pkg* pkg, powercap_rapl_z
 
 /**
  * Get the minimum power allowed in microwatts.
+ * NOTE: As of this writing, RAPL does not support this file.
  */
 int powercap_rapl_get_min_power_uw(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, powercap_rapl_constraint constraint, uint64_t* val);
 
@@ -175,11 +176,13 @@ int powercap_rapl_set_power_limit_uw(const powercap_rapl_pkg* pkg, powercap_rapl
 
 /**
  * Get the maximum time window in microseconds.
+ * NOTE: As of this writing, RAPL does not support this file.
  */
 int powercap_rapl_get_max_time_window_us(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, powercap_rapl_constraint constraint, uint64_t* val);
 
 /**
  * Get the minimum time window in microseconds.
+ * NOTE: As of this writing, RAPL does not support this file.
  */
 int powercap_rapl_get_min_time_window_us(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, powercap_rapl_constraint constraint, uint64_t* val);
 
