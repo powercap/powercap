@@ -12,14 +12,14 @@
 #include "powercap-sysfs.h"
 #include "util-common.h"
 
-static const char short_options[] = "hp:z:c:j:e:l:s:";
+static const char short_options[] = "hp:z:c:je:l:s:";
 static const struct option long_options[] = {
   {"help",                no_argument,        NULL, 'h'},
   {"package",             required_argument,  NULL, 'p'},
   {"control-type",        required_argument,  NULL, 'p'},
   {"zone",                required_argument,  NULL, 'z'},
   {"constraint",          required_argument,  NULL, 'c'},
-  {"z-energy",            required_argument,  NULL, 'j'},
+  {"z-energy",            no_argument      ,  NULL, 'j'},
   {"z-enabled",           required_argument,  NULL, 'e'},
   {"c-power-limit",       required_argument,  NULL, 'l'},
   {"c-time-window",       required_argument,  NULL, 's'},
@@ -38,14 +38,12 @@ static void print_usage(void) {
   printf("                               E.g., for zone 0, subzone 2: \"-z 0:2\"\n");
   printf("  -c, --constraint=CONSTRAINT  The constraint number (none by default)\n");
   printf("The following zone-level arguments may be used together:\n");
-  printf("  -j, --z-energy=UJ            Set zone energy counter\n");
-  printf("                               0 is probably the only allowable value\n");
+  printf("  -j, --z-energy               Reset zone energy counter\n");
   printf("  -e, --z-enabled=1|0          Enable/disable a zone\n");
   printf("The following constraint-level arguments may be used together and require -c/--constraint:\n");
   printf("  -l, --c-power-limit=UW       Set constraint power limit\n");
   printf("  -s, --c-time-window=US       Set constraint time window\n");
-  printf("\nEnergy units: microjoules (uJ)\n");
-  printf("Power units: microwatts (uW)\n");
+  printf("\nPower units: microwatts (uW)\n");
   printf("Time units: microseconds (us)\n");
 }
 
@@ -60,7 +58,7 @@ int main(int argc, char** argv) {
   uint32_t zones[MAX_ZONE_DEPTH] = { 0 };
   uint32_t depth = 0;
   u32_param constraint = {0, 0};
-  u64_param energy = {0, 0};
+  int reset_energy = 0;
   u32_param enabled = {0, 0};
   u64_param power_limit = {0, 0};
   u64_param time_window = {0, 0};
@@ -79,6 +77,10 @@ int main(int argc, char** argv) {
       print_usage();
       return 0;
     case 'p':
+      if (control_type) {
+        cont = 0;
+        ret = -EINVAL;
+      }
       control_type = optarg;
       break;
     case 'z':
@@ -88,7 +90,11 @@ int main(int argc, char** argv) {
       ret = set_u32_param(&constraint, optarg, &cont);
       break;
     case 'j':
-      ret = set_u64_param(&energy, optarg, &cont);
+      if (reset_energy) {
+        cont = 0;
+        ret = -EINVAL;
+      }
+      reset_energy = 1;
       break;
     case 'e':
       ret = set_u32_param(&enabled, optarg, &cont);
@@ -123,7 +129,7 @@ int main(int argc, char** argv) {
     if (power_limit.set || time_window.set) {
       fprintf(stderr, "Must specify -c/--constraint when using constraint-level arguments\n");
       ret = -EINVAL;
-    } else if (!(energy.set || enabled.set)) {
+    } else if (!(reset_energy || enabled.set)) {
       fprintf(stderr, "Nothing to do\n");
       ret = -EINVAL;
     }
@@ -150,8 +156,8 @@ int main(int argc, char** argv) {
   }
 
   /* Perform requested action(s) */
-  if (energy.set) {
-    c = powercap_sysfs_zone_set_energy_uj(control_type, zones, depth, energy.val);
+  if (reset_energy) {
+    c = powercap_sysfs_zone_reset_energy_uj(control_type, zones, depth);
     if (c) {
       perror("Error setting energy counter");
       ret |= c;

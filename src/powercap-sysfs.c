@@ -89,13 +89,13 @@ int powercap_sysfs_zone_get_max_energy_range_uj(const char* control_type, const 
   return zone_read_u64(control_type, zones, depth, val, POWERCAP_ZONE_FILE_MAX_ENERGY_RANGE_UJ);
 }
 
-int powercap_sysfs_zone_set_energy_uj(const char* control_type, const uint32_t* zones, uint32_t depth, uint64_t val) {
+int powercap_sysfs_zone_reset_energy_uj(const char* control_type, const uint32_t* zones, uint32_t depth) {
   int ret;
   int fd;
   if ((fd = open_zone_file(control_type, zones, depth, POWERCAP_ZONE_FILE_ENERGY_UJ, O_WRONLY)) < 0) {
     return -errno;
   }
-  ret = write_u64(fd, val);
+  ret = write_u64(fd, 0);
   close(fd);
   return ret;
 }

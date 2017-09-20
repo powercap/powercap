@@ -75,15 +75,14 @@ int powercap_sysfs_constraint_exists(const char* control_type, const uint32_t* z
 int powercap_sysfs_zone_get_max_energy_range_uj(const char* control_type, const uint32_t* zones, uint32_t depth, uint64_t* val);
 
 /**
- * Set energy_uj for a zone.
+ * Reset energy_uj for a zone.
  *
  * @param control_type
  * @param zones
  * @param depth
- * @param val
  * @return 0 on success, a negative error code otherwise.
  */
-int powercap_sysfs_zone_set_energy_uj(const char* control_type, const uint32_t* zones, uint32_t depth, uint64_t val);
+int powercap_sysfs_zone_reset_energy_uj(const char* control_type, const uint32_t* zones, uint32_t depth);
 
 /**
  * Get energy_uj for a zone.

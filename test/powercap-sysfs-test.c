@@ -94,7 +94,7 @@ static void test_get_set_zone_all_bad(void) {
   assert(powercap_sysfs_zone_get_energy_uj("foo", zones, 2, &val64) == -ENOENT);
   assert(errno == ENOENT);
   errno = 0;
-  assert(powercap_sysfs_zone_set_energy_uj("foo", zones, 2, 0) == -ENOENT);
+  assert(powercap_sysfs_zone_reset_energy_uj("foo", zones, 2) == -ENOENT);
   assert(errno == ENOENT);
   errno = 0;
   assert(powercap_sysfs_zone_get_max_power_range_uw("foo", zones, 2, &val64) == -ENOENT);
@@ -128,10 +128,10 @@ static void test_get_set_zone_all_bad(void) {
 #endif
   /* set u64 */
   errno = 0;
-  assert(powercap_sysfs_zone_set_energy_uj(NULL, zones, 2, 0) == -EINVAL);
+  assert(powercap_sysfs_zone_reset_energy_uj(NULL, zones, 2) == -EINVAL);
   assert(errno == EINVAL);
   errno = 0;
-  assert(powercap_sysfs_zone_set_energy_uj("foo", NULL, 2, 0) == -EINVAL);
+  assert(powercap_sysfs_zone_reset_energy_uj("foo", NULL, 2) == -EINVAL);
   assert(errno == EINVAL);
   /* get u32 */
   errno = 0;
