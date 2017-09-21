@@ -93,6 +93,12 @@ cmake ..
 make
 ```
 
+To create a shared object library as a release build, specify for cmake:
+
+``` sh
+cmake .. -DBUILD_SHARED_LIBS=On -DCMAKE_BUILD_TYPE=Release
+```
+
 
 ### Installing
 
