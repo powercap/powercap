@@ -151,7 +151,7 @@ static const struct option long_options[] = {
 };
 
 static void print_usage(void) {
-  printf("Usage: powercap-info [OPTION]...\n");
+  printf("Usage: powercap-info -p NAME [OPTION]...\n");
   printf("Options:\n");
   printf("  -h, --help                   Print this message and exit\n");
   printf("  -v, --verbose                Print errors when files are not available\n");

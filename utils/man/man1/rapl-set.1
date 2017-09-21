@@ -1,4 +1,4 @@
-.TH "rapl-set" "1" "2017" "rapl-set" "rapl-set"
+.TH "rapl-set" "1" "2017-09-20" "powercap" "rapl-set"
 .SH "NAME"
 .LP
 rapl\-set \- set RAPL configurations
@@ -9,8 +9,15 @@ rapl\-set \- set RAPL configurations
 .LP
 Sets Intel Running Average Power Limit (RAPL) configurations.
 .LP
-Since RAPL does not implement all capabilities defined in the powercap interface, only a subset of the options seen powercap-set(1) are available.
+Since RAPL does not implement all capabilities defined in the powercap
+interface, only a subset of the options from powercap-set(1) are
+available.
 Additionally, the \-p and \-z options are different.
+.LP
+This software requires an Intel processor (Sandy Bridge or newer), Linux
+kernel 3.13 or newer compiled with \fBCONFIG_POWERCAP\fR and
+\fBCONFIG_INTEL_RAPL\fR enabled, and the \fBintel_rapl\fR kernel module to
+be loaded.
 .SH "OPTIONS"
 .LP
 .TP
@@ -25,13 +32,14 @@ The package subzone number (none by default)
 .TP
 \fB\-c,\fR \fB\-\-constraint\fR=\fICONSTRAINT\fP
 The constraint number (none by default)
-.TP
+.LP
 The following is a zone-level argument (\-z/\-\-subzone is optional):
 .TP
 \fB\-e,\fR \fB\-\-z\-enabled=1|0\fR
 Enable/disable a zone
-.TP
-The following constraint-level arguments may be used together and require \-c/\-\-constraint (\-z/\-\-subzone is optional):
+.LP
+The following constraint-level arguments may be used together and require
+\-c/\-\-constraint (\-z/\-\-subzone is optional):
 .TP
 \fB\-l,\fR \fB\-\-c\-power\-limit=UW\fR
 Set constraint power limit
@@ -40,27 +48,36 @@ Set constraint power limit
 Set constraint time window
 .SH "EXAMPLES"
 .LP
-Note that \-p/\-\-package=0 is used by default, allowing for simpler commands on single-socket systems.
+Note that \-p/\-\-package=0 is used by default, allowing for simpler
+commands on single-socket systems.
 .TP
-To enable package 0 (implicitly), which is usually named "package\-0":
 \fBrapl\-set \-e 1\fP
+Enable package 0 (implicitly), which is usually named \fBpackage\-0\fR.
 .TP
-To enable package 0 (explicitly):
 \fBrapl\-set \-p 0 \-e 1\fP
+Enable package 0 (explicitly).
 .TP
-To enable package 0, subzone 1, which is usually the "uncore" or "dram" subzone of "package\-0", depending on the system:
 \fBrapl\-set \-p 0 \-z 1 \-e 1\fP
+Enable package 0, subzone 1, which is usually the \fBuncore\fR or
+\fBdram\fR subzone of \fBpackage\-0\fR, depending on the system.
 .TP
-To set a power cap of 25 Watts (25000000 uW) on package 0, constraint 1, which is usually the "short_term" constraint for "package\-0":
 \fBrapl\-set \-p 0 \-c 1 \-l 25000000\fP
+Set a power cap of 25 Watts (25000000 uW) on package 0, constraint 1,
+which is usually the \fBshort_term\fR constraint for \fBpackage\-0\fR.
 .TP
-To set a power cap of 15 Watts (15000000 uW) and time window of 976 microseconds on package 1, subzone 0, constraint 0, which is usually the "long_term" (and only) constraint for the "core" subzone of "package\-1" (a multi-socket system):
 \fBrapl\-set \-p 1 \-z 0 \-c 0 \-l 15000000 \-s 976\fP
+Set a power cap of 15 Watts (15000000 uW) and time window of 976
+microseconds on package 1, subzone 0, constraint 0, which is usually the
+\fBlong_term\fR (and only) constraint for the \fBcore\fR subzone of
+\fBpackage\-1\fR (a multi-socket system).
 .SH "REMARKS"
 .LP
-Administrative (root) privileges are usually needed to use \fBrapl\-set\fR.
+Administrative (root) privileges are usually needed to use
+\fBrapl\-set\fR.
 .LP
-Setting constraint power cap and/or time limit values does not enable or disable a package/subzone - the \-e/-\-z\-enabled flag must be set explicitly.
+Setting constraint power cap and/or time limit values does not enable or
+disable a package/subzone - the \-e/-\-z\-enabled flag must be set
+explicitly.
 .LP
 A package is a zone with constraints.
 Subzones are a package's child domains, including power planes.
@@ -70,24 +87,36 @@ Power units: microwatts (uW)
 Time units: microseconds (us)
 .SH "BUGS"
 .LP
-The following are behavioral quirks due to the kernel interface or abnormalities in some hardware.
+The following are behavioral quirks due to the kernel interface or
+abnormalities in some hardware.
 They are not bugs in \fBrapl\-set\fR and should not be reported as such.
 .LP
-The kernel is not guaranteed to accept power limit and time window values exactly as specified.
-Values may be rounded due to how they are encoded in Model-Specific Registers.
-This rounding error is usually small within normal operating ranges, but can be significant at the extremes.
+The kernel is not guaranteed to accept power limit and time window values
+exactly as specified.
+Values may be rounded due to how they are encoded in Model-Specific
+Registers.
+This rounding error is usually small within normal operating ranges, but
+can be significant at the extremes.
 .LP
-Some systems may not accept time window values correctly, requiring a system reboot to reset the time window to the default value.
+Some systems may not accept time window values correctly, requiring a
+system reboot to reset the time window to the default value.
 .LP
-Values returned by the kernel, e.g., by rapl\-info(1), sometimes lose accuracy from the actual stored value due to integer rounding.
-For example, the kernel may return a time window value of 7812 us, when in fact the actual stored value is 7812.5 us.
-Writing back an integer value returned by the kernel may cause unexpected changes to its stored value due to these rounding problems.
+Values returned by the kernel, e.g., by rapl\-info(1), sometimes lose
+accuracy from the actual stored value due to integer rounding.
+For example, the kernel may return a time window value of 7812 us, when in
+fact the actual stored value is 7812.5 us.
+Writing back an integer value returned by the kernel may cause unexpected
+changes to its stored value due to these rounding problems.
 .LP
 Some systems may not allow disabling package-level zones/constraints.
 .LP
-It is possible for packages on multi-socket systems to be indexed out of order by the kernel.
-For example, the package at index 0 (\fB\-p 0\fR) could actually be named "package\-1" while the package at index 1 (\fB\-p 1\fR) is named "package\-0".
-If this matters to the user, it is their responsibility to check before setting values, e.g., using rapl\-info(1).
+It is possible for packages on multi-socket systems to be indexed out of
+order by the kernel.
+For example, the package at index 0 (\fB\-p 0\fR) could actually be named
+\fBpackage\-1\fR while the package at index 1 (\fB\-p 1\fR) is named
+\fBpackage\-0\fR.
+If this matters to the user, it is their responsibility to check before
+setting values, e.g., using rapl\-info(1).
 .LP
 Report bugs upstream at <https://github.com/powercap/powercap>
 .SH "FILES"

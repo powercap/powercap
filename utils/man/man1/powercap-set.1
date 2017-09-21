@@ -1,10 +1,11 @@
-.TH "powercap-set" "1" "2017" "powercap-set" "powercap-set"
+.TH "powercap-set" "1" "2017-09-20" "powercap" "powercap-set"
 .SH "NAME"
 .LP
-powercap\-set \- manage power capping devices with the Linux power capping framework
+powercap\-set \- manage power capping devices with the Linux power capping
+framework
 .SH "SYNPOSIS"
 .LP
-\fBpowercap\-set\fP [\fIOPTION\fP]...
+\fBpowercap\-set \-p\fP \fINAME\fP \fB\-z\fP \fIZONE(S)\fP [\fIOPTION\fP]...
 .SH "DESCRIPTION"
 .LP
 Sets configurations for a powercap control type.
@@ -15,16 +16,19 @@ Sets configurations for a powercap control type.
 Prints the help screen
 .TP
 \fB\-p,\fR \fB\-\-control\-type\fR=\fINAME\fP
-[REQUIRED] The powercap control type name. Must not be empty or contain a '.' or '/'.
+[REQUIRED] The powercap control type name.
+Must not be empty or contain a '.' or '/'.
 .TP
 \fB\-z,\fR \fB\-\-zone=\fR\fIZONE(S)\fP
-[REQUIRED] The zone/subzone numbers in the control type's powercap tree. Separate zones/subzones with a colon. E.g., for zone 0, subzone 2:
+[REQUIRED] The zone/subzone numbers in the control type's powercap tree.
+Separate zones/subzones with a colon.
+E.g., for zone 0, subzone 2:
 .br
 \fB\-z 0:2\fP
 .TP
 \fB\-c,\fR \fB\-\-constraint\fR=\fICONSTRAINT\fP
 The constraint number (none by default)
-.TP
+.LP
 The following zone-level arguments may be used together:
 .TP
 \fB\-j,\fR \fB\-\-z\-energy\fR
@@ -32,8 +36,9 @@ Reset zone energy counter
 .TP
 \fB\-e,\fR \fB\-\-z\-enabled=1|0\fR
 Enable/disable a zone
-.TP
-The following constraint-level arguments may be used together and require \-c/\-\-constraint:
+.LP
+The following constraint-level arguments may be used together and require
+\-c/\-\-constraint:
 .TP
 \fB\-l,\fR \fB\-\-c\-power\-limit=UW\fR
 Set constraint power limit
@@ -42,26 +47,37 @@ Set constraint power limit
 Set constraint time window
 .SH "EXAMPLES"
 .LP
-These examples use Intel RAPL, for which the control type is "intel\-rapl".
+These examples use Intel RAPL, for which the control type is
+\fBintel\-rapl\fR.
 .TP
-To enable zone 0, which is usually named "package\-0":
 \fBpowercap\-set \-p intel\-rapl \-z 0 \-e 1\fP
+Enable zone 0, which is usually named \fBpackage\-0\fR.
 .TP
-To enable zone 0, subzone 1, which is usually the "uncore" or "dram" subzone of "package\-0", depending on the system:
 \fBpowercap\-set \-p intel\-rapl \-z 0:1 \-e 1\fP
+Enable zone 0, subzone 1, which is usually the \fBuncore\fR or \fBdram\fR
+subzone of \fBpackage\-0\fR, depending on the system.
 .TP
-To set a power cap of 25 Watts (25000000 uW) on zone 0, constraint 1, which is usually the "short_term" constraint for "package\-0":
 \fBpowercap\-set \-p intel\-rapl \-z 0 \-c 1 \-l 25000000\fP
+Set a power cap of 25 Watts (25000000 uW) on zone 0, constraint 1, which
+is usually the \fBshort_term\fR constraint for \fBpackage\-0\fR.
 .TP
-To set a power cap of 15 Watts (15000000 uW) and time window of 976 microseconds on zone 1, subzone 0, constraint 0, which is usually the "long_term" (and only) constraint for the "core" subzone of "package\-1" (a multi-socket system):
 \fBpowercap\-set \-p intel\-rapl \-z 1:0 \-c 0 \-l 15000000 \-s 976\fP
+Set a power cap of 15 Watts (15000000 uW) and time window of 976
+microseconds on zone 1, subzone 0, constraint 0, which is usually the
+\fBlong_term\fR (and only) constraint for the \fBcore\fR subzone of
+\fBpackage\-1\fR (a multi-socket system).
 .SH "REMARKS"
 .LP
-Administrative (root) privileges are usually needed to use \fBpowercap\-set\fR.
+Administrative (root) privileges are usually needed to use
+\fBpowercap\-set\fR.
 .LP
-Setting constraint power cap and/or time limit values does not enable or disable a zone/subzone - the \-e/-\-z\-enabled flag must be set explicitly.
+Setting constraint power cap and/or time limit values does not enable or
+disable a zone/subzone - the \-e/-\-z\-enabled flag must be set
+explicitly.
 .LP
-The kernel may round power limits and time windows to discrete values supported by the hardware, e.g., 28 seconds might round to 27983872 microseconds.
+The kernel may round power limits and time windows to discrete values
+supported by the hardware, e.g., 28 seconds might round to 27983872
+microseconds.
 .LP
 Power units: microwatts (uW)
 .br

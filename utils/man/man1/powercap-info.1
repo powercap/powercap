@@ -1,10 +1,10 @@
-.TH "powercap-info" "1" "2017" "powercap-info" "powercap-info"
+.TH "powercap-info" "1" "2017-09-20" "powercap" "powercap-info"
 .SH "NAME"
 .LP
 powercap\-info \- get information from the Linux power capping framework
 .SH "SYNPOSIS"
 .LP
-\fBpowercap\-info\fP [\fIOPTION\fP]...
+\fBpowercap\-info \-p\fP \fINAME\fP [\fIOPTION\fP]...
 .SH "DESCRIPTION"
 .LP
 Prints configurations for a powercap control type.
@@ -18,14 +18,19 @@ Prints the help screen
 Print errors when files are not available
 .TP
 \fB\-p,\fR \fB\-\-control\-type\fR=\fINAME\fP
-[REQUIRED] The powercap control type name. Must not be empty or contain a '.' or '/'.
+[REQUIRED] The powercap control type name.
+Must not be empty or contain a '.' or '/'.
 .TP
 \fB\-z,\fR \fB\-\-zone=\fR\fIZONE(S)\fP
-The zone/subzone numbers in the control type's powercap tree (control type's root by default). Separate zones/subzones with a colon. E.g., for zone 0, subzone 2:
+The zone/subzone numbers in the control type's powercap tree (control
+type's root by default).
+Separate zones/subzones with a colon.
+E.g., for zone 0, subzone 2:
 .br
 \fB\-z 0:2\fP
 .br
-Ending with a colon prevents output for subzones. E.g., for zone 0, but not subzones:
+Ending with a colon prevents output for subzones.
+E.g., for zone 0, but not subzones:
 .br
 \fB\-z 0:\fP
 .TP
@@ -35,8 +40,9 @@ The constraint number
 All remaining options below are mutually exclusive:
 .TP
 \fB\-n,\fR \fB\-\-nzones\fR
-Print the number of zones (control type's root by default; within the \-z/\-\-zone level, if set)
-.TP
+Print the number of zones (control type's root by default; within the
+\-z/\-\-zone level, if set)
+.LP
 The following are zone-level arguments and require \-z/\-\-zone:
 .TP
 \fB\-j,\fR \fB\-\-z\-energy\fR
@@ -56,8 +62,9 @@ Print zone enable/disabled status
 .TP
 \fB\-x,\fR \fB\-\-z\-name\fR
 Print zone name
-.TP
-The following are constraint-level arguments and require \-z/\-\-zone and \-c/\-\-constraint:
+.LP
+The following are constraint-level arguments and require \-z/\-\-zone and
+\-c/\-\-constraint:
 .TP
 \fB\-l,\fR \fB\-\-c\-power\-limit\fR
 Print constraint power limit
@@ -81,30 +88,38 @@ Print constraint minimum allowed time window
 Print constraint name
 .SH "EXAMPLES"
 .LP
-These examples use Intel RAPL, for which the control type is "intel\-rapl".
+These examples use Intel RAPL, for which the control type is
+\fBintel\-rapl\fR.
 .TP
-To print all RAPL zones:
 \fBpowercap\-info \-p intel\-rapl\fP
+Print all RAPL zones.
 .TP
-To print only zone 0, which is usually named "package\-0":
 \fBpowercap\-info \-p intel\-rapl \-z 0\fP
+Print only zone 0, which is usually named \fBpackage\-0\fR.
 .TP
-To print zone 0, subzone 1, which is usually the "uncore" or "dram" subzone of "package\-0", depending on the system:
 \fBpowercap\-info \-p intel\-rapl \-z 0:1\fP
+Print zone 0, subzone 1, which is usually the \fBuncore\fR or \fBdram\fR
+subzone of \fBpackage\-0\fR, depending on the system.
 .TP
-To print zone 0, constraint 1, which is usually the "short_term" constraint for "package\-0":
 \fBpowercap\-info \-p intel\-rapl \-z 0 \-c 1\fP
+Print zone 0, constraint 1, which is usually the \fBshort_term\fR
+constraint for \fBpackage\-0\fR.
 .TP
-To print the energy counter for zone 0, which is usually named "package\-0":
 \fBpowercap\-info \-p intel\-rapl \-z 0 \-j\fP
+Print the energy counter for zone 0, which is usually named
+\fBpackage\-0\fR.
 .TP
-To print the power limit for zone 1, subzone 0, constraint 0, which is usually the "long_term" constraint for the "core" subzone of "package\-1" (a multi\-socket system):
 \fBpowercap\-info \-p intel\-rapl \-z 1:0 \-c 0 \-l\fP
+Print the power limit for zone 1, subzone 0, constraint 0, which is
+usually the \fBlong_term\fR constraint for the \fBcore\fR subzone of
+\fBpackage\-1\fR (a multi-socket system).
 .SH "REMARKS"
 .LP
-Some fields are optional and will only be printed if they are available unless \-v/\-\-verbose is set.
+Some fields are optional and will only be printed if they are available
+unless \-v/\-\-verbose is set.
 .br
-If no subzone/constraint\-specific outputs are requested, all available zones and constraints will be shown.
+If no subzone/constraint\-specific outputs are requested, all available
+zones and constraints will be shown.
 .LP
 Energy units: microjoules (uJ)
 .br

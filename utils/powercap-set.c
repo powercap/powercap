@@ -27,7 +27,7 @@ static const struct option long_options[] = {
 };
 
 static void print_usage(void) {
-  printf("Usage: powercap-set [OPTION]...\n");
+  printf("Usage: powercap-set -p NAME -z ZONE(S) [OPTION]...\n");
   printf("Options:\n");
   printf("  -h, --help                   Print this message and exit\n");
   printf("  -p, --control-type=NAME      [REQUIRED] The powercap control type name\n");
