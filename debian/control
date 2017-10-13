@@ -1,0 +1,46 @@
+Source: powercap
+Maintainer: Connor Imes <ckimes@ubuntu.com>
+Section: admin
+Priority: optional
+Build-Depends: debhelper (>= 10),
+               cmake
+Standards-Version: 4.1.1
+Vcs-Browser: https://github.com/connorimes/powercap/tree/debian
+Vcs-Git: https://github.com/connorimes/powercap.git -b debian
+Homepage: https://github.com/powercap/powercap
+
+Package: powercap-utils
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         libpowercap0 (= ${binary:Version})
+Description: Utilities for accessing the powercap Linux kernel feature
+ This package contains utilities for accessing the powercap Linux kernel
+ feature through sysfs. Specifically, it provides powercap-info and powercap-
+ set for generic access to powercap control types, and rapl-info and rapl-
+ set for managing Intel RAPL implementations.
+
+Package: libpowercap0
+Architecture: any
+Multi-Arch: same
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends}
+Recommends: powercap-utils (= ${binary:Version})
+Description: Shared library for accessing the powercap Linux kernel feature
+ This library provides methods to access the Linux kernel powercap
+ interface. It exposes functions for direct access to sysfs files,
+ as well as an abstraction to discover and operate on Intel RAPL
+ power zones.
+
+Package: libpowercap-dev
+Architecture: any
+Multi-Arch: same
+Section: libdevel
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         libpowercap0 (= ${binary:Version})
+Description: Development files for libpowercap
+ This package provides everything needed to develop other programs and
+ libraries with libpowercap, including header files and pkg-config
+ configurations.

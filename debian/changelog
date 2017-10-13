@@ -1,0 +1,5 @@
+powercap (0.1.1-1) unstable; urgency=medium
+
+  * Initial release. (Closes: #876409)
+
+ -- Connor Imes <ckimes@ubuntu.com>  Thu, 12 Oct 2017 16:34:03 -0500
