@@ -14,5 +14,5 @@ target_link_libraries(rapl-set powercap)
 
 # Install
 
-install(TARGETS powercap-info powercap-set rapl-info rapl-set DESTINATION bin)
-install(DIRECTORY man/ DESTINATION share/man)
+install(TARGETS powercap-info powercap-set rapl-info rapl-set DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(DIRECTORY man/ DESTINATION ${CMAKE_INSTALL_MANDIR})

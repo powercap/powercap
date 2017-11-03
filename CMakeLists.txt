@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.5)
 
 project(powercap)
 set(VERSION_MAJOR 0)
@@ -7,6 +7,8 @@ set(VERSION_PATCH 1)
 set(PROJECT_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99 -D_GNU_SOURCE")
+
+include(GNUInstallDirs)
 
 # See powercap-common.h for enumeration
 set(POWERCAP_LOG_LEVEL 2 CACHE STRING "Set the log level: 0=DEBUG, 1=INFO, 2=WARN (default), 3=ERROR, 4=OFF")
@@ -52,8 +54,8 @@ add_unit_test(powercap-sysfs-test)
 # pkg-config
 
 set(PKG_CONFIG_EXEC_PREFIX "\${prefix}")
-set(PKG_CONFIG_LIBDIR "\${prefix}/lib")
-set(PKG_CONFIG_INCLUDEDIR "\${prefix}/include/${PROJECT_NAME}")
+set(PKG_CONFIG_LIBDIR "\${prefix}/${CMAKE_INSTALL_LIBDIR}")
+set(PKG_CONFIG_INCLUDEDIR "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}")
 set(PKG_CONFIG_CFLAGS "-I\${includedir}")
 
 set(PKG_CONFIG_NAME "${PROJECT_NAME}")
@@ -67,9 +69,9 @@ configure_file(
 
 # Install
 
-install(TARGETS powercap DESTINATION lib)
-install(FILES inc/powercap.h inc/powercap-sysfs.h inc/powercap-rapl.h inc/powercap-rapl-sysfs.h DESTINATION include/${PROJECT_NAME})
-install(DIRECTORY ${CMAKE_BINARY_DIR}/pkgconfig/ DESTINATION lib/pkgconfig)
+install(TARGETS powercap DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(FILES inc/powercap.h inc/powercap-sysfs.h inc/powercap-rapl.h inc/powercap-rapl-sysfs.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
+install(DIRECTORY ${CMAKE_BINARY_DIR}/pkgconfig/ DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
 # Uninstall
 
