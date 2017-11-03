@@ -8,6 +8,11 @@
 ### Changed
  * Increased minimum CMake version from 2.8 to 2.8.5 to support GNUInstallDirs
 
+### Removed
+ * Removed private symbol exports in shared object library
+  * Note: This is already patched in Debian; no symbols will be lost there
+
+
 ## [v0.1.1] - 2017-09-21
 ### Added
  * Added stateless interfaces to sysfs
@@ -16,6 +21,7 @@
 
 ### Changed
  * Update license to use author as copyright holder
+
 
 ## v0.1.0 - 2017-06-09
 ### Added
