@@ -4,13 +4,13 @@
 ### Added
  * This RELEASES.md file
  * Multiarch support (use GNU standard installation directories)
+ * Additional documentation in README
 
 ### Changed
  * Increased minimum CMake version from 2.8 to 2.8.5 to support GNUInstallDirs
 
 ### Removed
- * Removed private symbol exports in shared object library
-  * Note: This is already patched in Debian; no symbols will be lost there
+ * Removed private symbol exports in shared object library (already patched in Debian)
 
 
 ## [v0.1.1] - 2017-09-21
