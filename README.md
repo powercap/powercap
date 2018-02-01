@@ -13,6 +13,10 @@ It also provides the following applications:
 These bindings were originally created for use with [RAPLCap](https://github.com/powercap/raplcap), but can be used independently.
 See the RAPLCap project for a more general interface for managing RAPL power caps, including other command line utilities.
 
+If using this project for other scientific works or publications, please reference:
+
+* Connor Imes, Huazhe Zhang, Kevin Zhao, Henry Hoffmann. "Handing DVFS to Hardware: Using Power Capping to Control Software Performance". Technical Report [TR-2018-03](https://cs.uchicago.edu/research/publications/techreports/TR-2018-03). University of Chicago, Department of Computer Science. 2018.
+
 ## Prerequisites
 
 Powercap (with the RAPL implementation) was released with Linux kernel 3.13.
