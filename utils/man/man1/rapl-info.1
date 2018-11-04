@@ -1,4 +1,4 @@
-.TH "rapl-info" "1" "2017-09-20" "powercap" "rapl-info"
+.TH "RAPL\-INFO" "1" "2018-11-04" "powercap" "rapl\-info"
 .SH "NAME"
 .LP
 rapl\-info \- get RAPL configurations
@@ -10,8 +10,9 @@ rapl\-info \- get RAPL configurations
 Prints out Intel Running Average Power Limit (RAPL) configurations.
 .LP
 Since RAPL does not implement all capabilities defined in the powercap
-interface, only a subset of the options from powercap-info(1) are
-available.
+interface, only a subset of the options from
+.BR powercap\-info (1)
+are available.
 Additionally, the \-p and \-z options are different.
 .LP
 This software requires an Intel processor (Sandy Bridge or newer), Linux
@@ -152,5 +153,6 @@ Report bugs upstream at <https://github.com/powercap/powercap>
 Connor Imes <connor.k.imes@gmail.com>
 .fi
 .SH "SEE ALSO"
-.LP
-rapl\-set(1), powercap-info(1), powercap-set(1)
+.BR powercap\-info (1),
+.BR powercap\-set (1),
+.BR rapl\-set (1)

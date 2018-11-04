@@ -8,6 +8,7 @@
 
 ### Changed
  * Increased minimum CMake version from 2.8 to 2.8.5 to support GNUInstallDirs
+ * More pedantic man page source formatting
 
 ### Removed
  * Removed private symbol exports in shared object library (already patched in Debian)
