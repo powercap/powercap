@@ -13,6 +13,9 @@
 ### Removed
  * Removed private symbol exports in shared object library (already patched in Debian)
 
+### Fixed
+ * Fixed [#1]: Kernel uses hexadecimal numbers in directory paths, not decimal
+
 
 ## [v0.1.1] - 2017-09-21
 ### Added
@@ -30,3 +33,4 @@
 
 [Unreleased]: https://github.com/powercap/powercap/compare/v0.1.1...HEAD
 [v0.1.1]: https://github.com/powercap/powercap/compare/v0.1.0...v0.1.1
+[#1]: https://github.com/powercap/powercap/issues/1
