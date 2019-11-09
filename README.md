@@ -17,6 +17,7 @@ If using this project for other scientific works or publications, please referen
 
 * Connor Imes, Huazhe Zhang, Kevin Zhao, Henry Hoffmann. "CoPPer: Soft Real-time Application Performance Using Hardware Power Capping". In: IEEE International Conference on Autonomic Computing (ICAC). 2019. DOI: https://doi.org/10.1109/ICAC.2019.00015
 
+
 ## Prerequisites
 
 Powercap (with the RAPL implementation) was released with Linux kernel 3.13.
@@ -27,6 +28,7 @@ If the `intel_rapl` kernel module is not loaded at startup, run with proper priv
 ```sh
 modprobe intel_rapl
 ```
+
 
 ## Power Capping
 
@@ -56,23 +58,23 @@ See the header files for documentation.
 The `powercap.h` interface provides read/write functions for generic powercap `zone` and `constraint` file sets.
 Users are responsible for managing memory and populating the structs with file descriptors (e.g., code that wrap this interface performs zone/constraint discovery and file descriptor management).
 
-The `powercap-rapl.h` interface discovers RAPL packages, power zones, and constraints (i.e., long\_term and short\_term constraints).
-Users are responsible for managing memory, but the library will manage discovering, opening, and closing files within packages.
+The `powercap-rapl.h` interface discovers RAPL instances, power zones, and constraints (i.e., long\_term and short\_term constraints).
+Users are responsible for managing memory, but the library will manage discovering, opening, and closing files within instances.
 
 Basic lifecycle example:
 
 ```C
-  // get number of processor sockets
-  uint32_t npackages = powercap_rapl_get_num_packages();
-  if (npackages == 0) {
-    // no packages found (maybe the kernel module isn't loaded?)
+  // get number of top-level (parent) RAPL instances
+  uint32_t count = powercap_rapl_get_num_packages();
+  if (count == 0) {
+    // none found (maybe the kernel module isn't loaded?)
     perror("powercap_rapl_get_num_packages")
     return -1;
   }
-  powercap_rapl_pkg* pkgs = malloc(npackages * sizeof(powercap_rapl_pkg));
+  powercap_rapl_pkg* pkgs = malloc(count * sizeof(powercap_rapl_pkg));
   // initialize
   uint32_t i;
-  for (i = 0; i < npackages; i++) {
+  for (i = 0; i < count; i++) {
     if (powercap_rapl_init(i, &pkgs[i], 0)) {
       // could be that you don't have write privileges
       perror("powercap_rapl_init");
@@ -80,9 +82,9 @@ Basic lifecycle example:
     }
   }
   // do a bunch of stuff with the interface here,
-  // e.g., enable desired packages or power planes and get/set power caps...
+  // e.g., enable desired zones and get/set power caps...
   // now cleanup
-  for (i = 0; i < npackages; i++) {
+  for (i = 0; i < count; i++) {
     if (powercap_rapl_destroy(&pkgs[i])) {
       perror("powercap_rapl_destroy");
     }
@@ -95,31 +97,11 @@ Basic lifecycle example:
 The interfaces do _NOT_ guarantee that values are actually accepted by the kernel, they only notice errors if I/O operations fail.
 It is recommended that, at least during development/debugging, users read back to see if their write operations were successful.
 
-Additionally, the kernel sysfs bindings (and thus the `powercap-rapl` interface) do _NOT_ guarantee that RAPL packages are presented in order.
-For example, the first package (sysfs directory `intel-rapl:0`) on a dual-socket system may actually provide access to `package-1` instead of `package-0`, and vice versa.
-In cases where order matters, e.g., when sockets are managed asymmetrically, the user is responsible for ensuring that the correct socket is being operated on, e.g., by checking the package name with `powercap_rapl_get_name(...)`.
+Additionally, the kernel sysfs bindings (and thus the `powercap-rapl` interface) do _NOT_ guarantee that RAPL instances are presented in package order.
+For example, the first instance (sysfs directory `intel-rapl:0`) on a dual-socket system may actually provide access to `package-1` instead of `package-0`, and vice versa.
+In cases where order matters, e.g., when sockets are managed asymmetrically, the user is responsible for ensuring that the correct powercap instance is being operated on, e.g., by checking its name with `powercap_rapl_get_name(...)`.
 More concretely, in the example above, `powercap_rapl_get_name(&pkgs[0], POWERCAP_RAPL_ZONE_PACKAGE, ...)` gives name `package-1`, and `powercap_rapl_get_name(&pkgs[1], POWERCAP_RAPL_ZONE_PACKAGE, ...)` is `package-0`.
-It might be helpful to simply sort the `pkgs` array *after* initialization:
-
-```C
-int sort_rapl_pkgs(const void* a, const void* b) {
-  #define MAX_PKG_NAME_SIZE 16
-  char name_a[MAX_PKG_NAME_SIZE] = { 0 };
-  char name_b[MAX_PKG_NAME_SIZE] = { 0 };
-  if (powercap_rapl_get_name((const powercap_rapl_pkg*) a, POWERCAP_RAPL_ZONE_PACKAGE, name_a, sizeof(name_a)) <= 0 ||
-      powercap_rapl_get_name((const powercap_rapl_pkg*) b, POWERCAP_RAPL_ZONE_PACKAGE, name_b, sizeof(name_b)) <= 0) {
-    // there was a problem reading package names, maybe do some error handling...
-    perror("powercap_rapl_get_name");
-    return 0;
-  }
-  // assumes names are in the form "package-N" and 0 <= N < 10 (N >= 10 would need more advanced parsing)
-  return strncmp(name_a, name_b, sizeof(name_a));
-}
-
-...
-  qsort(pkgs, npackages, sizeof(powercap_rapl_pkg), sort_rapl_pkgs);
-...
-```
+It might be helpful to sort the `pkgs` array *after* initialization (see the `powercap` implementation of [RAPLCap](https://github.com/powercap/raplcap) for an example).
 
 Finally, the `powercap-rapl` interface exposes functions for files that are not (currently) supported by RAPL in order to be compliant with the powercap interface.
 Use the `powercap_rapl_is_zone_file_supported(...)` and `powercap_rapl_is_constraint_file_supported(...)` functions to check in advance if you are unsure if a zone or constraint file is supported.
@@ -146,7 +128,6 @@ To create a shared object library as a release build, specify for cmake:
 ``` sh
 cmake .. -DBUILD_SHARED_LIBS=On -DCMAKE_BUILD_TYPE=Release
 ```
-
 
 ### Installing
 
@@ -181,6 +162,7 @@ Bug reports and pull requests for bug fixes and enhancements are welcome.
 
 This project is developed by Connor Imes.
 It is released under the 3-Clause BSD License.
+
 
 ## Thanks
 
