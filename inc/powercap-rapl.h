@@ -9,6 +9,16 @@
  * These operations do basic I/O - it may reasonably be expected that callers need to handle I/O errors.
  * For example, it has been seen that "powercap_rapl_get_max_power_uw" sets errno=ENODATA for power zones.
  *
+ * The terms "package" and "pkg" refer to top-level (parent) RAPL instances, which aren't necessarily physical packages.
+ * Prior to Cascade Lake CPUs (2019), RAPL top-level instances mapped one-to-one with physical sockets/packages.
+ * Some systems now support multiple die on a physical socket/package, resulting in multiple top-level instances per
+ * physical socket/package.
+ * It is also possible that the scope of a top-level instances could change again in the future.
+ * Thus, it should not be assumed that a 'powercap_rapl_pkg' instance or a 'POWERCAP_RAPL_ZONE_PACKAGE' zone maps
+ * one-to-one with a physical socket.
+ * Intel's backward compatibility _appears_ to be in a zone's name, but even this is not explicitly guaranteed - it is
+ * the user's responsibility to interpret what a top-level RAPL instance actually is.
+ *
  * @author Connor Imes
  * @date 2016-05-12
  */
@@ -33,7 +43,7 @@ typedef struct powercap_rapl_zone_files {
 } powercap_rapl_zone_files;
 
 /**
- * All files for a RAPL package/socket.
+ * All files for a top-level RAPL instance.
  */
 typedef struct powercap_rapl_pkg {
   powercap_rapl_zone_files pkg;
@@ -63,7 +73,7 @@ typedef enum powercap_rapl_constraint {
 } powercap_rapl_constraint;
 
 /**
- * Get the number of packages/sockets found.
+ * Get the number of top-level (parent) RAPL instances found.
  * Returns 0 and sets errno if none are found.
  */
 uint32_t powercap_rapl_get_num_packages(void);
