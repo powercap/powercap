@@ -18,8 +18,12 @@
 
 #define DEPTH() (is_sz ? 2 : 1)
 
-int rapl_sysfs_pkg_exists(uint32_t zone) {
+int rapl_sysfs_zone_exists(uint32_t zone) {
   return powercap_sysfs_zone_exists(CONTROL_TYPE, &zone, 1);
+}
+
+int rapl_sysfs_pkg_exists(uint32_t zone) {
+  return rapl_sysfs_zone_exists(zone);
 }
 
 int rapl_sysfs_sz_exists(uint32_t zone, uint32_t sz) {

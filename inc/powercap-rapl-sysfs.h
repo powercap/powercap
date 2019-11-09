@@ -26,6 +26,31 @@ extern "C" {
 
 /**
  * Determine if a top-level (parent) zone exists.
+ * It is _not_ assumed that a zone maps one-to-one with an particular physical component like a socket or die.
+ *
+ * Originally, a zone mapped to a physical socket/package, but this assumed mapping did not hold.
+ * As of 2019, a zone maps to a CPU die, but nothing prevents Intel from changing the scope again in the future.
+ * Their backward compatibility _appears_ to be in a zone's name, but even this is not explicitly guaranteed, nor does
+ * this sysfs binding interface make such an assumption - it is the user's responsibility to interpret what a zone is.
+ *
+ * @param zone
+ * @return 0 if zone exists, a negative error code otherwise.
+ */
+int rapl_sysfs_zone_exists(uint32_t zone);
+
+/**
+ * @deprecated Use rapl_sysfs_zone_exists() instead.
+ *
+ * This function's name no longer accurately describes its scope.
+ * Prior to Cascade Lake CPUs (2019), RAPL top-level (parent) zones mapped one-to-one with physical sockets/packages.
+ * Thus the term "pkg" made sense and was chosen over the more general term "zone".
+ * Some systems now support multiple die on a physical socket/package, resulting in multiple top-level (parent) zones
+ * per physical socket/package.
+ * The scope of a zone could potentially change again in the future.
+ *
+ * This function checks if a top-level (parent) zone exists, where num(top-level zones) >= num(sockets).
+ * For systems with a single die per physical socket, num(top-level zones) == num(sockets).
+ * For systems with multiple die per physical socket, num(top-level zones) > num(sockets).
  *
  * @param zone
  * @return 0 if zone exists, a negative error code otherwise.
