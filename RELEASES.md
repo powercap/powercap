@@ -10,6 +10,7 @@
  * Increased minimum CMake version from 2.8 to 2.8.5 to support GNUInstallDirs
  * More pedantic man page source formatting
  * RAPL sysfs 'pkg' parameter names changed to 'zone' to improve generality
+ * RAPL 'package' parameter names changed to 'id' to improve generality
 
 ### Deprecated
  * Function 'rapl_sysfs_pkg_exists' in powercap-rapl-sysfs.h - use 'rapl_sysfs_zone_exists' instead

@@ -69,10 +69,10 @@ typedef enum powercap_rapl_constraint {
 uint32_t powercap_rapl_get_num_packages(void);
 
 /**
- * Initialize the struct for the package with the given identifier.
+ * Initialize the struct for the parent zone with the given identifier.
  * Read-only access can be requested, which may prevent the need for elevated privileges.
  */
-int powercap_rapl_init(uint32_t package, powercap_rapl_pkg* pkg, int read_only);
+int powercap_rapl_init(uint32_t id, powercap_rapl_pkg* pkg, int read_only);
 
 /**
  * Clean up file descriptors.
