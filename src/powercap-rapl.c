@@ -228,7 +228,7 @@ static int get_constraint_fd(const powercap_rapl_pkg* pkg, powercap_rapl_zone zo
 
 static uint32_t get_num_power_planes(uint32_t id) {
   uint32_t sz = 0;
-  while (!rapl_sysfs_sz_exists(id, sz)) {
+  while (!rapl_sysfs_zone_exists(id, sz, 1)) {
     sz++;
   }
   return sz;

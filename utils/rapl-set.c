@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
   if (rapl_sysfs_zone_exists(package.val, 0, 0)) {
     fprintf(stderr, "Package does not exist\n");
     ret = -EINVAL;
-  } else if (subzone.set && rapl_sysfs_sz_exists(package.val, subzone.val)) {
+  } else if (subzone.set && rapl_sysfs_zone_exists(package.val, subzone.val, 1)) {
     fprintf(stderr, "Subzone does not exist\n");
     ret = -EINVAL;
   } else if (constraint.set && rapl_sysfs_constraint_exists(package.val, subzone.val, subzone.set, constraint.val)) {
