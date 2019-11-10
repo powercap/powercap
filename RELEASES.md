@@ -14,6 +14,7 @@
 
 ### Deprecated
  * Function 'rapl_sysfs_pkg_exists' in powercap-rapl-sysfs.h - use 'rapl_sysfs_zone_exists' instead
+ * Function 'rapl_sysfs_sz_exists' in powercap-rapl-sysfs.h - use 'rapl_sysfs_zone_exists' instead
 
 ### Removed
  * Removed private symbol exports in shared object library (already patched in Debian)

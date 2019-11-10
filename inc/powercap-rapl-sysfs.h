@@ -60,6 +60,8 @@ int rapl_sysfs_zone_exists(uint32_t zone, uint32_t sz, int is_sz);
 int rapl_sysfs_pkg_exists(uint32_t zone);
 
 /**
+ * @deprecated Use rapl_sysfs_zone_exists() instead.
+ *
  * Determine if a subzone exists.
  *
  * @param zone
