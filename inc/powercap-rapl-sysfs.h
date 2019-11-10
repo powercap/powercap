@@ -25,7 +25,7 @@ extern "C" {
 #include <unistd.h>
 
 /**
- * Determine if a top-level (parent) zone exists.
+ * Determine if a zone or subzone exist.
  * It is _not_ assumed that a zone maps one-to-one with an particular physical component like a socket or die.
  *
  * Originally, a zone mapped to a physical socket/package, but this assumed mapping did not hold.
@@ -34,9 +34,11 @@ extern "C" {
  * this sysfs binding interface make such an assumption - it is the user's responsibility to interpret what a zone is.
  *
  * @param zone
+ * @param sz
+ * @param is_sz
  * @return 0 if zone exists, a negative error code otherwise.
  */
-int rapl_sysfs_zone_exists(uint32_t zone);
+int rapl_sysfs_zone_exists(uint32_t zone, uint32_t sz, int is_sz);
 
 /**
  * @deprecated Use rapl_sysfs_zone_exists() instead.

@@ -259,7 +259,7 @@ static ssize_t get_pp_type(uint32_t id, uint32_t pp, powercap_rapl_zone* zone) {
 
 uint32_t powercap_rapl_get_num_packages(void) {
   uint32_t n = 0;
-  while (!rapl_sysfs_zone_exists(n)) {
+  while (!rapl_sysfs_zone_exists(n, 0, 0)) {
     n++;
   }
   if (!n) {

@@ -83,14 +83,14 @@ static void analyze_pkg(uint32_t pkg, int verbose) {
 
 static void analyze_all_pkgs(int verbose) {
   uint32_t pkg;
-  for (pkg = 0; !rapl_sysfs_zone_exists(pkg); pkg++) {
+  for (pkg = 0; !rapl_sysfs_zone_exists(pkg, 0, 0); pkg++) {
     analyze_pkg(pkg, verbose);
   }
 }
 
 static void print_num_packages(void) {
   uint32_t pkg = 0;
-  while (!rapl_sysfs_zone_exists(pkg)) {
+  while (!rapl_sysfs_zone_exists(pkg, 0, 0)) {
     pkg++;
   }
   printf("%"PRIu32"\n", pkg);
@@ -264,7 +264,7 @@ int main(int argc, char** argv) {
   }
 
   /* Check if package/subzone/constraint exist */
-  if (rapl_sysfs_zone_exists(package.val)) {
+  if (rapl_sysfs_zone_exists(package.val, 0, 0)) {
     fprintf(stderr, "Package does not exist\n");
     ret = -EINVAL;
   } else if (subzone.set && rapl_sysfs_sz_exists(package.val, subzone.val)) {
@@ -377,7 +377,7 @@ int main(int argc, char** argv) {
     }
   } else {
     /* print all packages */
-    if ((ret = rapl_sysfs_zone_exists(0))) {
+    if ((ret = rapl_sysfs_zone_exists(0, 0, 0))) {
       fprintf(stderr, "No RAPL packages found\n");
     } else {
       analyze_all_pkgs(verbose);
