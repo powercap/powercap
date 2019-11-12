@@ -5,6 +5,7 @@
  * This RELEASES.md file
  * Multiarch support (use GNU standard installation directories)
  * Additional documentation in README
+ * Function 'rapl_sysfs_zone_exists' in powercap-rapl-sysfs.h
 
 ### Changed
  * Increased minimum CMake version from 2.8 to 2.8.5 to support GNUInstallDirs
