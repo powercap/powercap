@@ -1,4 +1,4 @@
-.TH "RAPL\-INFO" "1" "2018-11-04" "powercap" "rapl\-info"
+.TH "RAPL\-INFO" "1" "2019-11-21" "powercap" "rapl\-info"
 .SH "NAME"
 .LP
 rapl\-info \- get RAPL configurations
@@ -28,16 +28,19 @@ Prints out the help screen
 \fB\-v,\fR \fB\-\-verbose\fR
 Print errors when files are not available
 .TP
-\fB\-p,\fR \fB\-\-package\fR=\fIPACKAGE\fP
-The package number (none by default; 0 by default if using \-z/\-\-subzone
+\fB\-p,\fR \fB\-\-zone\fR=\fIZONE\fP
+The zone number (none by default; 0 by default if using \-z/\-\-subzone
 and/or \-c/\-\-constraint).
 Ending with a colon prevents output for subzones.
-E.g., for package 0, but not subzones:
+E.g., for zone 0, but not subzones:
 .br
 \fB\-p 0:\fP
 .TP
+\fB\-p,\fR \fB\-\-package\fR=\fIPACKAGE\fP
+Deprecated, use \-\-zone instead
+.TP
 \fB\-z,\fR \fB\-\-subzone=\fR\fISUBZONE\fP
-The package subzone number (none by default)
+The subzone number (none by default)
 .TP
 \fB\-c,\fR \fB\-\-constraint\fR=\fICONSTRAINT\fP
 The constraint number (none by default)
@@ -45,8 +48,8 @@ The constraint number (none by default)
 All remaining options below are mutually exclusive:
 .TP
 \fB\-n,\fR \fB\-\-nzones\fR
-Print the number of packages found, or the number of subzones found if
-\-p/\-\-package is set
+Print the number of zones found, or the number of subzones found if
+\-p/\-\-zone is set
 .LP
 The following are zone-level arguments (\-z/\-\-subzone is optional):
 .TP
@@ -78,7 +81,7 @@ Print constraint maximum allowed power
 Print constraint name
 .SH "EXAMPLES"
 .LP
-Note that \-p/\-\-package=0 is used by default when also specifying
+Note that \-p/\-\-zone=0 is used by default when also specifying
 \-z/\-\-subzone and/or \-c/\-\-constraint, allowing for simpler commands
 on single-socket systems.
 .TP
@@ -86,30 +89,27 @@ on single-socket systems.
 Print all RAPL zones.
 .TP
 \fBrapl\-info \-p 0\fP
-Print only package 0, which is usually named \fBpackage\-0\fR.
+Print only zone 0, which is usually named \fBpackage\-0\fR.
 .TP
 \fBrapl\-info \-p 0 \-z 1\fP
-Print package 0, subzone 1, which is usually the \fBuncore\fR or
+Print zone 0, subzone 1, which is usually the \fBuncore\fR or
 \fBdram\fR subzone of \fBpackage\-0\fR, depending on the system.
 .TP
 \fBrapl\-info \-p 0 \-c 1\fP
-Print package 0, constraint 1, which is usually the \fBshort_term\fR
+Print zone 0, constraint 1, which is usually the \fBshort_term\fR
 constraint for \fBpackage\-0\fR.
 .TP
 \fBrapl\-info \-p 0 \-j\fP
-Print the energy counter for package 0, which is usually named
+Print the energy counter for zone 0, which is usually named
 \fBpackage\-0\fR.
 .TP
 \fBrapl\-info \-p 1 \-z 0 \-c 0 \-l\fP
-Print the power limit for package 1, subzone 0, constraint 0, which is
+Print the power limit for zone 1, subzone 0, constraint 0, which is
 usually the \fBlong_term\fR constraint for the \fBcore\fR subzone of
 \fBpackage\-1\fR (a multi-socket system).
 .SH "REMARKS"
 .LP
-A package is a zone with constraints.
-Subzones are a package's child domains, including power planes.
-.LP
-If no subzone/constraint-specific outputs are requested, all available
+If no zone/constraint-specific outputs are requested, all available
 zones and constraints will be shown.
 .LP
 Energy units: microjoules (uJ)

@@ -6,6 +6,7 @@
  * Multiarch support (use GNU standard installation directories)
  * Additional documentation in README
  * Function 'rapl_sysfs_zone_exists' in powercap-rapl-sysfs.h
+ * Command line long option '--zone' to rapl-info and rapl-set
 
 ### Changed
  * Increased minimum CMake version from 2.8 to 2.8.5 to support GNUInstallDirs
@@ -16,6 +17,7 @@
 ### Deprecated
  * Function 'rapl_sysfs_pkg_exists' in powercap-rapl-sysfs.h - use 'rapl_sysfs_zone_exists' instead
  * Function 'rapl_sysfs_sz_exists' in powercap-rapl-sysfs.h - use 'rapl_sysfs_zone_exists' instead
+ * Command line long option '--package' for rapl-info and rapl-set - use '--zone' instead
 
 ### Removed
  * Removed private symbol exports in shared object library (already patched in Debian)

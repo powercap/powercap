@@ -14,7 +14,7 @@
 
 static void print_headers(uint32_t zone, uint32_t do_zone, uint32_t sz, int is_sz) {
   if (do_zone) {
-    printf("Package %"PRIu32"\n", zone);
+    printf("Zone %"PRIu32"\n", zone);
   }
   if (is_sz) {
     indent(1);
@@ -110,6 +110,7 @@ static const struct option long_options[] = {
   {"verbose",             no_argument,        NULL, 'v'},
   {"nzones",              no_argument,        NULL, 'n'},
   {"package",             required_argument,  NULL, 'p'},
+  {"zone",                required_argument,  NULL, 'p'},
   {"subzone",             required_argument,  NULL, 'z'},
   {"constraint",          required_argument,  NULL, 'c'},
   {"z-energy",            no_argument,        NULL, 'j'},
@@ -128,15 +129,16 @@ static void print_usage(void) {
   printf("Options:\n");
   printf("  -h, --help                   Print this message and exit\n");
   printf("  -v, --verbose                Print errors when files are not available\n");
-  printf("  -p, --package=PACKAGE        The package number (none by default; 0 by default\n");
-  printf("                               if using -z/--subzone and/or -c/--constraint)\n");
+  printf("  -p, --zone=ZONE              The zone number (none by default; 0 by default if\n");
+  printf("                               using -z/--subzone and/or -c/--constraint)\n");
   printf("                               Ending with a colon prevents output for subzones\n");
-  printf("                               E.g., for package 0, but not subzones: \"-p 0:\"\n");
-  printf("  -z, --subzone=SUBZONE        The package subzone number (none by default)\n");
+  printf("                               E.g., for zone 0, but not subzones: \"-p 0:\"\n");
+  printf("      --package=PACKAGE        Deprecated, use --zone instead\n");
+  printf("  -z, --subzone=SUBZONE        The subzone number (none by default)\n");
   printf("  -c, --constraint=CONSTRAINT  The constraint number (none by default)\n");
   printf("All remaining options below are mutually exclusive:\n");
-  printf("  -n, --nzones                 Print the number of packages found, or the number\n");
-  printf("                               of subzones found if -p/--package is set\n");
+  printf("  -n, --nzones                 Print the number of zones found, or the number of\n");
+  printf("                               subzones found if -p/--zone is set\n");
   printf("The following are zone-level arguments (-z/--subzone is optional):\n");
   printf("  -j, --z-energy               Print zone energy counter\n");
   printf("  -J, --z-max-energy-range     Print zone maximum energy counter range\n");
@@ -147,9 +149,7 @@ static void print_usage(void) {
   printf("  -s, --c-time-window          Print constraint time window\n");
   printf("  -U, --c-max-power            Print constraint maximum allowed power\n");
   printf("  -y, --c-name                 Print constraint name\n");
-  printf("\nA package is a zone with constraints.\n");
-  printf("Subzones are a package's child domains, including power planes.\n");
-  printf("If no subzone/constraint-specific outputs are requested, all available zones and constraints will be shown.\n");
+  printf("\nIf no zone/constraint-specific outputs are requested, all available zones and constraints will be shown.\n");
   printf("\nEnergy units: microjoules (uJ)\n");
   printf("Power units: microwatts (uW)\n");
   printf("Time units: microseconds (us)\n");
@@ -265,7 +265,7 @@ int main(int argc, char** argv) {
 
   /* Check if zone/subzone/constraint exist */
   if (rapl_sysfs_zone_exists(zone.val, 0, 0)) {
-    fprintf(stderr, "Package does not exist\n");
+    fprintf(stderr, "Zone does not exist\n");
     ret = -EINVAL;
   } else if (subzone.set && rapl_sysfs_zone_exists(zone.val, subzone.val, 1)) {
     fprintf(stderr, "Subzone does not exist\n");
@@ -378,7 +378,7 @@ int main(int argc, char** argv) {
   } else {
     /* print all zones */
     if ((ret = rapl_sysfs_zone_exists(0, 0, 0))) {
-      fprintf(stderr, "No RAPL packages found\n");
+      fprintf(stderr, "No RAPL zones found\n");
     } else {
       analyze_all_zones_recurse(verbose);
     }

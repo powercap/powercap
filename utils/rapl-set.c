@@ -16,6 +16,7 @@ static const char short_options[] = "hp:z:c:e:l:s:";
 static const struct option long_options[] = {
   {"help",                no_argument,        NULL, 'h'},
   {"package",             required_argument,  NULL, 'p'},
+  {"zone",                required_argument,  NULL, 'p'},
   {"subzone",             required_argument,  NULL, 'z'},
   {"constraint",          required_argument,  NULL, 'c'},
   {"z-enabled",           required_argument,  NULL, 'e'},
@@ -28,16 +29,15 @@ static void print_usage(void) {
   printf("Usage: rapl-set [OPTION]...\n");
   printf("Options:\n");
   printf("  -h, --help                   Print this message and exit\n");
-  printf("  -p, --package=PACKAGE        The package number (0 by default)\n");
-  printf("  -z, --subzone=SUBZONE        The package subzone number (none by default)\n");
+  printf("  -p, --zone=ZONE              The zone number (0 by default)\n");
+  printf("      --package=PACKAGE        Deprecated, use --zone instead\n");
+  printf("  -z, --subzone=SUBZONE        The subzone number (none by default)\n");
   printf("  -c, --constraint=CONSTRAINT  The constraint number (none by default)\n");
   printf("The following is a zone-level argument (-z/--subzone is optional):\n");
   printf("  -e, --z-enabled=1|0          Enable/disable a zone\n");
   printf("The following constraint-level arguments may be used together and require -c/--constraint (-z/--subzone is optional):\n");
   printf("  -l, --c-power-limit=UW       Set constraint power limit\n");
   printf("  -s, --c-time-window=US       Set constraint time window\n");
-  printf("\nA package is a zone with constraints.\n");
-  printf("Subzones are a package's child domains, including power planes.\n");
   printf("\nPower units: microwatts (uW)\n");
   printf("Time units: microseconds (us)\n");
 }
@@ -115,7 +115,7 @@ int main(int argc, char** argv) {
 
   /* Check if zone/subzone/constraint exist */
   if (rapl_sysfs_zone_exists(zone.val, 0, 0)) {
-    fprintf(stderr, "Package does not exist\n");
+    fprintf(stderr, "Zone does not exist\n");
     ret = -EINVAL;
   } else if (subzone.set && rapl_sysfs_zone_exists(zone.val, subzone.val, 1)) {
     fprintf(stderr, "Subzone does not exist\n");
