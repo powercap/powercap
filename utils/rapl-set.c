@@ -49,7 +49,7 @@ static void print_common_help(void) {
 }
 
 int main(int argc, char** argv) {
-  u32_param package = {0, 0};
+  u32_param zone = {0, 0};
   u32_param subzone = {0, 0};
   u32_param constraint = {0, 0};
   u32_param enabled = {0, 0};
@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
       print_usage();
       return 0;
     case 'p':
-      ret = set_u32_param(&package, optarg, &cont);
+      ret = set_u32_param(&zone, optarg, &cont);
       break;
     case 'z':
       ret = set_u32_param(&subzone, optarg, &cont);
@@ -113,14 +113,14 @@ int main(int argc, char** argv) {
     return ret;
   }
 
-  /* Check if package/subzone/constraint exist */
-  if (rapl_sysfs_zone_exists(package.val, 0, 0)) {
+  /* Check if zone/subzone/constraint exist */
+  if (rapl_sysfs_zone_exists(zone.val, 0, 0)) {
     fprintf(stderr, "Package does not exist\n");
     ret = -EINVAL;
-  } else if (subzone.set && rapl_sysfs_zone_exists(package.val, subzone.val, 1)) {
+  } else if (subzone.set && rapl_sysfs_zone_exists(zone.val, subzone.val, 1)) {
     fprintf(stderr, "Subzone does not exist\n");
     ret = -EINVAL;
-  } else if (constraint.set && rapl_sysfs_constraint_exists(package.val, subzone.val, subzone.set, constraint.val)) {
+  } else if (constraint.set && rapl_sysfs_constraint_exists(zone.val, subzone.val, subzone.set, constraint.val)) {
     fprintf(stderr, "Constraint does not exist\n");
     ret = -EINVAL;
   }
@@ -131,21 +131,21 @@ int main(int argc, char** argv) {
 
   /* Perform requested action(s) */
   if (enabled.set) {
-    c = rapl_sysfs_zone_set_enabled(package.val, subzone.val, subzone.set, enabled.val);
+    c = rapl_sysfs_zone_set_enabled(zone.val, subzone.val, subzone.set, enabled.val);
     if (c) {
       perror("Error setting enabled/disabled");
       ret |= c;
     }
   }
   if (power_limit.set) {
-    c = rapl_sysfs_constraint_set_power_limit_uw(package.val, subzone.val, subzone.set, constraint.val, power_limit.val);
+    c = rapl_sysfs_constraint_set_power_limit_uw(zone.val, subzone.val, subzone.set, constraint.val, power_limit.val);
     if (c) {
       perror("Error setting power limit");
       ret |= c;
     }
   }
   if (time_window.set) {
-    c = rapl_sysfs_constraint_set_time_window_us(package.val, subzone.val, subzone.set, constraint.val, time_window.val);
+    c = rapl_sysfs_constraint_set_time_window_us(zone.val, subzone.val, subzone.set, constraint.val, time_window.val);
     if (c) {
       perror("Error setting time window");
       ret |= c;
