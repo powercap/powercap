@@ -68,7 +68,7 @@ int main(int argc, char** argv) {
       break;
     case 'h':
       print_usage();
-      return 0;
+      return EXIT_SUCCESS;
     case 'p':
       ret = set_u32_param(&zone, optarg, &cont);
       break;
@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
   }
   if (ret) {
     print_usage();
-    return ret;
+    return EXIT_FAILURE;
   }
 
   /* Check if zone/subzone/constraint exist */
@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
   }
   if (ret) {
     print_common_help();
-    return ret;
+    return EXIT_FAILURE;
   }
 
   /* Perform requested action(s) */
@@ -155,5 +155,5 @@ int main(int argc, char** argv) {
     print_common_help();
   }
 
-  return ret;
+  return ret ? EXIT_FAILURE : EXIT_SUCCESS;
 }

@@ -219,7 +219,7 @@ int main(int argc, char** argv) {
       break;
     case 'h':
       print_usage();
-      return 0;
+      return EXIT_SUCCESS;
     case 'v':
       verbose = 1;
       break;
@@ -319,7 +319,7 @@ int main(int argc, char** argv) {
   }
   if (ret) {
     print_usage();
-    return ret;
+    return EXIT_FAILURE;
   }
 
   /* Check if control type/zones/constraint exist */
@@ -335,7 +335,7 @@ int main(int argc, char** argv) {
   }
   if (ret) {
     print_common_help();
-    return ret;
+    return EXIT_FAILURE;
   }
 
   /* Perform requested action */
@@ -475,5 +475,5 @@ int main(int argc, char** argv) {
     print_common_help();
   }
 
-  return ret;
+  return ret ? EXIT_FAILURE : EXIT_SUCCESS;
 }

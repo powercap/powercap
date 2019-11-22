@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
       break;
     case 'h':
       print_usage();
-      return 0;
+      return EXIT_SUCCESS;
     case 'p':
       if (control_type) {
         cont = 0;
@@ -136,7 +136,7 @@ int main(int argc, char** argv) {
   }
   if (ret) {
     print_usage();
-    return ret;
+    return EXIT_FAILURE;
   }
 
   /* Check if control type/zones/constraint exist */
@@ -152,7 +152,7 @@ int main(int argc, char** argv) {
   }
   if (ret) {
     print_common_help();
-    return ret;
+    return EXIT_FAILURE;
   }
 
   /* Perform requested action(s) */
@@ -188,5 +188,5 @@ int main(int argc, char** argv) {
     print_common_help();
   }
 
-  return ret;
+  return ret ? EXIT_FAILURE : EXIT_SUCCESS;
 }
