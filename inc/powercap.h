@@ -1,4 +1,6 @@
-/**
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  * A simple interface for configuring powercaps using sysfs.
  * Parameters are never allowed to be NULL.
  * Unless otherwise stated, all functions return 0 on success or a negative value on error.

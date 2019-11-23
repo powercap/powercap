@@ -1,4 +1,6 @@
-/**
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  * Basic tests - gets caps and sets them right back.
  */
 #include <errno.h>

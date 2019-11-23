@@ -1,4 +1,6 @@
-/**
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  * Read/write RAPL sysfs files.
  * This is a wrapper around powercap-sysfs.h.
  *

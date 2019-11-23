@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+
 # Binaries
 
 add_executable(powercap-info powercap-info.c util-common.c)

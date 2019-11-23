@@ -1,4 +1,6 @@
-/**
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  * RAPL implementation of powercap.
  *
  * @author Connor Imes

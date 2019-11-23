@@ -1,4 +1,6 @@
-/**
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  * Read/write powercap sysfs files.
  *
  * The "control_type" parameter to functions is the name of the control type as it appears in the filesystem at

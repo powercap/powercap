@@ -1,4 +1,6 @@
-/**
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  * Tests bad parameters.
  * No way to test good ones without a functioning powercap implementation, which isn't guaranteed to exist.
  */

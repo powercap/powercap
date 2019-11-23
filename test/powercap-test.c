@@ -1,4 +1,6 @@
-/**
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  * Basic unit tests.
  * Can't actually test the implementation without a system that supports all file types.
  */
