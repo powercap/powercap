@@ -126,7 +126,7 @@ int powercap_sysfs_zone_set_enabled(const char* control_type, const uint32_t* zo
 }
 
 int powercap_sysfs_zone_get_enabled(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t* val) {
-  uint64_t enabled;
+  uint64_t enabled = 0;
   int ret;
   if (val) {
     if (!(ret = zone_read_u64(control_type, zones, depth, &enabled, POWERCAP_ZONE_FILE_ENABLED))) {
