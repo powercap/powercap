@@ -12,6 +12,16 @@
  * For example, zone=0, sz=0, is_sz=1 is usually for the "core" power plane and is analogous to using powercap-sysfs.h
  * with zones[2]={0, 0}, depth=2.
  *
+ * The "intel-rapl" control type implements a subset of the powercap interface.
+ * The following functions are not currently supported by RAPL, but are implemented here in case RAPL adds support for
+ * them in the future:
+ * - rapl_sysfs_zone_reset_energy_uj
+ * - rapl_sysfs_zone_get_max_power_range_uw
+ * - rapl_sysfs_zone_get_power_uw
+ * - rapl_sysfs_constraint_get_min_power_uw
+ * - rapl_sysfs_constraint_get_max_time_window_us
+ * - rapl_sysfs_constraint_get_min_time_window_us
+ *
  * @author Connor Imes
  * @date 2017-08-24
  */
@@ -95,6 +105,16 @@ int rapl_sysfs_constraint_exists(uint32_t zone, uint32_t sz, int is_sz, uint32_t
 int rapl_sysfs_zone_get_max_energy_range_uj(uint32_t zone, uint32_t sz, int is_sz, uint64_t* val);
 
 /**
+ * Reset energy_uj for a zone.
+ *
+ * @param zone
+ * @param sz
+ * @param is_sz
+ * @return 0 on success, a negative error code otherwise.
+ */
+int rapl_sysfs_zone_reset_energy_uj(uint32_t zone, uint32_t sz, int is_sz);
+
+/**
  * Get energy_uj for a zone.
  *
  * @param zone
@@ -104,6 +124,28 @@ int rapl_sysfs_zone_get_max_energy_range_uj(uint32_t zone, uint32_t sz, int is_s
  * @return 0 on success, a negative error code otherwise.
  */
 int rapl_sysfs_zone_get_energy_uj(uint32_t zone, uint32_t sz, int is_sz, uint64_t* val);
+
+/**
+ * Get max_power_range_uw for a zone.
+ *
+ * @param zone
+ * @param sz
+ * @param is_sz
+ * @param val
+ * @return 0 on success, a negative error code otherwise.
+ */
+int rapl_sysfs_zone_get_max_power_range_uw(uint32_t zone, uint32_t sz, int is_sz, uint64_t* val);
+
+/**
+ * Get power_uw for a zone.
+ *
+ * @param zone
+ * @param sz
+ * @param is_sz
+ * @param val
+ * @return 0 on success, a negative error code otherwise.
+ */
+int rapl_sysfs_zone_get_power_uw(uint32_t zone, uint32_t sz, int is_sz, uint64_t* val);
 
 /**
  * Enable/disable a zone.
@@ -198,6 +240,43 @@ int rapl_sysfs_constraint_get_time_window_us(uint32_t zone, uint32_t sz, int is_
  * @return 0 on success, a negative error code otherwise.
  */
 int rapl_sysfs_constraint_get_max_power_uw(uint32_t zone, uint32_t sz, int is_sz, uint32_t constraint, uint64_t* val);
+
+/**
+ * Get get_min_power_uw for a constraint.
+ *
+ * @param zone
+ * @param sz
+ * @param is_sz
+ * @param constraint
+ * @param val
+ * @return 0 on success, a negative error code otherwise.
+ */
+int rapl_sysfs_constraint_get_min_power_uw(uint32_t zone, uint32_t sz, int is_sz, uint32_t constraint, uint64_t* val);
+
+/**
+ * Get max_time_window_us for a constraint.
+ *
+ * @param zone
+ * @param sz
+ * @param is_sz
+ * @param constraint
+ * @param val
+ * @return 0 on success, a negative error code otherwise.
+ */
+int rapl_sysfs_constraint_get_max_time_window_us(uint32_t zone, uint32_t sz, int is_sz, uint32_t constraint, uint64_t* val);
+
+/**
+ * Get min_time_window_us for a constraint.
+ *
+ * @param zone
+ * @param sz
+ * @param is_sz
+ * @param constraint
+ * @param val
+ * @return 0 on success, a negative error code otherwise.
+ */
+int rapl_sysfs_constraint_get_min_time_window_us(uint32_t zone, uint32_t sz, int is_sz, uint32_t constraint, uint64_t* val);
+
 
 /**
  * Get name for a constraint.

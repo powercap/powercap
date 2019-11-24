@@ -38,6 +38,11 @@ int rapl_sysfs_constraint_exists(uint32_t zone, uint32_t sz, int is_sz, uint32_t
   return powercap_sysfs_constraint_exists(CONTROL_TYPE, zones, DEPTH(), constraint);
 }
 
+int rapl_sysfs_zone_reset_energy_uj(uint32_t zone, uint32_t sz, int is_sz) {
+  DECL_ZONES();
+  return powercap_sysfs_zone_reset_energy_uj(CONTROL_TYPE, zones, DEPTH());
+}
+
 int rapl_sysfs_zone_get_max_energy_range_uj(uint32_t zone, uint32_t sz, int is_sz, uint64_t* val) {
   DECL_ZONES();
   return powercap_sysfs_zone_get_max_energy_range_uj(CONTROL_TYPE, zones, DEPTH(), val);
@@ -46,6 +51,16 @@ int rapl_sysfs_zone_get_max_energy_range_uj(uint32_t zone, uint32_t sz, int is_s
 int rapl_sysfs_zone_get_energy_uj(uint32_t zone, uint32_t sz, int is_sz, uint64_t* val) {
   DECL_ZONES();
   return powercap_sysfs_zone_get_energy_uj(CONTROL_TYPE, zones, DEPTH(), val);
+}
+
+int rapl_sysfs_zone_get_max_power_range_uw(uint32_t zone, uint32_t sz, int is_sz, uint64_t* val) {
+  DECL_ZONES();
+  return powercap_sysfs_zone_get_max_power_range_uw(CONTROL_TYPE, zones, DEPTH(), val);
+}
+
+int rapl_sysfs_zone_get_power_uw(uint32_t zone, uint32_t sz, int is_sz, uint64_t* val) {
+  DECL_ZONES();
+  return powercap_sysfs_zone_get_power_uw(CONTROL_TYPE, zones, DEPTH(), val);
 }
 
 int rapl_sysfs_zone_set_enabled(uint32_t zone, uint32_t sz, int is_sz, uint32_t val) {
@@ -86,6 +101,21 @@ int rapl_sysfs_constraint_get_time_window_us(uint32_t zone, uint32_t sz, int is_
 int rapl_sysfs_constraint_get_max_power_uw(uint32_t zone, uint32_t sz, int is_sz, uint32_t constraint, uint64_t* val) {
   DECL_ZONES();
   return powercap_sysfs_constraint_get_max_power_uw(CONTROL_TYPE, zones, DEPTH(), constraint, val);
+}
+
+int rapl_sysfs_constraint_get_min_power_uw(uint32_t zone, uint32_t sz, int is_sz, uint32_t constraint, uint64_t* val) {
+  DECL_ZONES();
+  return powercap_sysfs_constraint_get_min_power_uw(CONTROL_TYPE, zones, DEPTH(), constraint, val);
+}
+
+int rapl_sysfs_constraint_get_max_time_window_us(uint32_t zone, uint32_t sz, int is_sz, uint32_t constraint, uint64_t* val) {
+  DECL_ZONES();
+  return powercap_sysfs_constraint_get_max_time_window_us(CONTROL_TYPE, zones, DEPTH(), constraint, val);
+}
+
+int rapl_sysfs_constraint_get_min_time_window_us(uint32_t zone, uint32_t sz, int is_sz, uint32_t constraint, uint64_t* val) {
+  DECL_ZONES();
+  return powercap_sysfs_constraint_get_min_time_window_us(CONTROL_TYPE, zones, DEPTH(), constraint, val);
 }
 
 ssize_t rapl_sysfs_constraint_get_name(uint32_t zone, uint32_t sz, int is_sz, uint32_t constraint, char* buf, size_t size) {
