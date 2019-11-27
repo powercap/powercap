@@ -28,6 +28,7 @@
 ### Removed
 
 * Removed private symbol exports in shared object library (already patched in Debian)
+* Undocumented (and unintended) --package long option from powercap-set
 
 ### Fixed
 

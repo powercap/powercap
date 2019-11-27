@@ -17,7 +17,6 @@
 static const char short_options[] = "hp:z:c:je:l:s:";
 static const struct option long_options[] = {
   {"help",                no_argument,        NULL, 'h'},
-  {"package",             required_argument,  NULL, 'p'},
   {"control-type",        required_argument,  NULL, 'p'},
   {"zone",                required_argument,  NULL, 'z'},
   {"constraint",          required_argument,  NULL, 'c'},
