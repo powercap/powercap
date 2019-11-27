@@ -43,8 +43,17 @@ static void analyze_constraint(uint32_t zone, uint32_t sz, int is_sz, uint32_t c
   ret = rapl_sysfs_constraint_get_time_window_us(zone, sz, is_sz, constraint, &val64);
   u64_or_verbose(verbose, is_sz + 2, "time_window_us", val64, ret);
 
+  ret = rapl_sysfs_constraint_get_min_power_uw(zone, sz, is_sz, constraint, &val64);
+  u64_or_verbose(verbose, is_sz + 2, "min_power_uw", val64, ret);
+
   ret = rapl_sysfs_constraint_get_max_power_uw(zone, sz, is_sz, constraint, &val64);
   u64_or_verbose(verbose, is_sz + 2, "max_power_uw", val64, ret);
+
+  ret = rapl_sysfs_constraint_get_min_time_window_us(zone, sz, is_sz, constraint, &val64);
+  u64_or_verbose(verbose, is_sz + 2, "min_time_window_us", val64, ret);
+
+  ret = rapl_sysfs_constraint_get_max_time_window_us(zone, sz, is_sz, constraint, &val64);
+  u64_or_verbose(verbose, is_sz + 2, "max_time_window_us", val64, ret);
 }
 
 static void analyze_zone(uint32_t zone, uint32_t sz, int is_sz, int verbose) {
@@ -68,6 +77,12 @@ static void analyze_zone(uint32_t zone, uint32_t sz, int is_sz, int verbose) {
 
   ret = rapl_sysfs_zone_get_energy_uj(zone, sz, is_sz, &val64);
   u64_or_verbose(verbose, is_sz + 1, "energy_uj", val64, ret);
+
+  ret = rapl_sysfs_zone_get_max_power_range_uw(zone, sz, is_sz, &val64);
+  u64_or_verbose(verbose, is_sz + 1, "max_power_range_uw", val64, ret);
+
+  ret = rapl_sysfs_zone_get_power_uw(zone, sz, is_sz, &val64);
+  u64_or_verbose(verbose, is_sz + 1, "power_uw", val64, ret);
 
   for (val32 = 0; !rapl_sysfs_constraint_exists(zone, sz, is_sz, val32); val32++) {
     analyze_constraint(zone, sz, is_sz, val32, verbose);
@@ -106,22 +121,27 @@ static void print_num_subzones(uint32_t zone) {
   printf("%"PRIu32"\n", n);
 }
 
-static const char short_options[] = "hvnp:z:c:jJexlsUy";
+static const char short_options[] = "hvp:z:c:njJwWexlsUuTty";
 static const struct option long_options[] = {
   {"help",                no_argument,        NULL, 'h'},
   {"verbose",             no_argument,        NULL, 'v'},
-  {"nzones",              no_argument,        NULL, 'n'},
   {"package",             required_argument,  NULL, 'p'},
   {"zone",                required_argument,  NULL, 'p'},
   {"subzone",             required_argument,  NULL, 'z'},
   {"constraint",          required_argument,  NULL, 'c'},
+  {"nzones",              no_argument,        NULL, 'n'},
   {"z-energy",            no_argument,        NULL, 'j'},
   {"z-max-energy-range",  no_argument,        NULL, 'J'},
+  {"z-power",             no_argument,        NULL, 'w'},
+  {"z-max-power-range",   no_argument,        NULL, 'W'},
   {"z-enabled",           no_argument,        NULL, 'e'},
   {"z-name",              no_argument,        NULL, 'x'},
   {"c-power-limit",       no_argument,        NULL, 'l'},
   {"c-time-window",       no_argument,        NULL, 's'},
   {"c-max-power",         no_argument,        NULL, 'U'},
+  {"c-min-power",         no_argument,        NULL, 'u'},
+  {"c-max-time-window",   no_argument,        NULL, 'T'},
+  {"c-min-time-window",   no_argument,        NULL, 't'},
   {"c-name",              no_argument,        NULL, 'y'},
   {0, 0, 0, 0}
 };
@@ -144,14 +164,20 @@ static void print_usage(void) {
   printf("The following are zone-level arguments (-z/--subzone is optional):\n");
   printf("  -j, --z-energy               Print zone energy counter\n");
   printf("  -J, --z-max-energy-range     Print zone maximum energy counter range\n");
+  printf("  -w, --z-power                Print zone current power\n");
+  printf("  -W, --z-max-power-range      Print zone maximum current power range\n");
   printf("  -e, --z-enabled              Print zone enabled/disabled status\n");
   printf("  -x, --z-name                 Print zone name\n");
   printf("The following are constraint-level arguments and require -c/--constraint (-z/--subzone is optional):\n");
   printf("  -l, --c-power-limit          Print constraint power limit\n");
   printf("  -s, --c-time-window          Print constraint time window\n");
   printf("  -U, --c-max-power            Print constraint maximum allowed power\n");
+  printf("  -u, --c-min-power            Print constraint minimum allowed power\n");
+  printf("  -T, --c-max-time-window      Print constraint maximum allowed time window\n");
+  printf("  -t, --c-min-time-window      Print constraint minimum allowed time window\n");
   printf("  -y, --c-name                 Print constraint name\n");
-  printf("\nIf no zone/constraint-specific outputs are requested, all available zones and constraints will be shown.\n");
+  printf("\nSome fields are optional and will only be printed if they are available unless -v/--verbose is set.\n");
+  printf("If no zone/constraint-specific outputs are requested, all available zones and constraints will be shown.\n");
   printf("\nEnergy units: microjoules (uJ)\n");
   printf("Power units: microwatts (uW)\n");
   printf("Time units: microseconds (us)\n");
@@ -160,6 +186,7 @@ static void print_usage(void) {
 static void print_common_help(void) {
   printf("Considerations for common errors:\n");
   printf("- Ensure that the intel_rapl kernel module is loaded\n");
+  printf("- Some files may simply not exist\n");
   printf("- On some systems, the kernel always returns an error when reading constraint max power (-U/--c-max-power)\n");
 }
 
@@ -210,6 +237,9 @@ int main(int argc, char** argv) {
     case 'l':
     case 's':
     case 'U':
+    case 'u':
+    case 'T':
+    case 't':
     case 'y':
       if (unique_set) {
         fprintf(stderr, "Only one of -n/--nzones, a zone-level argument, or a constraint-level argument is allowed at a time\n");
@@ -252,6 +282,9 @@ int main(int argc, char** argv) {
     case 'l':
     case 's':
     case 'U':
+    case 'u':
+    case 'T':
+    case 't':
     case 'y':
       if (!constraint.set) {
         fprintf(stderr, "-c/--constraint must be set for constraint-level arguments\n");
@@ -308,6 +341,22 @@ int main(int argc, char** argv) {
         perror("Failed to get zone max energy range");
       }
       break;
+    case 'w':
+      /* Get zone power */
+      if (!(ret = rapl_sysfs_zone_get_power_uw(zone.val, subzone.val, subzone.set, &val64))) {
+        printf("%"PRIu64"\n", val64);
+      } else {
+        perror("Failed to get zone power");
+      }
+      break;
+    case 'W':
+      /* Get zone max power range */
+      if (!(ret = rapl_sysfs_zone_get_max_power_range_uw(zone.val, subzone.val, subzone.set, &val64))) {
+        printf("%"PRIu64"\n", val64);
+      } else {
+        perror("Failed to get zone max power range");
+      }
+      break;
     case 'e':
       /* Get zone enabled */
       if (!(ret = rapl_sysfs_zone_get_enabled(zone.val, subzone.val, subzone.set, &val32))) {
@@ -347,6 +396,30 @@ int main(int argc, char** argv) {
         printf("%"PRIu64"\n", val64);
       } else {
         perror("Failed to get constraint max power");
+      }
+      break;
+    case 'u':
+      /* Get constraint min power */
+      if (!(ret = rapl_sysfs_constraint_get_min_power_uw(zone.val, subzone.val, subzone.set, constraint.val, &val64))) {
+        printf("%"PRIu64"\n", val64);
+      } else {
+        perror("Failed to get constraint min power");
+      }
+      break;
+    case 'T':
+      /* Get constraint max time window */
+      if (!(ret = rapl_sysfs_constraint_get_max_time_window_us(zone.val, subzone.val, subzone.set, constraint.val, &val64))) {
+        printf("%"PRIu64"\n", val64);
+      } else {
+        perror("Failed to get constraint max time window");
+      }
+      break;
+    case 't':
+      /* Get constraint min time window */
+      if (!(ret = rapl_sysfs_constraint_get_min_time_window_us(zone.val, subzone.val, subzone.set, constraint.val, &val64))) {
+        printf("%"PRIu64"\n", val64);
+      } else {
+        perror("Failed to get constraint min time window");
       }
       break;
     case 'y':

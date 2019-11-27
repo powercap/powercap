@@ -14,13 +14,14 @@
 #include "powercap-rapl-sysfs.h"
 #include "util-common.h"
 
-static const char short_options[] = "hp:z:c:e:l:s:";
+static const char short_options[] = "hp:z:c:je:l:s:";
 static const struct option long_options[] = {
   {"help",                no_argument,        NULL, 'h'},
   {"package",             required_argument,  NULL, 'p'},
   {"zone",                required_argument,  NULL, 'p'},
   {"subzone",             required_argument,  NULL, 'z'},
   {"constraint",          required_argument,  NULL, 'c'},
+  {"z-energy",            no_argument      ,  NULL, 'j'},
   {"z-enabled",           required_argument,  NULL, 'e'},
   {"c-power-limit",       required_argument,  NULL, 'l'},
   {"c-time-window",       required_argument,  NULL, 's'},
@@ -36,6 +37,7 @@ static void print_usage(void) {
   printf("  -z, --subzone=SUBZONE        The subzone number (none by default)\n");
   printf("  -c, --constraint=CONSTRAINT  The constraint number (none by default)\n");
   printf("The following is a zone-level argument (-z/--subzone is optional):\n");
+  printf("  -j, --z-energy               Reset zone energy counter\n");
   printf("  -e, --z-enabled=1|0          Enable/disable a zone\n");
   printf("The following constraint-level arguments may be used together and require -c/--constraint (-z/--subzone is optional):\n");
   printf("  -l, --c-power-limit=UW       Set constraint power limit\n");
@@ -48,12 +50,14 @@ static void print_common_help(void) {
   printf("Considerations for common errors:\n");
   printf("- Ensure that the intel_rapl kernel module is loaded\n");
   printf("- Ensure that you run with administrative (super-user) privileges\n");
+  printf("- Resetting a zone energy counter is an optional powercap feature and may not be supported by RAPL\n");
 }
 
 int main(int argc, char** argv) {
   u32_param zone = {0, 0};
   u32_param subzone = {0, 0};
   u32_param constraint = {0, 0};
+  int reset_energy = 0;
   u32_param enabled = {0, 0};
   u64_param power_limit = {0, 0};
   u64_param time_window = {0, 0};
@@ -79,6 +83,13 @@ int main(int argc, char** argv) {
       break;
     case 'c':
       ret = set_u32_param(&constraint, optarg, &cont);
+      break;
+    case 'j':
+      if (reset_energy) {
+        cont = 0;
+        ret = -EINVAL;
+      }
+      reset_energy = 1;
       break;
     case 'e':
       ret = set_u32_param(&enabled, optarg, &cont);
@@ -106,7 +117,7 @@ int main(int argc, char** argv) {
   } else if (!constraint.set && (power_limit.set || time_window.set)) {
     fprintf(stderr, "Must specify -c/--constraint when using constraint-level arguments\n");
     ret = -EINVAL;
-  } else if (!(enabled.set || power_limit.set || time_window.set)) {
+  } else if (!(reset_energy || enabled.set || power_limit.set || time_window.set)) {
     printf("Nothing to do\n");
     ret = -EINVAL;
   }
@@ -132,6 +143,13 @@ int main(int argc, char** argv) {
   }
 
   /* Perform requested action(s) */
+  if (reset_energy) {
+    c = rapl_sysfs_zone_reset_energy_uj(zone.val, subzone.val, subzone.set);
+    if (c) {
+      perror("Error setting energy counter");
+      ret |= c;
+    }
+  }
   if (enabled.set) {
     c = rapl_sysfs_zone_set_enabled(zone.val, subzone.val, subzone.set, enabled.val);
     if (c) {

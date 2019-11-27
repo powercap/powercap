@@ -1,4 +1,4 @@
-.TH "RAPL\-INFO" "1" "2019-11-21" "powercap" "rapl\-info"
+.TH "RAPL\-INFO" "1" "2019-11-27" "powercap" "rapl\-info"
 .SH "NAME"
 .LP
 rapl\-info \- get RAPL configurations
@@ -9,11 +9,8 @@ rapl\-info \- get RAPL configurations
 .LP
 Prints out Intel Running Average Power Limit (RAPL) configurations.
 .LP
-Since RAPL does not implement all capabilities defined in the powercap
-interface, only a subset of the options from
-.BR powercap\-info (1)
-are available.
-Additionally, the \-p and \-z options are different.
+Note that the \-p and \-z options are different from
+.BR powercap\-info (1).
 .LP
 This software requires an Intel processor (Sandy Bridge or newer), Linux
 kernel 3.13 or newer compiled with \fBCONFIG_POWERCAP\fR and
@@ -59,6 +56,12 @@ Print zone energy counter
 \fB\-J,\fR \fB\-\-z\-max\-energy\-range\fR
 Print zone maximum energy counter range
 .TP
+\fB\-w,\fR \fB\-\-z\-power\fR
+Print zone current power
+.TP
+\fB\-W,\fR \fB\-\-z\-max\-power\-range\fR
+Print zone maximum current power range
+.TP
 \fB\-e,\fR \fB\-\-z\-enabled\fR
 Print zone enable/disabled status
 .TP
@@ -76,6 +79,15 @@ Print constraint time window
 .TP
 \fB\-U,\fR \fB\-\-c\-max\-power\fR
 Print constraint maximum allowed power
+.TP
+\fB\-u,\fR \fB\-\-c\-min\-power\fR
+Print constraint minimum allowed power
+.TP
+\fB\-T,\fR \fB\-\-c\-max\-time\-window\fR
+Print constraint maximum allowed time window
+.TP
+\fB\-t,\fR \fB\-\-c\-min\-time\-window\fR
+Print constraint minimum allowed time window
 .TP
 \fB\-y,\fR \fB\-\-c\-name\fR
 Print constraint name
@@ -109,6 +121,9 @@ usually the \fBlong_term\fR constraint for the \fBcore\fR subzone of
 \fBpackage\-1\fR (a multi-socket system).
 .SH "REMARKS"
 .LP
+Some fields are optional and will only be printed if they are available
+unless \-v/\-\-verbose is set.
+.br
 If no zone/constraint-specific outputs are requested, all available
 zones and constraints will be shown.
 .LP
@@ -129,6 +144,15 @@ For example, the kernel may return a time window value of 7812 us, when in
 fact the actual stored value is 7812.5 us.
 Writing back a value returned by the kernel, e.g., using rapl\-set(1), may
 cause unexpected changes to its value due to these rounding problems.
+.LP
+At the time of this writing, some features in the powercap interface are not
+supported by RAPL.
+The following options may result in ENOENT (No such file or directory) errors:
+  \fB\-w/\-\-z\-power\fR
+  \fB\-W/\-\-z\-max\-power\-range\fR
+  \fB\-u/\-\-c\-min\-power\fR
+  \fB\-T/\-\-c\-max\-time\-window\fR
+  \fB\-t/\-\-c\-min\-time\-window\fR
 .LP
 On some systems, the constraint max_power_uw file, e.g.,
 constraint_0_max_power_uw, is known to receive an ENODATA (No data

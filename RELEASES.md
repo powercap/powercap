@@ -10,6 +10,7 @@
 * Function 'rapl_sysfs_zone_exists' in powercap-rapl-sysfs.h
 * Command line long option '--zone' to rapl-info and rapl-set
 * Functions to powercap-rapl-sysfs.h allowed by the powercap API that RAPL doesn't support (but could in the future)
+* Options to rapl-info and rapl-set to support optional powercap features not currently implemented in RAPL
 
 ### Changed
 
