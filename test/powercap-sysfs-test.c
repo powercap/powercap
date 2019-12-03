@@ -1,4 +1,6 @@
-/**
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  * Tests bad parameters.
  * No way to test good ones without a functioning powercap implementation, which isn't guaranteed to exist.
  */
@@ -7,6 +9,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <limits.h>
+#include <stdlib.h>
 #include <string.h>
 #include "powercap-sysfs.h"
 
@@ -254,5 +257,5 @@ int main(void) {
   test_bad_constraint_exists();
   test_get_set_zone_all_bad();
   test_get_set_constraint_all_bad();
-  return 0;
+  return EXIT_SUCCESS;
 }

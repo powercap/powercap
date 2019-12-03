@@ -1,4 +1,4 @@
-.TH "rapl-set" "1" "2017-09-20" "powercap" "rapl-set"
+.TH "RAPL\-SET" "1" "2019-11-27" "powercap" "rapl\-set"
 .SH "NAME"
 .LP
 rapl\-set \- set RAPL configurations
@@ -9,10 +9,8 @@ rapl\-set \- set RAPL configurations
 .LP
 Sets Intel Running Average Power Limit (RAPL) configurations.
 .LP
-Since RAPL does not implement all capabilities defined in the powercap
-interface, only a subset of the options from powercap-set(1) are
-available.
-Additionally, the \-p and \-z options are different.
+Note that the \-p and \-z options are different from
+.BR powercap\-set (1).
 .LP
 This software requires an Intel processor (Sandy Bridge or newer), Linux
 kernel 3.13 or newer compiled with \fBCONFIG_POWERCAP\fR and
@@ -24,16 +22,22 @@ be loaded.
 \fB\-h,\fR \fB\-\-help\fR
 Prints out the help screen
 .TP
+\fB\-p,\fR \fB\-\-zone\fR=\fIZONE\fP
+The zone number (0 by default)
+.TP
 \fB\-p,\fR \fB\-\-package\fR=\fIPACKAGE\fP
-The package number (0 by default)
+Deprecated, use \-\-zone instead
 .TP
 \fB\-z,\fR \fB\-\-subzone=\fR\fISUBZONE\fP
-The package subzone number (none by default)
+The subzone number (none by default)
 .TP
 \fB\-c,\fR \fB\-\-constraint\fR=\fICONSTRAINT\fP
 The constraint number (none by default)
 .LP
-The following is a zone-level argument (\-z/\-\-subzone is optional):
+The following zone-level arguments may be used together (\-z/\-\-subzone is optional):
+.TP
+\fB\-j,\fR \fB\-\-z\-energy\fR
+Reset zone energy counter
 .TP
 \fB\-e,\fR \fB\-\-z\-enabled=1|0\fR
 Enable/disable a zone
@@ -48,26 +52,26 @@ Set constraint power limit
 Set constraint time window
 .SH "EXAMPLES"
 .LP
-Note that \-p/\-\-package=0 is used by default, allowing for simpler
+Note that \-p/\-\-zone=0 is used by default, allowing for simpler
 commands on single-socket systems.
 .TP
 \fBrapl\-set \-e 1\fP
-Enable package 0 (implicitly), which is usually named \fBpackage\-0\fR.
+Enable zone 0 (implicitly), which is usually named \fBpackage\-0\fR.
 .TP
 \fBrapl\-set \-p 0 \-e 1\fP
-Enable package 0 (explicitly).
+Enable zone 0 (explicitly).
 .TP
 \fBrapl\-set \-p 0 \-z 1 \-e 1\fP
-Enable package 0, subzone 1, which is usually the \fBuncore\fR or
+Enable zone 0, subzone 1, which is usually the \fBuncore\fR or
 \fBdram\fR subzone of \fBpackage\-0\fR, depending on the system.
 .TP
 \fBrapl\-set \-p 0 \-c 1 \-l 25000000\fP
-Set a power cap of 25 Watts (25000000 uW) on package 0, constraint 1,
+Set a power cap of 25 Watts (25000000 uW) on zone 0, constraint 1,
 which is usually the \fBshort_term\fR constraint for \fBpackage\-0\fR.
 .TP
 \fBrapl\-set \-p 1 \-z 0 \-c 0 \-l 15000000 \-s 976\fP
 Set a power cap of 15 Watts (15000000 uW) and time window of 976
-microseconds on package 1, subzone 0, constraint 0, which is usually the
+microseconds on zone 1, subzone 0, constraint 0, which is usually the
 \fBlong_term\fR (and only) constraint for the \fBcore\fR subzone of
 \fBpackage\-1\fR (a multi-socket system).
 .SH "REMARKS"
@@ -76,11 +80,8 @@ Administrative (root) privileges are usually needed to use
 \fBrapl\-set\fR.
 .LP
 Setting constraint power cap and/or time limit values does not enable or
-disable a package/subzone - the \-e/-\-z\-enabled flag must be set
+disable a zone/subzone - the \-e/-\-z\-enabled flag must be set
 explicitly.
-.LP
-A package is a zone with constraints.
-Subzones are a package's child domains, including power planes.
 .LP
 Power units: microwatts (uW)
 .br
@@ -108,6 +109,11 @@ fact the actual stored value is 7812.5 us.
 Writing back an integer value returned by the kernel may cause unexpected
 changes to its stored value due to these rounding problems.
 .LP
+At the time of this writing, some features in the powercap interface are not
+supported by RAPL.
+Resetting a zone energy counter (\-j/\-\-z\-energy) may result in an EACCES
+(Permission denied) error due to the energy_uj file being read-only.
+.LP
 Some systems may not allow disabling package-level zones/constraints.
 .LP
 It is possible for packages on multi-socket systems to be indexed out of
@@ -130,5 +136,6 @@ Report bugs upstream at <https://github.com/powercap/powercap>
 Connor Imes <connor.k.imes@gmail.com>
 .fi
 .SH "SEE ALSO"
-.LP
-rapl\-info(1), powercap-info(1), powercap-set(1)
+.BR powercap\-info (1),
+.BR powercap\-set (1),
+.BR rapl\-info (1)

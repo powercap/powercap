@@ -1,4 +1,6 @@
-/**
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  * Common utilities, like logging.
  *
  * @author Connor Imes
@@ -15,6 +17,8 @@ extern "C" {
 #include <stdio.h>
 /* Main powercap header only used for enums */
 #include "powercap.h"
+
+#pragma GCC visibility push(hidden)
 
 typedef enum powercap_loglevel {
   DEBUG = 0,
@@ -86,6 +90,8 @@ int open_zone_file(const char* control_type, const uint32_t* zones, uint32_t dep
 /* Return fd on success, negative error code if path is too large, -1 on open failure */
 int open_constraint_file(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint,
                          powercap_constraint_file type, int flags);
+
+#pragma GCC visibility pop
 
 #ifdef __cplusplus
 }

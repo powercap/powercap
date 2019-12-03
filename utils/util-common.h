@@ -1,4 +1,6 @@
-/**
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  * Common utilities.
  *
  * @author Connor Imes
@@ -14,9 +16,13 @@ extern "C" {
 
 #include <inttypes.h>
 
+#ifndef MAX_ZONE_DEPTH
 /* A large number */
 #define MAX_ZONE_DEPTH 64
-#define MAX_NAME_SIZE 32
+#endif // MAX_ZONE_DEPTH
+#ifndef MAX_NAME_SIZE
+#define MAX_NAME_SIZE 64
+#endif // MAX_NAME_SIZE
 
 typedef struct u32_param {
   uint32_t val;

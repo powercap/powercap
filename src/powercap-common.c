@@ -1,4 +1,6 @@
-/**
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  * Common functions.
  *
  * @author Connor Imes
@@ -146,7 +148,7 @@ static size_t append_zone_dir(const char* control_type, const uint32_t* zones, u
   uint32_t i;
   if ((written = snprintf_ret_to_size_t(snprintf(path, size - 1, "%s", control_type), size - 1))) {
     for (i = 0; i < depth; i++) {
-      if (!(n = snprintf_ret_to_size_t(snprintf(path + written, size - written - 1, ":%"PRIu32, zones[i]), size - written - 1))) {
+      if (!(n = snprintf_ret_to_size_t(snprintf(path + written, size - written - 1, ":%x", zones[i]), size - written - 1))) {
         return 0;
       }
       written += n;

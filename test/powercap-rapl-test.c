@@ -1,4 +1,6 @@
-/**
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  * Basic tests - gets caps and sets them right back.
  */
 #include <errno.h>
@@ -31,19 +33,21 @@ int main(int argc, char** argv) {
     } else {
       fprintf(stderr, "No RAPL packages found\n");
     }
-    return 1;
+    return EXIT_FAILURE;
   }
 
   powercap_rapl_pkg* pkgs = malloc(npackages * sizeof(powercap_rapl_pkg));
   if (pkgs == NULL) {
     perror("malloc");
-    return 1;
+    return EXIT_FAILURE;
   }
 
   for (i = 0; i < npackages; i++) {
     if (powercap_rapl_init(i, &pkgs[i], ro)) {
       perror("powercap_rapl_init");
-      return 1;
+      ret = EXIT_FAILURE;
+      npackages = i; // for correct cleanup count
+      goto cleanup;
     }
   }
   printf("Initialized %"PRIu32" package(s)\n", npackages);
@@ -60,7 +64,8 @@ int main(int argc, char** argv) {
     supported = powercap_rapl_is_zone_supported(p, ZONES[i]);
     if (supported < 0) {
       perror("powercap_rapl_is_zone_supported");
-      return 1;
+      ret = EXIT_FAILURE;
+      goto cleanup;
     } else if (supported == 0) {
       printf("Zone %s: not supported\n", ZONE_NAMES[i]);
       continue;
@@ -69,14 +74,16 @@ int main(int argc, char** argv) {
     supported = powercap_rapl_is_zone_file_supported(p, ZONES[i], POWERCAP_ZONE_FILE_NAME);
     if (supported < 0) {
       perror("powercap_rapl_is_zone_file_supported");
-      return 1;
+      ret = EXIT_FAILURE;
+      goto cleanup;
     } else if (supported == 0) {
       printf("%s name: not supported\n", ZONE_NAMES[i]);
     } else {
       name_ret = powercap_rapl_get_name(p, ZONES[i], name, sizeof(name));
       if (name_ret < 0) {
         perror("powercap_rapl_get_name");
-        return 1;
+        ret = EXIT_FAILURE;
+        goto cleanup;
       }
       printf("%s name: %s\n", ZONE_NAMES[i], name_ret > 0 ? name : "[None]");
     }
@@ -84,32 +91,37 @@ int main(int argc, char** argv) {
     supported = powercap_rapl_is_zone_file_supported(p, ZONES[i], POWERCAP_ZONE_FILE_ENABLED);
     if (supported < 0) {
       perror("powercap_rapl_is_zone_file_supported");
-      return 1;
+      ret = EXIT_FAILURE;
+      goto cleanup;
     } else if (supported == 0) {
       printf("%s enabled: not supported\n", ZONE_NAMES[i]);
     } else {
       enabled = powercap_rapl_is_enabled(p, ZONES[i]);
       if (enabled < 0) {
         perror("powercap_rapl_is_enabled");
-        return 1;
+        ret = EXIT_FAILURE;
+        goto cleanup;
       }
       printf("%s enabled: %s\n", ZONE_NAMES[i], enabled > 0 ? "yes" : "no");
       if (!ro && powercap_rapl_set_enabled(p, ZONES[i], enabled)) {
         perror("powercap_rapl_set_enabled");
-        return 1;
+        ret = EXIT_FAILURE;
+        goto cleanup;
       }
     }
 
     supported = powercap_rapl_is_zone_file_supported(p, ZONES[i], POWERCAP_ZONE_FILE_MAX_ENERGY_RANGE_UJ);
     if (supported < 0) {
       perror("powercap_rapl_is_zone_file_supported");
-      return 1;
+      ret = EXIT_FAILURE;
+      goto cleanup;
     } else if (supported == 0) {
       printf("%s max_energy_range_uj: not supported\n", ZONE_NAMES[i]);
     } else {
       if (powercap_rapl_get_max_energy_range_uj(p, ZONES[i], &val)) {
         perror("powercap_rapl_get_max_energy_range_uj");
-        return 1;
+        ret = EXIT_FAILURE;
+        goto cleanup;
       }
       printf("%s max_energy_range_uj: %"PRIu64"\n", ZONE_NAMES[i], val);
     }
@@ -117,13 +129,15 @@ int main(int argc, char** argv) {
     supported = powercap_rapl_is_zone_file_supported(p, ZONES[i], POWERCAP_ZONE_FILE_ENERGY_UJ);
     if (supported < 0) {
       perror("powercap_rapl_is_zone_file_supported");
-      return 1;
+      ret = EXIT_FAILURE;
+      goto cleanup;
     } else if (supported == 0) {
       printf("%s energy_uj: not supported\n", ZONE_NAMES[i]);
     } else {
       if (powercap_rapl_get_energy_uj(p, ZONES[i], &val)) {
         perror("powercap_rapl_get_energy_uj");
-        return 1;
+        ret = EXIT_FAILURE;
+        goto cleanup;
       }
       printf("%s energy_uj: %"PRIu64"\n", ZONE_NAMES[i], val);
       // TODO: Test powercap_rapl_reset_energy_uj
@@ -132,13 +146,15 @@ int main(int argc, char** argv) {
     supported = powercap_rapl_is_zone_file_supported(p, ZONES[i], POWERCAP_ZONE_FILE_MAX_POWER_RANGE_UW);
     if (supported < 0) {
       perror("powercap_rapl_is_zone_file_supported");
-      return 1;
+      ret = EXIT_FAILURE;
+      goto cleanup;
     } else if (supported == 0) {
       printf("%s max_power_range_uw: not supported\n", ZONE_NAMES[i]);
     } else {
       if (powercap_rapl_get_max_power_range_uw(p, ZONES[i], &val)) {
         perror("powercap_rapl_get_max_power_range_uw");
-        return 1;
+        ret = EXIT_FAILURE;
+        goto cleanup;
       }
       printf("%s max_power_range_uw: %"PRIu64"\n", ZONE_NAMES[i], val);
     }
@@ -146,13 +162,15 @@ int main(int argc, char** argv) {
     supported = powercap_rapl_is_zone_file_supported(p, ZONES[i], POWERCAP_ZONE_FILE_POWER_UW);
     if (supported < 0) {
       perror("powercap_rapl_is_zone_file_supported");
-      return 1;
+      ret = EXIT_FAILURE;
+      goto cleanup;
     } else if (supported == 0) {
       printf("%s power_uw: not supported\n", ZONE_NAMES[i]);
     } else {
       if (powercap_rapl_get_power_uw(p, ZONES[i], &val)) {
         perror("powercap_rapl_get_power_uw");
-        return 1;
+        ret = EXIT_FAILURE;
+        goto cleanup;
       }
       printf("%s power_uw: %"PRIu64"\n", ZONE_NAMES[i], val);
     }
@@ -164,7 +182,8 @@ int main(int argc, char** argv) {
       supported = powercap_rapl_is_constraint_supported(p, ZONES[i], CONSTRAINTS[j]);
       if (supported < 0) {
         perror("powercap_rapl_is_constraint_supported");
-        return 1;
+        ret = EXIT_FAILURE;
+        goto cleanup;
       } else if (supported == 0) {
         printf("%s constraint_(%s): not supported\n", ZONE_NAMES[i], cnst);
         continue;
@@ -173,14 +192,16 @@ int main(int argc, char** argv) {
       supported = powercap_rapl_is_constraint_file_supported(p, ZONES[i], CONSTRAINTS[j], POWERCAP_CONSTRAINT_FILE_MAX_POWER_UW);
       if (supported < 0) {
         perror("powercap_rapl_is_constraint_file_supported");
-        return 1;
+        ret = EXIT_FAILURE;
+        goto cleanup;
       } else if (supported == 0) {
         printf("%s constraint_(%s)_max_power_uw: not supported\n", ZONE_NAMES[i], cnst);
       } else {
         if (powercap_rapl_get_max_power_uw(p, ZONES[i], CONSTRAINTS[j], &val)) {
           perror("powercap_rapl_get_max_power_uw");
           // TODO: powercap_rapl_get_max_power_uw fails and sets errno=ENODATA for power planes on development system...
-          // return 1;
+          // ret = EXIT_FAILURE;
+          // goto cleanup;
         } else {
           printf("%s constraint_(%s)_max_power_uw: %"PRIu64"\n", ZONE_NAMES[i], cnst, val);
         }
@@ -189,13 +210,15 @@ int main(int argc, char** argv) {
       supported = powercap_rapl_is_constraint_file_supported(p, ZONES[i], CONSTRAINTS[j], POWERCAP_CONSTRAINT_FILE_MIN_POWER_UW);
       if (supported < 0) {
         perror("powercap_rapl_is_constraint_file_supported");
-        return 1;
+        ret = EXIT_FAILURE;
+        goto cleanup;
       } else if (supported == 0) {
         printf("%s constraint_(%s)_min_power_uw: not supported\n", ZONE_NAMES[i], cnst);
       } else {
         if (powercap_rapl_get_min_power_uw(p, ZONES[i], CONSTRAINTS[j], &val)) {
           perror("powercap_rapl_get_min_power_uw");
-          return 1;
+          ret = EXIT_FAILURE;
+          goto cleanup;
         } else {
           printf("%s constraint_(%s)_min_power_uw: %"PRIu64"\n", ZONE_NAMES[i], cnst, val);
         }
@@ -204,13 +227,15 @@ int main(int argc, char** argv) {
       supported = powercap_rapl_is_constraint_file_supported(p, ZONES[i], CONSTRAINTS[j], POWERCAP_CONSTRAINT_FILE_POWER_LIMIT_UW);
       if (supported < 0) {
         perror("powercap_rapl_is_constraint_file_supported");
-        return 1;
+        ret = EXIT_FAILURE;
+        goto cleanup;
       } else if (supported == 0) {
         printf("%s constraint_(%s)_power_limit_uw: not supported\n", ZONE_NAMES[i], cnst);
       } else {
         if (powercap_rapl_get_power_limit_uw(p, ZONES[i], CONSTRAINTS[j], &val)) {
           perror("powercap_rapl_get_power_limit_uw");
-          return 1;
+          ret = EXIT_FAILURE;
+          goto cleanup;
         } else {
           printf("%s constraint_(%s)_power_limit_uw: %"PRIu64"\n", ZONE_NAMES[i], cnst, val);
           if (!ro && powercap_rapl_set_power_limit_uw(p, ZONES[i], CONSTRAINTS[j], val)) {
@@ -223,13 +248,15 @@ int main(int argc, char** argv) {
       supported = powercap_rapl_is_constraint_file_supported(p, ZONES[i], CONSTRAINTS[j], POWERCAP_CONSTRAINT_FILE_MAX_TIME_WINDOW_US);
       if (supported < 0) {
         perror("powercap_rapl_is_constraint_file_supported");
-        return 1;
+        ret = EXIT_FAILURE;
+        goto cleanup;
       } else if (supported == 0) {
         printf("%s constraint_(%s)_max_time_window_us: not supported\n", ZONE_NAMES[i], cnst);
       } else {
         if (powercap_rapl_get_max_time_window_us(p, ZONES[i], CONSTRAINTS[j], &val)) {
           perror("powercap_rapl_get_max_time_window_us");
-          return 1;
+          ret = EXIT_FAILURE;
+          goto cleanup;
         } else {
           printf("%s constraint_(%s)_max_time_window_us: %"PRIu64"\n", ZONE_NAMES[i], cnst, val);
         }
@@ -238,13 +265,15 @@ int main(int argc, char** argv) {
       supported = powercap_rapl_is_constraint_file_supported(p, ZONES[i], CONSTRAINTS[j], POWERCAP_CONSTRAINT_FILE_MIN_TIME_WINDOW_US);
       if (supported < 0) {
         perror("powercap_rapl_is_constraint_file_supported");
-        return 1;
+        ret = EXIT_FAILURE;
+        goto cleanup;
       } else if (supported == 0) {
         printf("%s constraint_(%s)_min_time_window_us: not supported\n", ZONE_NAMES[i], cnst);
       } else {
         if (powercap_rapl_get_min_time_window_us(p, ZONES[i], CONSTRAINTS[j], &val)) {
           perror("powercap_rapl_get_min_time_window_us");
-          return 1;
+          ret = EXIT_FAILURE;
+          goto cleanup;
         } else {
           printf("%s constraint_(%s)_min_time_window_us: %"PRIu64"\n", ZONE_NAMES[i], cnst, val);
         }
@@ -253,13 +282,15 @@ int main(int argc, char** argv) {
       supported = powercap_rapl_is_constraint_file_supported(p, ZONES[i], CONSTRAINTS[j], POWERCAP_CONSTRAINT_FILE_TIME_WINDOW_US);
       if (supported < 0) {
         perror("powercap_rapl_is_constraint_file_supported");
-        return 1;
+        ret = EXIT_FAILURE;
+        goto cleanup;
       } else if (supported == 0) {
         printf("%s constraint_(%s)_time_window_us: not supported\n", ZONE_NAMES[i], cnst);
       } else {
         if (powercap_rapl_get_time_window_us(p, ZONES[i], CONSTRAINTS[j], &val)) {
           perror("powercap_rapl_get_time_window_us");
-          return 1;
+          ret = EXIT_FAILURE;
+          goto cleanup;
         } else {
           printf("%s constraint_(%s)_time_window_us: %"PRIu64"\n", ZONE_NAMES[i], cnst, val);
           if (!ro && powercap_rapl_set_time_window_us(p, ZONES[i], CONSTRAINTS[j], val)) {
@@ -272,25 +303,27 @@ int main(int argc, char** argv) {
       supported = powercap_rapl_is_constraint_file_supported(p, ZONES[i], CONSTRAINTS[j], POWERCAP_CONSTRAINT_FILE_NAME);
       if (supported < 0) {
         perror("powercap_rapl_is_constraint_file_supported");
-        return 1;
+        ret = EXIT_FAILURE;
+        goto cleanup;
       } else if (supported == 0) {
         printf("%s constraint_(%s)_name: not supported\n", ZONE_NAMES[i], cnst);
       } else {
         name_ret = powercap_rapl_get_constraint_name(p, ZONES[i], CONSTRAINTS[j], name, sizeof(name));
         if (name_ret < 0) {
           perror("powercap_rapl_get_constraint_name");
-          return 1;
+          ret = EXIT_FAILURE;
+          goto cleanup;
         }
         printf("%s constraint_(%s)_name: %s\n", ZONE_NAMES[i], cnst, name_ret > 0 ? name : "[None]");
         }
     }
   }
 
-  // cleanup
+cleanup:
   for (i = 0; i < npackages; i++) {
     if (powercap_rapl_destroy(&pkgs[i])) {
       perror("powercap_rapl_destroy");
-      ret = 1;
+      ret = EXIT_FAILURE;
     }
   }
   free(pkgs);

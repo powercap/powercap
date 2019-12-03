@@ -1,4 +1,6 @@
-/**
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  * RAPL implementation of powercap.
  *
  * @author Connor Imes
@@ -101,12 +103,12 @@ static int is_wrong_constraint(const powercap_constraint* fds, const char* expec
          strncmp(buf, expected_name, sizeof(buf)) != 0;
 }
 
-static int open_all(uint32_t pkg, uint32_t pp, int is_pp, powercap_rapl_zone_files* fds, int ro) {
+static int open_all(uint32_t id, uint32_t pp, int is_pp, powercap_rapl_zone_files* fds, int ro) {
   assert(fds != NULL);
   powercap_constraint tmp;
   uint32_t zones[2];
   uint32_t depth;
-  zones[0] = pkg;
+  zones[0] = id;
   zones[1] = pp;
   depth = is_pp ? 2 : 1;
   if (open_zone(zones, depth, &fds->zone, ro) ||
@@ -118,7 +120,7 @@ static int open_all(uint32_t pkg, uint32_t pp, int is_pp, powercap_rapl_zone_fil
   // note: never actually seen this problem, but not 100% sure it can't happen, so check anyway...
   if (is_wrong_constraint(&fds->constraint_long, CONSTRAINT_NAME_LONG) &&
       is_wrong_constraint(&fds->constraint_short, CONSTRAINT_NAME_SHORT)) {
-    LOG(WARN, "open_all: long and short term constraints are out of order for pkg %"PRIu32"\n", pkg);
+    LOG(WARN, "open_all: long and short term constraints are out of order for zone ID: %"PRIu32"\n", id);
     memcpy(&tmp, &fds->constraint_short, sizeof(powercap_constraint));
     memcpy(&fds->constraint_short, &fds->constraint_long, sizeof(powercap_constraint));
     memcpy(&fds->constraint_long, &tmp, sizeof(powercap_constraint));
@@ -226,19 +228,19 @@ static int get_constraint_fd(const powercap_rapl_pkg* pkg, powercap_rapl_zone zo
   }
 }
 
-static uint32_t get_num_power_planes(uint32_t pkg) {
+static uint32_t get_num_power_planes(uint32_t id) {
   uint32_t sz = 0;
-  while (!rapl_sysfs_sz_exists(pkg, sz)) {
+  while (!rapl_sysfs_zone_exists(id, sz, 1)) {
     sz++;
   }
   return sz;
 }
 
-static ssize_t get_pp_type(uint32_t pkg, uint32_t pp, powercap_rapl_zone* zone) {
+static ssize_t get_pp_type(uint32_t id, uint32_t pp, powercap_rapl_zone* zone) {
   assert(zone != NULL);
   char name[8];
   ssize_t ret;
-  if ((ret = rapl_sysfs_zone_get_name(pkg, pp, 1, name, sizeof(name))) < 0) {
+  if ((ret = rapl_sysfs_zone_get_name(id, pp, 1, name, sizeof(name))) < 0) {
     /* Casting to int causes uninitialized warning in calling function, so we return ssize_t */
     return ret;
   }
@@ -258,18 +260,18 @@ static ssize_t get_pp_type(uint32_t pkg, uint32_t pp, powercap_rapl_zone* zone) 
 }
 
 uint32_t powercap_rapl_get_num_packages(void) {
-  uint32_t pkg = 0;
-  while (!rapl_sysfs_pkg_exists(pkg)) {
-    pkg++;
+  uint32_t n = 0;
+  while (!rapl_sysfs_zone_exists(n, 0, 0)) {
+    n++;
   }
-  if (!pkg) {
-    LOG(ERROR, "powercap_rapl_get_num_packages: No packages found - is the intel_rapl kernel module loaded?\n");
+  if (!n) {
+    LOG(ERROR, "powercap_rapl_get_num_packages: No top-level zones found - is the intel_rapl kernel module loaded?\n");
     errno = ENOENT;
   }
-  return pkg;
+  return n;
 }
 
-int powercap_rapl_init(uint32_t package, powercap_rapl_pkg* pkg, int read_only) {
+int powercap_rapl_init(uint32_t id, powercap_rapl_pkg* pkg, int read_only) {
   int ret;
   ssize_t sret;
   int err_save;
@@ -283,27 +285,27 @@ int powercap_rapl_init(uint32_t package, powercap_rapl_pkg* pkg, int read_only) 
   // force all fds to 0 so we don't try to operate on invalid descriptors
   memset(pkg, 0, sizeof(powercap_rapl_pkg));
   // first populate zone and package power zone
-  if (!(ret = open_all(package, 0, 0, &pkg->pkg, read_only))) {
+  if (!(ret = open_all(id, 0, 0, &pkg->pkg, read_only))) {
     // get a count of subordinate power zones in this package
-    npp = get_num_power_planes(package);
+    npp = get_num_power_planes(id);
     // now get all power zones
     for (i = 0; i < npp && !ret; i++) {
-      if ((sret = get_pp_type(package, i, &type))) {
+      if ((sret = get_pp_type(id, i, &type))) {
         ret = (int) sret;
         break;
       }
       switch (type) {
         case POWERCAP_RAPL_ZONE_CORE:
-          ret = open_all(package, i, 1, &pkg->core, read_only);
+          ret = open_all(id, i, 1, &pkg->core, read_only);
           break;
         case POWERCAP_RAPL_ZONE_UNCORE:
-          ret = open_all(package, i, 1, &pkg->uncore, read_only);
+          ret = open_all(id, i, 1, &pkg->uncore, read_only);
           break;
         case POWERCAP_RAPL_ZONE_DRAM:
-          ret = open_all(package, i, 1, &pkg->dram, read_only);
+          ret = open_all(id, i, 1, &pkg->dram, read_only);
           break;
         case POWERCAP_RAPL_ZONE_PSYS:
-          ret = open_all(package, i, 1, &pkg->psys, read_only);
+          ret = open_all(id, i, 1, &pkg->psys, read_only);
           break;
         case POWERCAP_RAPL_ZONE_PACKAGE:
         default:

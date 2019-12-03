@@ -1,4 +1,6 @@
-/**
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  * Set powercap values.
  *
  * @author Connor Imes
@@ -15,7 +17,6 @@
 static const char short_options[] = "hp:z:c:je:l:s:";
 static const struct option long_options[] = {
   {"help",                no_argument,        NULL, 'h'},
-  {"package",             required_argument,  NULL, 'p'},
   {"control-type",        required_argument,  NULL, 'p'},
   {"zone",                required_argument,  NULL, 'z'},
   {"constraint",          required_argument,  NULL, 'c'},
@@ -51,6 +52,7 @@ static void print_common_help(void) {
   printf("Considerations for common errors:\n");
   printf("- Ensure that the control type exists (may require loading a kernel module, e.g., intel_rapl)\n");
   printf("- Ensure that you run with administrative (super-user) privileges\n");
+  printf("- Resetting a zone energy counter is an optional powercap feature not supported by all control types\n");
 }
 
 int main(int argc, char** argv) {
@@ -75,7 +77,7 @@ int main(int argc, char** argv) {
       break;
     case 'h':
       print_usage();
-      return 0;
+      return EXIT_SUCCESS;
     case 'p':
       if (control_type) {
         cont = 0;
@@ -136,7 +138,7 @@ int main(int argc, char** argv) {
   }
   if (ret) {
     print_usage();
-    return ret;
+    return EXIT_FAILURE;
   }
 
   /* Check if control type/zones/constraint exist */
@@ -152,7 +154,7 @@ int main(int argc, char** argv) {
   }
   if (ret) {
     print_common_help();
-    return ret;
+    return EXIT_FAILURE;
   }
 
   /* Perform requested action(s) */
@@ -188,5 +190,5 @@ int main(int argc, char** argv) {
     print_common_help();
   }
 
-  return ret;
+  return ret ? EXIT_FAILURE : EXIT_SUCCESS;
 }

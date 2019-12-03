@@ -1,4 +1,6 @@
-/**
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  * I/O operations for powercap sysfs files.
  *
  * @author Connor Imes

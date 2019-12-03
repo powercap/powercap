@@ -1,10 +1,13 @@
-/**
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  * Basic unit tests.
  * Can't actually test the implementation without a system that supports all file types.
  */
 // force assertions
 #undef NDEBUG
 #include <assert.h>
+#include <stdlib.h>
 #include <string.h>
 #include "powercap.h"
 
@@ -45,5 +48,5 @@ static void test_powercap_constraint_file_get_name(void) {
 int main(void) {
   test_powercap_zone_file_get_name();
   test_powercap_constraint_file_get_name();
-  return 0;
+  return EXIT_SUCCESS;
 }
