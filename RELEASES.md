@@ -1,6 +1,6 @@
 # Release Notes
 
-## [Unreleased]
+## [v0.2.0] - 2019-12-03
 
 ### Added
 
@@ -55,6 +55,6 @@
 
 * Initial public release
 
-[Unreleased]: https://github.com/powercap/powercap/compare/v0.1.1...HEAD
+[v0.2.0]: https://github.com/powercap/powercap/compare/v0.1.1...v0.2.0
 [v0.1.1]: https://github.com/powercap/powercap/compare/v0.1.0...v0.1.1
 [#1]: https://github.com/powercap/powercap/issues/1
