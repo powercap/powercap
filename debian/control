@@ -10,7 +10,7 @@ Vcs-Git: https://github.com/connorimes/powercap.git -b debian
 Homepage: https://github.com/powercap/powercap
 
 Package: powercap-utils
-Architecture: any
+Architecture: linux-any
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          libpowercap0 (= ${binary:Version})
@@ -21,7 +21,7 @@ Description: Utilities for accessing the powercap Linux kernel feature
  set for managing Intel RAPL implementations.
 
 Package: libpowercap0
-Architecture: any
+Architecture: linux-any
 Multi-Arch: same
 Section: libs
 Depends: ${shlibs:Depends},
@@ -34,7 +34,7 @@ Description: Shared library for accessing the powercap Linux kernel feature
  power zones.
 
 Package: libpowercap-dev
-Architecture: any
+Architecture: linux-any
 Multi-Arch: same
 Section: libdevel
 Depends: ${shlibs:Depends},

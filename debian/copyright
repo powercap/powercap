@@ -3,11 +3,11 @@ Upstream-Name: powercap
 Source: https://github.com/powercap/powercap/releases
 
 Files: *
-Copyright: 2016-2017 Connor Imes <ckimes@cs.uchicago.edu>
+Copyright: 2016-2019 Connor Imes <ckimes@cs.uchicago.edu>
 License: BSD-3-Clause
 
 Files: debian/*
-Copyright: 2017 Connor Imes <ckimes@ubuntu.com>
+Copyright: 2017-2019 Connor Imes <ckimes@ubuntu.com>
 License: BSD-3-Clause
 
 License: BSD-3-Clause

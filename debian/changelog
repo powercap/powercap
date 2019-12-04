@@ -1,3 +1,11 @@
+powercap (0.2.0-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Change packaging architecture from any to linux-any. (Closes: #883122)
+  * Remove patches now in upstream: multiarch, symvisibility.
+
+ -- Connor Imes <ckimes@ubuntu.com>  Tue, 03 Dec 2019 15:02:34 -0500
+
 powercap (0.1.1-1) unstable; urgency=medium
 
   * Initial release. (Closes: #876409)
