@@ -1,4 +1,5 @@
 libpowercap.so.0 libpowercap0 #MINVER#
+* Build-Depends-Package: libpowercap-dev
  powercap_constraint_file_get_name@Base 0.1.1
  powercap_constraint_get_max_power_uw@Base 0.1.1
  powercap_constraint_get_max_time_window_us@Base 0.1.1
