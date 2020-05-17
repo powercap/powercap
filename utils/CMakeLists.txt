@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
-function(POWERCAP_UTIL_ADD app control_type)
+function(POWERCAP_UTIL_ADD app control_type module_name)
   add_executable(${app}-${control_type} ${app}.c util-common.c)
-  target_compile_definitions(${app}-${control_type} PRIVATE POWERCAP_CONTROL_TYPE="${control_type}")
+  target_compile_definitions(${app}-${control_type} PRIVATE POWERCAP_CONTROL_TYPE="${control_type}"
+                                                            POWERCAP_KMOD_NAME="${module_name}")
   target_link_libraries(${app}-${control_type} powercap)
 
   string(REPLACE "-" "\\-" MAN_CONTROL_TYPE "${control_type}")
@@ -28,8 +29,8 @@ add_executable(powercap-set powercap-set.c util-common.c)
 target_link_libraries(powercap-set powercap)
 
 foreach(control_type "intel-rapl")
-  POWERCAP_UTIL_ADD("powercap-info" ${control_type})
-  POWERCAP_UTIL_ADD("powercap-set" ${control_type})
+  POWERCAP_UTIL_ADD("powercap-info" ${control_type} "intel_rapl")
+  POWERCAP_UTIL_ADD("powercap-set" ${control_type} "intel_rapl")
 endforeach(control_type)
 
 add_executable(rapl-info rapl-info.c util-common.c)
