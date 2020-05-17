@@ -1,4 +1,4 @@
-.TH "POWERCAP-INFO" "1" "2018-11-04" "powercap" "powercap\-info"
+.TH "POWERCAP-INFO" "1" "2020-05-17" "powercap" "powercap\-info"
 .SH "NAME"
 .LP
 powercap\-info \- get information from the Linux power capping framework
@@ -92,27 +92,22 @@ These examples use Intel RAPL, for which the control type is
 \fBintel\-rapl\fR.
 .TP
 \fBpowercap\-info \-p intel\-rapl\fP
-Print all RAPL zones.
+Print all zones.
 .TP
 \fBpowercap\-info \-p intel\-rapl \-z 0\fP
-Print only zone 0, which is usually named \fBpackage\-0\fR.
+Print only zone 0.
 .TP
 \fBpowercap\-info \-p intel\-rapl \-z 0:1\fP
-Print zone 0, subzone 1, which is usually the \fBuncore\fR or \fBdram\fR
-subzone of \fBpackage\-0\fR, depending on the system.
+Print zone 0, subzone 1.
 .TP
 \fBpowercap\-info \-p intel\-rapl \-z 0 \-c 1\fP
-Print zone 0, constraint 1, which is usually the \fBshort_term\fR
-constraint for \fBpackage\-0\fR.
+Print zone 0, constraint 1.
 .TP
 \fBpowercap\-info \-p intel\-rapl \-z 0 \-j\fP
-Print the energy counter for zone 0, which is usually named
-\fBpackage\-0\fR.
+Print the energy counter for zone 0.
 .TP
 \fBpowercap\-info \-p intel\-rapl \-z 1:0 \-c 0 \-l\fP
-Print the power limit for zone 1, subzone 0, constraint 0, which is
-usually the \fBlong_term\fR constraint for the \fBcore\fR subzone of
-\fBpackage\-1\fR (a multi-socket system).
+Print the power limit for zone 1, subzone 0, constraint 0.
 .SH "REMARKS"
 .LP
 Some fields are optional and will only be printed if they are available
@@ -140,6 +135,4 @@ Report bugs upstream at <https://github.com/powercap/powercap>
 Connor Imes <connor.k.imes@gmail.com>
 .fi
 .SH "SEE ALSO"
-.BR powercap\-set (1),
-.BR rapl\-info (1),
-.BR rapl\-set (1)
+.BR powercap\-set (1)

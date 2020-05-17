@@ -1,4 +1,4 @@
-.TH "POWERCAP\-SET" "1" "2018-11-04" "powercap" "powercap\-set"
+.TH "POWERCAP\-SET" "1" "2020-05-17" "powercap" "powercap\-set"
 .SH "NAME"
 .LP
 powercap\-set \- manage power capping devices with the Linux power capping
@@ -51,21 +51,17 @@ These examples use Intel RAPL, for which the control type is
 \fBintel\-rapl\fR.
 .TP
 \fBpowercap\-set \-p intel\-rapl \-z 0 \-e 1\fP
-Enable zone 0, which is usually named \fBpackage\-0\fR.
+Enable zone 0.
 .TP
 \fBpowercap\-set \-p intel\-rapl \-z 0:1 \-e 1\fP
-Enable zone 0, subzone 1, which is usually the \fBuncore\fR or \fBdram\fR
-subzone of \fBpackage\-0\fR, depending on the system.
+Enable zone 0, subzone 1.
 .TP
 \fBpowercap\-set \-p intel\-rapl \-z 0 \-c 1 \-l 25000000\fP
-Set a power cap of 25 Watts (25000000 uW) on zone 0, constraint 1, which
-is usually the \fBshort_term\fR constraint for \fBpackage\-0\fR.
+Set a power cap of 25 Watts (25000000 uW) on zone 0, constraint 1.
 .TP
 \fBpowercap\-set \-p intel\-rapl \-z 1:0 \-c 0 \-l 15000000 \-s 976\fP
 Set a power cap of 15 Watts (15000000 uW) and time window of 976
-microseconds on zone 1, subzone 0, constraint 0, which is usually the
-\fBlong_term\fR (and only) constraint for the \fBcore\fR subzone of
-\fBpackage\-1\fR (a multi-socket system).
+microseconds on zone 1, subzone 0, constraint 0.
 .SH "REMARKS"
 .LP
 Administrative (root) privileges are usually needed to use
@@ -95,6 +91,4 @@ Report bugs upstream at <https://github.com/powercap/powercap>
 Connor Imes <connor.k.imes@gmail.com>
 .fi
 .SH "SEE ALSO"
-.BR powercap\-info (1),
-.BR rapl\-info (1),
-.BR rapl\-set (1)
+.BR powercap\-info (1)

@@ -9,6 +9,7 @@
 ### Changed
 
 * Increased minimum CMake version from 2.8.5 to 2.8.12 to support target_compile_definitions
+* Updated 'powercap-{info,set}' man pages
 
 
 ## [v0.2.0] - 2019-12-03
