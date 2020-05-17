@@ -1,0 +1,89 @@
+.TH "POWERCAP\-SET\-@MAN_CONTROL_TYPE_UPPER@" "1" "2020-05-17" "powercap" "powercap\-set\-@MAN_CONTROL_TYPE@"
+.SH "NAME"
+.LP
+powercap\-set\-@MAN_CONTROL_TYPE@ \- manage power capping devices with the
+Linux power capping framework for the @MAN_CONTROL_TYPE@ control type
+.SH "SYNPOSIS"
+.LP
+\fBpowercap\-set\-@MAN_CONTROL_TYPE@ \fB\-z\fP \fIZONE(S)\fP [\fIOPTION\fP]...
+.SH "DESCRIPTION"
+.LP
+Sets configurations for powercap @MAN_CONTROL_TYPE@ control type.
+.SH "OPTIONS"
+.LP
+.TP
+\fB\-h,\fR \fB\-\-help\fR
+Prints the help screen
+.TP
+\fB\-z,\fR \fB\-\-zone=\fR\fIZONE(S)\fP
+[REQUIRED] The zone/subzone numbers in the control type's powercap tree.
+Separate zones/subzones with a colon.
+E.g., for zone 0, subzone 2:
+.br
+\fB\-z 0:2\fP
+.TP
+\fB\-c,\fR \fB\-\-constraint\fR=\fICONSTRAINT\fP
+The constraint number (none by default)
+.LP
+The following zone-level arguments may be used together:
+.TP
+\fB\-j,\fR \fB\-\-z\-energy\fR
+Reset zone energy counter
+.TP
+\fB\-e,\fR \fB\-\-z\-enabled=1|0\fR
+Enable/disable a zone
+.LP
+The following constraint-level arguments may be used together and require
+\-c/\-\-constraint:
+.TP
+\fB\-l,\fR \fB\-\-c\-power\-limit=UW\fR
+Set constraint power limit
+.TP
+\fB\-s,\fR \fB\-\-c\-time\-window=US\fR
+Set constraint time window
+.SH "EXAMPLES"
+.TP
+\fBpowercap\-set\-@MAN_CONTROL_TYPE@ \-z 0 \-e 1\fP
+Enable zone 0.
+.TP
+\fBpowercap\-set\-@MAN_CONTROL_TYPE@ \-z 0:1 \-e 1\fP
+Enable zone 0, subzone 1.
+.TP
+\fBpowercap\-set\-@MAN_CONTROL_TYPE@ \-z 0 \-c 1 \-l 25000000\fP
+Set a power cap of 25 Watts (25000000 uW) on zone 0, constraint 1.
+.TP
+\fBpowercap\-set\-@MAN_CONTROL_TYPE@ \-z 1:0 \-c 0 \-l 15000000 \-s 976\fP
+Set a power cap of 15 Watts (15000000 uW) and time window of 976
+microseconds on zone 1, subzone 0, constraint 0.
+.SH "REMARKS"
+.LP
+Administrative (root) privileges are usually needed to use
+\fBpowercap\-set\-@MAN_CONTROL_TYPE@\fR.
+.LP
+Setting constraint power cap and/or time limit values may not enable or
+disable a zone/subzone - set the \-e/-\-z\-enabled flag explicitly.
+.LP
+The kernel may round power limits and time windows to discrete values
+supported by the hardware, e.g., 28 seconds might round to 27983872
+microseconds.
+.LP
+Power units: microwatts (uW)
+.br
+Time units: microseconds (us)
+.SH "BUGS"
+.LP
+Report bugs upstream at <https://github.com/powercap/powercap>
+.SH "FILES"
+.nf
+\fI/sys/devices/virtual/powercap/@MAN_CONTROL_TYPE@/*\fP
+.nf
+\fI/sys/class/powercap//@MAN_CONTROL_TYPE@*\fP
+.fi
+.SH "AUTHORS"
+.nf
+Connor Imes <connor.k.imes@gmail.com>
+.fi
+.SH "SEE ALSO"
+.BR powercap\-info (1),
+.BR powercap\-info\-@MAN_CONTROL_TYPE@ (1),
+.BR powercap\-set (1)
