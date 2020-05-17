@@ -1,5 +1,12 @@
 # Release Notes
 
+## [Unreleased]
+
+### Changed
+
+* Increased minimum CMake version from 2.8.5 to 2.8.12 to support target_compile_definitions
+
+
 ## [v0.2.0] - 2019-12-03
 
 ### Added
@@ -55,6 +62,7 @@
 
 * Initial public release
 
+[Unreleased]: https://github.com/powercap/powercap/compare/v0.2.0...HEAD
 [v0.2.0]: https://github.com/powercap/powercap/compare/v0.1.1...v0.2.0
 [v0.1.1]: https://github.com/powercap/powercap/compare/v0.1.0...v0.1.1
 [#1]: https://github.com/powercap/powercap/issues/1
