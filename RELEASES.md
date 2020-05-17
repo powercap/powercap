@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+* Binaries 'powercap-{info,set}-intel-rapl' (more faithful to Linux power capping framework interface than 'rapl-{info,set}')
+
 ### Changed
 
 * Increased minimum CMake version from 2.8.5 to 2.8.12 to support target_compile_definitions
