@@ -71,9 +71,8 @@ microseconds on zone 1, subzone 0, constraint 0, which is usually the
 Administrative (root) privileges are usually needed to use
 \fBpowercap\-set\fR.
 .LP
-Setting constraint power cap and/or time limit values does not enable or
-disable a zone/subzone - the \-e/-\-z\-enabled flag must be set
-explicitly.
+Setting constraint power cap and/or time limit values may not enable or
+disable a zone/subzone - set the \-e/-\-z\-enabled flag explicitly.
 .LP
 The kernel may round power limits and time windows to discrete values
 supported by the hardware, e.g., 28 seconds might round to 27983872
