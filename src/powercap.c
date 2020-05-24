@@ -12,6 +12,28 @@
 #include "powercap.h"
 #include "powercap-common.h"
 
+#define VERIFY_ARG(arg) \
+  if (!(arg)) { \
+    errno = EINVAL; \
+    return -errno; \
+  }
+
+int powercap_control_type_set_enabled(const powercap_control_type* control_type, int val) {
+  VERIFY_ARG(control_type);
+  return write_u64(control_type->enabled, (uint64_t) val);
+}
+
+int powercap_control_type_get_enabled(const powercap_control_type* control_type, int* val) {
+  uint64_t enabled;
+  int ret;
+  VERIFY_ARG(control_type);
+  VERIFY_ARG(val);
+  if (!(ret = read_u64(control_type->enabled, &enabled))) {
+    *val = enabled ? 1 : 0;
+  }
+  return ret;
+}
+
 int powercap_zone_file_get_name(powercap_zone_file type, char* buf, size_t size) {
   return zone_file_get_name(type, buf, size);
 }
@@ -19,12 +41,6 @@ int powercap_zone_file_get_name(powercap_zone_file type, char* buf, size_t size)
 int powercap_constraint_file_get_name(powercap_constraint_file type, uint32_t constraint, char* buf, size_t size) {
   return constraint_file_get_name(type, constraint, buf, size);
 }
-
-#define VERIFY_ARG(arg) \
-  if (!(arg)) { \
-    errno = EINVAL; \
-    return -errno; \
-  }
 
 int powercap_zone_get_max_energy_range_uj(const powercap_zone* zone, uint64_t* val) {
   VERIFY_ARG(zone);

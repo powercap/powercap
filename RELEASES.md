@@ -5,6 +5,7 @@
 ### Added
 
 * Binaries 'powercap-{info,set}-intel-rapl' (more faithful to Linux power capping framework interface than 'rapl-{info,set}')
+* Top-level 'powercap_control_type' type to powercap.h with file getters/setters (for 'enabled' field)
 
 ### Changed
 
