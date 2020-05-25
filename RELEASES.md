@@ -15,6 +15,10 @@
 * Updated 'powercap-{info,set}' man pages
 * Argument '--zone' for powercap-set no longer required due to introduction of '--enabled' argument
 
+### Deprecated
+
+* Binaries rapl-{info,set} - use powercap-{info,set}-intel-rapl instead
+
 
 ## [v0.2.0] - 2019-12-03
 
