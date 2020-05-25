@@ -187,28 +187,28 @@ int main(int argc, char** argv) {
   if (reset_energy) {
     c = powercap_sysfs_zone_reset_energy_uj(control_type, zones, depth);
     if (c) {
-      perror("Error setting energy counter");
+      perror("Error setting zone energy counter");
       ret |= c;
     }
   }
   if (enabled.set) {
     c = powercap_sysfs_zone_set_enabled(control_type, zones, depth, enabled.val);
     if (c) {
-      perror("Error setting enabled/disabled");
+      perror("Error setting zone enabled/disabled");
       ret |= c;
     }
   }
   if (power_limit.set) {
     c = powercap_sysfs_constraint_set_power_limit_uw(control_type, zones, depth, constraint.val, power_limit.val);
     if (c) {
-      perror("Error setting power limit");
+      perror("Error setting constraint power limit");
       ret |= c;
     }
   }
   if (time_window.set) {
     c = powercap_sysfs_constraint_set_time_window_us(control_type, zones, depth, constraint.val, time_window.val);
     if (c) {
-      perror("Error setting time window");
+      perror("Error setting constraint time window");
       ret |= c;
     }
   }
