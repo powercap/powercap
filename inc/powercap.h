@@ -87,6 +87,12 @@ typedef enum powercap_constraint_file {
 } powercap_constraint_file;
 
 /**
+ * Get the filename for a control type file type.
+ * Returns the number of characters written excluding the terminating null byte, or a negative value in case of error.
+ */
+int powercap_control_type_file_get_name(powercap_control_type_file type, char* buf, size_t size);
+
+/**
  * Get the filename for a zone file type.
  * Returns the number of characters written excluding the terminating null byte, or a negative value in case of error.
  */

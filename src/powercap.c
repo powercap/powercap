@@ -12,6 +12,10 @@
 #include "powercap.h"
 #include "powercap-common.h"
 
+int powercap_control_type_file_get_name(powercap_control_type_file type, char* buf, size_t size) {
+  return control_type_file_get_name(type, buf, size);
+}
+
 int powercap_zone_file_get_name(powercap_zone_file type, char* buf, size_t size) {
   return zone_file_get_name(type, buf, size);
 }
