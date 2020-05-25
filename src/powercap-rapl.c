@@ -17,7 +17,7 @@
 #include "powercap.h"
 #include "powercap-common.h"
 #include "powercap-rapl.h"
-#include "powercap-rapl-sysfs.h"
+#include "powercap-sysfs.h"
 
 #define CONTROL_TYPE "intel-rapl"
 
@@ -229,18 +229,19 @@ static int get_constraint_fd(const powercap_rapl_pkg* pkg, powercap_rapl_zone zo
 }
 
 static uint32_t get_num_power_planes(uint32_t id) {
-  uint32_t sz = 0;
-  while (!rapl_sysfs_zone_exists(id, sz, 1)) {
-    sz++;
+  uint32_t zones[2] = { id, 0 };
+  while (!powercap_sysfs_zone_exists(CONTROL_TYPE, zones, 2)) {
+    zones[1]++;
   }
-  return sz;
+  return zones[1];
 }
 
 static ssize_t get_pp_type(uint32_t id, uint32_t pp, powercap_rapl_zone* zone) {
   assert(zone != NULL);
   char name[8];
   ssize_t ret;
-  if ((ret = rapl_sysfs_zone_get_name(id, pp, 1, name, sizeof(name))) < 0) {
+  uint32_t zones[2] = { id, pp };
+  if ((ret = powercap_sysfs_zone_get_name(CONTROL_TYPE, zones, 2, name, sizeof(name))) < 0) {
     /* Casting to int causes uninitialized warning in calling function, so we return ssize_t */
     return ret;
   }
@@ -261,7 +262,7 @@ static ssize_t get_pp_type(uint32_t id, uint32_t pp, powercap_rapl_zone* zone) {
 
 uint32_t powercap_rapl_get_num_packages(void) {
   uint32_t n = 0;
-  while (!rapl_sysfs_zone_exists(n, 0, 0)) {
+  while (!powercap_sysfs_zone_exists(CONTROL_TYPE, &n, 1)) {
     n++;
   }
   if (!n) {
