@@ -6,9 +6,9 @@ It includes an implementation for working with Intel Running Average Power Limit
 It also provides the following applications:
 
 * `powercap-info` - view powercap control type hierarchies or zone/constraint-specific configurations
-* `powercap-set` - set powercap control zone/constraint-specific configurations
-* `rapl-info` - view Intel RAPL hierarchies or zone/constraint-specific configurations
-* `rapl-set` - set Intel RAPL zone/constraint-specific configurations
+* `powercap-set` - set powercap control type zone/constraint-specific configurations
+* `powercap-info-intel-rapl` - `powercap-info` abstraction for the "intel-rapl" control type
+* `powercap-set-intel-rapl` - `powercap-set` abstraction for the "intel-rapl" control type
 
 These bindings were originally created for use with [RAPLCap](https://github.com/powercap/raplcap), but can be used independently.
 See the RAPLCap project for a more general interface for managing RAPL power caps, including other command line utilities.
@@ -51,8 +51,8 @@ See the man pages or run the applications with the `-h` or `--help` option for i
 
 ### Library
 
-First, there are the `powercap-sysfs.h` and `powercap-rapl-sysfs.h` interfaces for reading/writing to sysfs without the need to maintain state.
-These are reasonable for simple use cases.
+First, there is the `powercap-sysfs.h` interface for reading/writing to sysfs without the need to maintain state.
+This is reasonable for simple use cases.
 See the header files for documentation.
 
 The `powercap.h` interface provides read/write functions for generic powercap `zone` and `constraint` file sets.
