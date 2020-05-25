@@ -18,6 +18,7 @@
 ### Deprecated
 
 * Binaries rapl-{info,set} - use powercap-{info,set}-intel-rapl instead
+* Interface powercap-rapl-sysfs.h - use powercap-sysfs.h directly instead
 
 
 ## [v0.2.0] - 2019-12-03
