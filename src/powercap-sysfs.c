@@ -20,6 +20,17 @@
 #include "powercap-common.h"
 #include "powercap-sysfs.h"
 
+static int control_type_read_u64(const char* control_type, uint64_t* val, powercap_control_type_file type) {
+  int ret;
+  int fd;
+  if ((fd = open_control_type_file(control_type, type, O_RDONLY)) < 0) {
+    return -errno;
+  }
+  ret = read_u64(fd, val);
+  close(fd);
+  return ret;
+}
+
 static int zone_read_u64(const char* control_type, const uint32_t* zones, uint32_t depth, uint64_t* val,
                          powercap_zone_file type) {
   int ret;
@@ -85,6 +96,31 @@ int powercap_sysfs_constraint_exists(const char* control_type, const uint32_t* z
     return -errno;
   }
   return 0;
+}
+
+int powercap_sysfs_control_type_set_enabled(const char* control_type, uint32_t val) {
+  int ret;
+  int fd;
+  if ((fd = open_control_type_file(control_type, POWERCAP_CONTROL_TYPE_FILE_ENABLED, O_WRONLY)) < 0) {
+    return -errno;
+  }
+  ret = write_u64(fd, (uint64_t) val);
+  close(fd);
+  return ret;
+}
+
+int powercap_sysfs_control_type_get_enabled(const char* control_type, uint32_t* val) {
+  uint64_t enabled = 0;
+  int ret;
+  if (val) {
+    if (!(ret = control_type_read_u64(control_type, &enabled, POWERCAP_CONTROL_TYPE_FILE_ENABLED))) {
+      *val = (uint32_t) enabled;
+    }
+  } else {
+    errno = EINVAL;
+    ret = -errno;
+  }
+  return ret;
 }
 
 int powercap_sysfs_zone_get_max_energy_range_uj(const char* control_type, const uint32_t* zones, uint32_t depth, uint64_t* val) {

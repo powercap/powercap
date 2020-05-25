@@ -66,6 +66,24 @@ int powercap_sysfs_zone_exists(const char* control_type, const uint32_t* zones, 
 int powercap_sysfs_constraint_exists(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint);
 
 /**
+ * Enable/disable a control type.
+ *
+ * @param control_type
+ * @param val
+ * @return 0 on success, a negative error code otherwise.
+ */
+int powercap_sysfs_control_type_set_enabled(const char* control_type, uint32_t val);
+
+/**
+ * Get whether a control type is enabled or disabled.
+ *
+ * @param control_type
+ * @param val
+ * @return 0 on success, a negative error code otherwise.
+ */
+int powercap_sysfs_control_type_get_enabled(const char* control_type, uint32_t* val);
+
+/**
  * Get max_energy_range_uj for a zone.
  *
  * @param control_type
