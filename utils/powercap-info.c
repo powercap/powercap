@@ -92,6 +92,12 @@ static void analyze_zone(const char* control_type, const uint32_t* zones, uint32
   }
 }
 
+static void analyze_control_type(const char* control_type, int verbose) {
+  uint32_t val32;
+  int ret = powercap_sysfs_control_type_get_enabled(control_type, &val32);
+  u64_or_verbose(verbose, 0, "enabled", (uint64_t) val32, ret);
+}
+
 /* depth must be > 0 */
 static void analyze_all_zones_recurse(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t max_depth, int verbose) {
   if (!powercap_sysfs_zone_exists(control_type, zones, depth)) {
@@ -130,9 +136,9 @@ static void print_num_zones(const char* control_type, uint32_t* zones, uint32_t 
 
 static const char short_options[] =
 #ifdef POWERCAP_CONTROL_TYPE
-    "hvz:c:njJwWexlsUuTty"; // no "p:"
+    "hvz:c:EnjJwWexlsUuTty"; // no "p:"
 #else
-    "hvp:z:c:njJwWexlsUuTty";
+    "hvp:z:c:EnjJwWexlsUuTty";
 #endif
 
 static const struct option long_options[] = {
@@ -143,6 +149,7 @@ static const struct option long_options[] = {
 #endif
   {"zone",                required_argument,  NULL, 'z'},
   {"constraint",          required_argument,  NULL, 'c'},
+  {"enabled",             no_argument,        NULL, 'E'},
   {"nzones",              no_argument,        NULL, 'n'},
   {"z-energy",            no_argument,        NULL, 'j'},
   {"z-max-energy-range",  no_argument,        NULL, 'J'},
@@ -181,6 +188,7 @@ static void print_usage(void) {
   printf("                               E.g., for zone 0, but not subzones: \"-z 0:\"\n");
   printf("  -c, --constraint=CONSTRAINT  The constraint number\n");
   printf("All remaining options below are mutually exclusive:\n");
+  printf("  -E, --enabled                Print control type enabled/disabled status\n");
   printf("  -n, --nzones                 Print the number of zones (control type's root by\n");
   printf("                               default; within the -z/--zone level, if set)\n");
   printf("The following are zone-level arguments and require -z/--zone:\n");
@@ -263,6 +271,7 @@ int main(int argc, char** argv) {
     case 'c':
       ret = set_u32_param(&constraint, optarg, &cont);
       break;
+    case 'E':
     case 'n':
     case 'j':
     case 'J':
@@ -306,7 +315,12 @@ int main(int argc, char** argv) {
     fprintf(stderr, "Must specify -z/--zone with -c/--constraint\n");
     ret = -EINVAL;
   } else if (unique_set) {
-    if (unique_set == 'n') {
+    if (unique_set == 'E') {
+      if (depth || constraint.set) {
+        fprintf(stderr, "-E/--enabled cannot be used with -z/--zone or -c/--constraint\n");
+        ret = -EINVAL;
+      }
+    } else if (unique_set == 'n') {
       if (constraint.set) {
         fprintf(stderr, "-n/--nzones cannot be used with -c/--constraint\n");
         ret = -EINVAL;
@@ -369,6 +383,14 @@ int main(int argc, char** argv) {
   /* Perform requested action */
   if (unique_set) {
     switch (unique_set) {
+    case 'E':
+      /* Get control type enabled */
+      if (!(ret = powercap_sysfs_control_type_get_enabled(control_type, &val32))) {
+        printf("%"PRIu32"\n", val32);
+      } else {
+        perror("Failed to get control type enabled");
+      }
+      break;
     case 'n':
       /* Print number of zones at the specified tree location */
       print_num_zones(control_type, zones, depth);
@@ -496,6 +518,7 @@ int main(int argc, char** argv) {
       }
     }
   } else {
+    analyze_control_type(control_type, verbose);
     /* print all zones */
     analyze_all_zones_recurse(control_type, zones, 1, MAX_ZONE_DEPTH, verbose);
   }

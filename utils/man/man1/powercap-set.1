@@ -1,11 +1,11 @@
-.TH "POWERCAP\-SET" "1" "2020-05-17" "powercap" "powercap\-set"
+.TH "POWERCAP\-SET" "1" "2020-05-24" "powercap" "powercap\-set"
 .SH "NAME"
 .LP
 powercap\-set \- manage power capping devices with the Linux power capping
 framework
 .SH "SYNPOSIS"
 .LP
-\fBpowercap\-set \-p\fP \fINAME\fP \fB\-z\fP \fIZONE(S)\fP [\fIOPTION\fP]...
+\fBpowercap\-set \-p\fP \fINAME\fP [\fIOPTION\fP]...
 .SH "DESCRIPTION"
 .LP
 Sets configurations for a powercap control type.
@@ -20,7 +20,7 @@ Prints the help screen
 Must not be empty or contain a '.' or '/'.
 .TP
 \fB\-z,\fR \fB\-\-zone=\fR\fIZONE(S)\fP
-[REQUIRED] The zone/subzone numbers in the control type's powercap tree.
+The zone/subzone numbers in the control type's powercap tree.
 Separate zones/subzones with a colon.
 E.g., for zone 0, subzone 2:
 .br
@@ -28,8 +28,12 @@ E.g., for zone 0, subzone 2:
 .TP
 \fB\-c,\fR \fB\-\-constraint\fR=\fICONSTRAINT\fP
 The constraint number (none by default)
+.TP
+\fB\-E,\fR \fB\-\-enabled=1|0\fR
+Enable/disable a control type
 .LP
-The following zone-level arguments may be used together:
+The following zone-level arguments may be used together and require
+\-z/\-\-zone:
 .TP
 \fB\-j,\fR \fB\-\-z\-energy\fR
 Reset zone energy counter
@@ -38,7 +42,7 @@ Reset zone energy counter
 Enable/disable a zone
 .LP
 The following constraint-level arguments may be used together and require
-\-c/\-\-constraint:
+\-z/\-\-zone and \-c/\-\-constraint:
 .TP
 \fB\-l,\fR \fB\-\-c\-power\-limit=UW\fR
 Set constraint power limit
