@@ -22,6 +22,9 @@ extern "C" {
 #include <stdint.h>
 #include <unistd.h>
 
+/**
+ * File descriptors for a control type.
+ */
 typedef struct powercap_control_type {
   int enabled;
 } powercap_control_type;
@@ -52,7 +55,7 @@ typedef struct powercap_constraint {
 } powercap_constraint;
 
 /**
- * Control file enumeration.
+ * Control type file enumeration.
  */
 typedef enum powercap_control_type_file {
   POWERCAP_CONTROL_TYPE_FILE_ENABLED
@@ -96,12 +99,12 @@ int powercap_zone_file_get_name(powercap_zone_file type, char* buf, size_t size)
 int powercap_constraint_file_get_name(powercap_constraint_file type, uint32_t constraint, char* buf, size_t size);
 
 /**
- * Set the control's enabled value.
+ * Set the control type's enabled value.
  */
 int powercap_control_type_set_enabled(const powercap_control_type* control, int val);
 
 /**
- * Get the control's enabled value.
+ * Get the control type's enabled value.
  */
 int powercap_control_type_get_enabled(const powercap_control_type* control, int* val);
 
