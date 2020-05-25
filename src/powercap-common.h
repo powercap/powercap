@@ -64,6 +64,8 @@ int read_u64(int fd, uint64_t* val);
 /* Return 0 on success, negative error code on failure */
 int write_u64(int fd, uint64_t val);
 
+int control_type_file_get_name(powercap_control_type_file type, char* buf, size_t size);
+
 /* Return is like snprintf, or negative error code if parameters are bad */
 int zone_file_get_name(powercap_zone_file type, char* buf, size_t size);
 
@@ -77,12 +79,18 @@ int constraint_file_get_name(powercap_constraint_file type, uint32_t constraint,
 size_t get_base_path(const char* control_type, const uint32_t* zones, uint32_t depth, char* path, size_t size);
 
 /* Returns 0 on failure like insufficient buffer size */
+size_t get_control_type_file_path(const char* control_type, powercap_control_type_file type, char* path, size_t size);
+
+/* Returns 0 on failure like insufficient buffer size */
 size_t get_zone_file_path(const char* control_type, const uint32_t* zones, uint32_t depth, powercap_zone_file type,
                           char* path, size_t size);
 
 /* Returns 0 on failure like insufficient buffer size */
 size_t get_constraint_file_path(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint,
                                 powercap_constraint_file type, char* path, size_t size);
+
+/* Return fd on success, negative error code if path is too large, -1 on open failure */
+int open_control_type_file(const char* control_type, powercap_control_type_file type, int flags);
 
 /* Return fd on success, negative error code if path is too large, -1 on open failure */
 int open_zone_file(const char* control_type, const uint32_t* zones, uint32_t depth, powercap_zone_file type, int flags);

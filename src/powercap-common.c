@@ -26,6 +26,11 @@
   #define POWERCAP_PATH "/sys/class/powercap"
 #endif
 
+/* These enums MUST align with powercap_control_type_file in powercap.h */
+static const char* CONTROL_TYPE_FILE[] = {
+  "enabled"
+};
+
 /* These enums MUST align with powercap_zone_file in powercap.h */
 static const char* ZONE_FILE[] = {
   "max_energy_range_uj",
@@ -107,6 +112,15 @@ int write_u64(int fd, uint64_t val) {
   return 0;
 }
 
+int control_type_file_get_name(powercap_control_type_file type, char* buf, size_t size) {
+  /* check type in case users pass bad int value instead of enum; int cast silences clang compiler */
+  if (!buf || !size || (int) type < 0 || (int) type > POWERCAP_CONTROL_TYPE_FILE_ENABLED) {
+    errno = EINVAL;
+    return -errno;
+  }
+  return snprintf(buf, size, "%s", CONTROL_TYPE_FILE[type]);
+}
+
 int zone_file_get_name(powercap_zone_file type, char* buf, size_t size) {
   /* check type in case users pass bad int value instead of enum; int cast silences clang compiler */
   if (!buf || !size || (int) type < 0 || (int) type > POWERCAP_ZONE_FILE_NAME) {
@@ -179,6 +193,19 @@ size_t get_base_path(const char* control_type, const uint32_t* zones, uint32_t d
   return written;
 }
 
+size_t get_control_type_file_path(const char* control_type, powercap_control_type_file type, char* path, size_t size) {
+  size_t written;
+  int n;
+  if ((written = get_base_path(control_type, NULL, 0, path, size))) {
+    n = control_type_file_get_name(type, path + written, size - written);
+    if (!snprintf_ret_to_size_t(n, size - written)) {
+      return 0;
+    }
+    written += (size_t) n;
+  }
+  return written;
+}
+
 size_t get_zone_file_path(const char* control_type, const uint32_t* zones, uint32_t depth, powercap_zone_file type,
                           char* path, size_t size) {
   size_t written;
@@ -205,6 +232,14 @@ size_t get_constraint_file_path(const char* control_type, const uint32_t* zones,
     written += (size_t) n;
   }
   return written;
+}
+
+int open_control_type_file(const char* control_type, powercap_control_type_file type, int flags) {
+  char path[PATH_MAX];
+  if (!get_control_type_file_path(control_type, type, path, sizeof(path))) {
+    return -errno;
+  }
+  return open(path, flags);
 }
 
 int open_zone_file(const char* control_type, const uint32_t* zones, uint32_t depth, powercap_zone_file type, int flags) {
