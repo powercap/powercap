@@ -7,12 +7,13 @@
 * Binaries 'powercap-{info,set}-intel-rapl' (more faithful to Linux power capping framework interface than 'rapl-{info,set}')
 * Top-level 'powercap_control_type' type to powercap.h with file getters/setters (for 'enabled' field)
 * Functions 'powercap_sysfs_control_type_{get,set}_enabled' in powercap-sysfs.h
-* Arguments -E/--enabled to powercap-{info,set} for getting/setting control type enabled field
+* Argument '--enabled' to powercap-{info,set} for getting/setting control type enabled field
 
 ### Changed
 
 * Increased minimum CMake version from 2.8.5 to 2.8.12 to support target_compile_definitions
 * Updated 'powercap-{info,set}' man pages
+* Argument '--zone' for powercap-set no longer required due to introduction of '--enabled' argument
 
 
 ## [v0.2.0] - 2019-12-03
