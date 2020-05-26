@@ -90,8 +90,8 @@ int main(int argc, char** argv) {
   u32_param enabled = {0, 0};
   u64_param power_limit = {0, 0};
   u64_param time_window = {0, 0};
-  int is_set_zone;
-  int is_set_constraint;
+  int is_set_zone = 0;
+  int is_set_constraint = 0;
   int c;
   int cont = 1;
   int ret = 0;
