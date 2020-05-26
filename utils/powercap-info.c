@@ -287,7 +287,7 @@ int main(int argc, char** argv) {
     case 't':
     case 'y':
       if (unique_set) {
-        fprintf(stderr, "Only one of -n/--nzones, a zone-level argument, or a constraint-level argument is allowed at a time\n");
+        fprintf(stderr, "Must not specify multiple mutually exclusive arguments\n");
         cont = 0;
         ret = -EINVAL;
         break;
