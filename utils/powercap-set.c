@@ -161,16 +161,16 @@ int main(int argc, char** argv) {
     ret = -EINVAL;
 #endif
   } else if (!depth && (is_set_zone || is_set_constraint)) {
-    fprintf(stderr, "Must specify -z/--zone when using zone-level or constraint-level arguments\n");
+    fprintf(stderr, "Must specify -z/--zone with zone-level or constraint-level argument\n");
     ret = -EINVAL;
   } else if (depth && !(is_set_zone || is_set_constraint)) {
-    fprintf(stderr, "Must set at least one zone-level or constraint-level argument when using -z/--zone\n");
+    fprintf(stderr, "Must specify zone-level or constraint-level argument with -z/--zone\n");
     ret = -EINVAL;
   } else if (!constraint.set && is_set_constraint) {
-    fprintf(stderr, "Must specify -c/--constraint when using constraint-level arguments\n");
+    fprintf(stderr, "Must specify -c/--constraint with constraint-level argument\n");
     ret = -EINVAL;
   } else if (constraint.set && !is_set_constraint) {
-    fprintf(stderr, "Must set at least one constraint-level argument when using -c/--constraint\n");
+    fprintf(stderr, "Must specify constraint-level argument with -c/--constraint\n");
     ret = -EINVAL;
   } else if (!ct_enabled.set && !is_set_zone && !is_set_constraint) {
     fprintf(stderr, "Nothing to do\n");

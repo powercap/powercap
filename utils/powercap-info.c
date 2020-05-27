@@ -311,53 +311,50 @@ int main(int argc, char** argv) {
     fprintf(stderr, "Must specify -p/--control-type; value must not be empty or contain any '.' or '/' characters\n");
     ret = -EINVAL;
 #endif
-  } else if (!depth && constraint.set) {
+  } else if (unique_set) {
+    switch (unique_set) {
+    case 'E':
+      if (depth || constraint.set) {
+        fprintf(stderr, "Must not specify -z/--zone or -c/--constraint with -E/--enabled\n");
+        ret = -EINVAL;
+      }
+      break;
+    case 'n':
+      if (constraint.set) {
+        fprintf(stderr, "Must not specify -c/--constraint with -n/--nzones\n");
+        ret = -EINVAL;
+      }
+      break;
+    case 'j':
+    case 'J':
+    case 'w':
+    case 'W':
+    case 'e':
+    case 'x':
+      if (!depth) {
+        fprintf(stderr, "Must specify -z/--zone with zone-level argument\n");
+        ret = -EINVAL;
+      } else if (constraint.set) {
+        fprintf(stderr, "Must not specify -c/--constraint with zone-level argument\n");
+        ret = -EINVAL;
+      }
+      break;
+    case 'l':
+    case 's':
+    case 'U':
+    case 'u':
+    case 'T':
+    case 't':
+    case 'y':
+      if (!depth || !constraint.set) {
+        fprintf(stderr, "Must specify -z/--zone and -c/--constraint with constraint-level argument\n");
+        ret = -EINVAL;
+      }
+      break;
+    }
+  } else if (constraint.set && !depth) {
     fprintf(stderr, "Must specify -z/--zone with -c/--constraint\n");
     ret = -EINVAL;
-  } else if (unique_set) {
-    if (unique_set == 'E') {
-      if (depth || constraint.set) {
-        fprintf(stderr, "-E/--enabled cannot be used with -z/--zone or -c/--constraint\n");
-        ret = -EINVAL;
-      }
-    } else if (unique_set == 'n') {
-      if (constraint.set) {
-        fprintf(stderr, "-n/--nzones cannot be used with -c/--constraint\n");
-        ret = -EINVAL;
-      }
-    } else if (!depth) {
-      fprintf(stderr, "-z/--zone must be set for zone-level and constraint-level arguments\n");
-      ret = -EINVAL;
-    } else {
-      switch (unique_set) {
-      case 'n':
-        /* special case handled above */
-        break;
-      case 'j':
-      case 'J':
-      case 'w':
-      case 'W':
-      case 'e':
-      case 'x':
-        if (constraint.set) {
-          fprintf(stderr, "-c/--constraint cannot be set for zone-level arguments\n");
-          ret = -EINVAL;
-        }
-        break;
-      case 'l':
-      case 's':
-      case 'U':
-      case 'u':
-      case 'T':
-      case 't':
-      case 'y':
-        if (!constraint.set) {
-          fprintf(stderr, "-c/--constraint must be set for constraint-level arguments\n");
-          ret = -EINVAL;
-        }
-        break;
-      }
-    }
   }
   if (ret) {
     print_usage();
