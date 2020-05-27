@@ -8,6 +8,7 @@
 * Top-level 'powercap_control_type' type to powercap.h with file getters/setters (for 'enabled' field)
 * Functions 'powercap_sysfs_control_type_{get,set}_enabled' in powercap-sysfs.h
 * Argument '--enabled' to powercap-{info,set} for getting/setting control type enabled field
+* Argument '--nconstraints' to powercap-info for getting the number of zone constraints
 
 ### Changed
 

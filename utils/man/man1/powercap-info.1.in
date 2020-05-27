@@ -1,4 +1,4 @@
-.TH "POWERCAP\-INFO\-@MAN_CONTROL_TYPE_UPPER@" "1" "2020-05-24" "powercap" "powercap\-info\-@MAN_CONTROL_TYPE@"
+.TH "POWERCAP\-INFO\-@MAN_CONTROL_TYPE_UPPER@" "1" "2020-05-27" "powercap" "powercap\-info\-@MAN_CONTROL_TYPE@"
 .SH "NAME"
 .LP
 powercap\-info\-@MAN_CONTROL_TYPE@ \- get information from the Linux power
@@ -44,6 +44,9 @@ Print the number of zones (control type's root by default; within the
 \-z/\-\-zone level, if set)
 .LP
 The following are zone-level arguments and require \-z/\-\-zone:
+.TP
+\fB\-N,\fR \fB\-\-nconstraints\fR
+Print the number of zone constraints
 .TP
 \fB\-j,\fR \fB\-\-z\-energy\fR
 Print zone energy counter

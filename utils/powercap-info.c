@@ -134,11 +134,19 @@ static void print_num_zones(const char* control_type, uint32_t* zones, uint32_t 
   printf("%"PRIu32"\n", zones[depth]);
 }
 
+static void print_num_constraints(const char* control_type, uint32_t* zones, uint32_t depth) {
+  uint32_t n = 0;
+  while (!powercap_sysfs_constraint_exists(control_type, zones, depth, n)) {
+    n++;
+  }
+  printf("%"PRIu32"\n", n);
+}
+
 static const char short_options[] =
 #ifdef POWERCAP_CONTROL_TYPE
-    "hvz:c:EnjJwWexlsUuTty"; // no "p:"
+    "hvz:c:EnNjJwWexlsUuTty"; // no "p:"
 #else
-    "hvp:z:c:EnjJwWexlsUuTty";
+    "hvp:z:c:EnNjJwWexlsUuTty";
 #endif
 
 static const struct option long_options[] = {
@@ -151,6 +159,7 @@ static const struct option long_options[] = {
   {"constraint",          required_argument,  NULL, 'c'},
   {"enabled",             no_argument,        NULL, 'E'},
   {"nzones",              no_argument,        NULL, 'n'},
+  {"nconstraints",        no_argument,        NULL, 'N'},
   {"z-energy",            no_argument,        NULL, 'j'},
   {"z-max-energy-range",  no_argument,        NULL, 'J'},
   {"z-power",             no_argument,        NULL, 'w'},
@@ -192,6 +201,7 @@ static void print_usage(void) {
   printf("  -n, --nzones                 Print the number of zones (control type's root by\n");
   printf("                               default; within the -z/--zone level, if set)\n");
   printf("The following are zone-level arguments and require -z/--zone:\n");
+  printf("  -N, --nconstraints           Print the number of zone constraints\n");
   printf("  -j, --z-energy               Print zone energy counter\n");
   printf("  -J, --z-max-energy-range     Print zone maximum energy counter range\n");
   printf("  -w, --z-power                Print zone current power\n");
@@ -273,6 +283,7 @@ int main(int argc, char** argv) {
       break;
     case 'E':
     case 'n':
+    case 'N':
     case 'j':
     case 'J':
     case 'w':
@@ -325,6 +336,7 @@ int main(int argc, char** argv) {
         ret = -EINVAL;
       }
       break;
+    case 'N':
     case 'j':
     case 'J':
     case 'w':
@@ -391,6 +403,10 @@ int main(int argc, char** argv) {
     case 'n':
       /* Print number of zones at the specified tree location */
       print_num_zones(control_type, zones, depth);
+      break;
+    case 'N':
+      /* Print number of constraints at the specified tree location */
+      print_num_constraints(control_type, zones, depth);
       break;
     case 'j':
       /* Get zone energy */
