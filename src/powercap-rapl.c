@@ -27,10 +27,10 @@
 #define CONSTRAINT_NAME_LONG "long_term"
 #define CONSTRAINT_NAME_SHORT "short_term"
 
-#define PP_NAME_CORE "core"
-#define PP_NAME_UNCORE "uncore"
-#define PP_NAME_DRAM "dram"
-#define PP_NAME_PSYS "psys"
+#define ZONE_NAME_CORE "core"
+#define ZONE_NAME_UNCORE "uncore"
+#define ZONE_NAME_DRAM "dram"
+#define ZONE_NAME_PSYS "psys"
 
 static int rapl_open_zone_file(const uint32_t* zones, uint32_t depth, powercap_zone_file type, int flags, int* fd) {
   assert(fd != NULL);
@@ -103,14 +103,9 @@ static int is_wrong_constraint(const powercap_constraint* fds, const char* expec
          strncmp(buf, expected_name, sizeof(buf)) != 0;
 }
 
-static int open_all(uint32_t id, uint32_t pp, int is_pp, powercap_rapl_zone_files* fds, int ro) {
+static int open_all(const uint32_t* zones, uint32_t depth, powercap_rapl_zone_files* fds, int ro) {
   assert(fds != NULL);
   powercap_constraint tmp;
-  uint32_t zones[2];
-  uint32_t depth;
-  zones[0] = id;
-  zones[1] = pp;
-  depth = is_pp ? 2 : 1;
   if (open_zone(zones, depth, &fds->zone, ro) ||
       open_constraint(zones, depth, CONSTRAINT_NUM_LONG, &fds->constraint_long, ro) ||
       open_constraint(zones, depth, CONSTRAINT_NUM_SHORT, &fds->constraint_short, ro)) {
@@ -120,7 +115,7 @@ static int open_all(uint32_t id, uint32_t pp, int is_pp, powercap_rapl_zone_file
   // note: never actually seen this problem, but not 100% sure it can't happen, so check anyway...
   if (is_wrong_constraint(&fds->constraint_long, CONSTRAINT_NAME_LONG) &&
       is_wrong_constraint(&fds->constraint_short, CONSTRAINT_NAME_SHORT)) {
-    LOG(WARN, "open_all: long and short term constraints are out of order for zone ID: %"PRIu32"\n", id);
+    LOG(WARN, "open_all: long and short term constraints are out of order for zone ID: %"PRIu32"\n", zones[0]);
     memcpy(&tmp, &fds->constraint_short, sizeof(powercap_constraint));
     memcpy(&fds->constraint_short, &fds->constraint_long, sizeof(powercap_constraint));
     memcpy(&fds->constraint_long, &tmp, sizeof(powercap_constraint));
@@ -236,22 +231,21 @@ static uint32_t get_num_power_planes(uint32_t id) {
   return zones[1];
 }
 
-static ssize_t get_pp_type(uint32_t id, uint32_t pp, powercap_rapl_zone* zone) {
+static ssize_t get_zone_type(const uint32_t* zones, uint32_t depth, powercap_rapl_zone* zone) {
   assert(zone != NULL);
-  char name[8];
+  char name[64];
   ssize_t ret;
-  uint32_t zones[2] = { id, pp };
-  if ((ret = powercap_sysfs_zone_get_name(CONTROL_TYPE, zones, 2, name, sizeof(name))) < 0) {
+  if ((ret = powercap_sysfs_zone_get_name(CONTROL_TYPE, zones, depth, name, sizeof(name))) < 0) {
     /* Casting to int causes uninitialized warning in calling function, so we return ssize_t */
     return ret;
   }
-  if (!strncmp(name, PP_NAME_CORE, sizeof(PP_NAME_CORE))) {
+  if (!strncmp(name, ZONE_NAME_CORE, sizeof(ZONE_NAME_CORE))) {
     *zone = POWERCAP_RAPL_ZONE_CORE;
-  } else if (!strncmp(name, PP_NAME_UNCORE, sizeof(PP_NAME_UNCORE))) {
+  } else if (!strncmp(name, ZONE_NAME_UNCORE, sizeof(ZONE_NAME_UNCORE))) {
     *zone = POWERCAP_RAPL_ZONE_UNCORE;
-  } else if (!strncmp(name, PP_NAME_DRAM, sizeof(PP_NAME_DRAM))) {
+  } else if (!strncmp(name, ZONE_NAME_DRAM, sizeof(ZONE_NAME_DRAM))) {
     *zone = POWERCAP_RAPL_ZONE_DRAM;
-  } else if (!strncmp(name, PP_NAME_PSYS, sizeof(PP_NAME_PSYS))) {
+  } else if (!strncmp(name, ZONE_NAME_PSYS, sizeof(ZONE_NAME_PSYS))) {
     *zone = POWERCAP_RAPL_ZONE_PSYS;
   } else {
     errno = EINVAL;
@@ -278,6 +272,7 @@ int powercap_rapl_init(uint32_t id, powercap_rapl_pkg* pkg, int read_only) {
   int err_save;
   uint32_t i;
   uint32_t npp;
+  uint32_t zones[2] = { id, 0 };
   powercap_rapl_zone type;
   if (pkg == NULL) {
     errno = EINVAL;
@@ -286,27 +281,28 @@ int powercap_rapl_init(uint32_t id, powercap_rapl_pkg* pkg, int read_only) {
   // force all fds to 0 so we don't try to operate on invalid descriptors
   memset(pkg, 0, sizeof(powercap_rapl_pkg));
   // first populate zone and package power zone
-  if (!(ret = open_all(id, 0, 0, &pkg->pkg, read_only))) {
+  if (!(ret = open_all(zones, 1, &pkg->pkg, read_only))) {
     // get a count of subordinate power zones in this package
     npp = get_num_power_planes(id);
     // now get all power zones
     for (i = 0; i < npp && !ret; i++) {
-      if ((sret = get_pp_type(id, i, &type))) {
+      zones[1] = i;
+      if ((sret = get_zone_type(zones, 2, &type))) {
         ret = (int) sret;
         break;
       }
       switch (type) {
         case POWERCAP_RAPL_ZONE_CORE:
-          ret = open_all(id, i, 1, &pkg->core, read_only);
+          ret = open_all(zones, 2, &pkg->core, read_only);
           break;
         case POWERCAP_RAPL_ZONE_UNCORE:
-          ret = open_all(id, i, 1, &pkg->uncore, read_only);
+          ret = open_all(zones, 2, &pkg->uncore, read_only);
           break;
         case POWERCAP_RAPL_ZONE_DRAM:
-          ret = open_all(id, i, 1, &pkg->dram, read_only);
+          ret = open_all(zones, 2, &pkg->dram, read_only);
           break;
         case POWERCAP_RAPL_ZONE_PSYS:
-          ret = open_all(id, i, 1, &pkg->psys, read_only);
+          ret = open_all(zones, 2, &pkg->psys, read_only);
           break;
         case POWERCAP_RAPL_ZONE_PACKAGE:
         default:
