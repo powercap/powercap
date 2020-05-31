@@ -19,6 +19,10 @@
 #include "powercap-rapl.h"
 #include "powercap-sysfs.h"
 
+#ifndef MAX_NAME_SIZE
+  #define MAX_NAME_SIZE 64
+#endif
+
 #define CONTROL_TYPE "intel-rapl"
 
 #define CONSTRAINT_NUM_LONG 0
@@ -27,6 +31,7 @@
 #define CONSTRAINT_NAME_LONG "long_term"
 #define CONSTRAINT_NAME_SHORT "short_term"
 
+#define ZONE_NAME_PREFIX_PKG "package"
 #define ZONE_NAME_CORE "core"
 #define ZONE_NAME_UNCORE "uncore"
 #define ZONE_NAME_DRAM "dram"
@@ -97,7 +102,7 @@ static int open_constraint(const uint32_t* zones, uint32_t depth, uint32_t const
 static int is_wrong_constraint(const powercap_constraint* fds, const char* expected_name) {
   assert(fds != NULL);
   assert(expected_name != NULL);
-  char buf[32];
+  char buf[MAX_NAME_SIZE];
   // assume constraint is wrong unless we can prove it's correct
   return powercap_constraint_get_name(fds, buf, sizeof(buf)) <= 0 ||
          strncmp(buf, expected_name, sizeof(buf)) != 0;
@@ -231,27 +236,27 @@ static uint32_t get_num_power_planes(uint32_t id) {
   return zones[1];
 }
 
-static ssize_t get_zone_type(const uint32_t* zones, uint32_t depth, powercap_rapl_zone* zone) {
-  assert(zone != NULL);
-  char name[64];
-  ssize_t ret;
-  if ((ret = powercap_sysfs_zone_get_name(CONTROL_TYPE, zones, depth, name, sizeof(name))) < 0) {
-    /* Casting to int causes uninitialized warning in calling function, so we return ssize_t */
-    return ret;
+static powercap_rapl_zone_files* get_files_by_name(powercap_rapl_pkg* pkg, const uint32_t* zones, uint32_t depth) {
+  assert(pkg != NULL);
+  char name[MAX_NAME_SIZE];
+  if (powercap_sysfs_zone_get_name(CONTROL_TYPE, zones, depth, name, sizeof(name)) < 0) {
+    return NULL;
   }
-  if (!strncmp(name, ZONE_NAME_CORE, sizeof(ZONE_NAME_CORE))) {
-    *zone = POWERCAP_RAPL_ZONE_CORE;
+  if (!strncmp(name, ZONE_NAME_PREFIX_PKG, sizeof(ZONE_NAME_PREFIX_PKG) - 1)) {
+    return &pkg->pkg;
+  } else if (!strncmp(name, ZONE_NAME_CORE, sizeof(ZONE_NAME_CORE))) {
+    return &pkg->core;
   } else if (!strncmp(name, ZONE_NAME_UNCORE, sizeof(ZONE_NAME_UNCORE))) {
-    *zone = POWERCAP_RAPL_ZONE_UNCORE;
+    return &pkg->uncore;
   } else if (!strncmp(name, ZONE_NAME_DRAM, sizeof(ZONE_NAME_DRAM))) {
-    *zone = POWERCAP_RAPL_ZONE_DRAM;
+    return &pkg->dram;
   } else if (!strncmp(name, ZONE_NAME_PSYS, sizeof(ZONE_NAME_PSYS))) {
-    *zone = POWERCAP_RAPL_ZONE_PSYS;
+    return &pkg->psys;
   } else {
+    LOG(ERROR, "get_files_by_name: Unrecognized zone name: %s\n", name);
     errno = EINVAL;
-    return -errno;
   }
-  return 0;
+  return NULL;
 }
 
 uint32_t powercap_rapl_get_num_packages(void) {
@@ -268,46 +273,36 @@ uint32_t powercap_rapl_get_num_packages(void) {
 
 int powercap_rapl_init(uint32_t id, powercap_rapl_pkg* pkg, int read_only) {
   int ret;
-  ssize_t sret;
   int err_save;
   uint32_t i;
   uint32_t npp;
   uint32_t zones[2] = { id, 0 };
-  powercap_rapl_zone type;
+  powercap_rapl_zone_files *files;
   if (pkg == NULL) {
     errno = EINVAL;
     return -errno;
   }
+  // first need the parent zone
+  if ((files = get_files_by_name(pkg, zones, 1)) == NULL) {
+    return -errno;
+  }
   // force all fds to 0 so we don't try to operate on invalid descriptors
   memset(pkg, 0, sizeof(powercap_rapl_pkg));
-  // first populate zone and package power zone
-  if (!(ret = open_all(zones, 1, &pkg->pkg, read_only))) {
-    // get a count of subordinate power zones in this package
+  // first populate parent zone
+  if (!(ret = open_all(zones, 1, files, read_only))) {
+    // get subordinate power zones
     npp = get_num_power_planes(id);
-    // now get all power zones
     for (i = 0; i < npp && !ret; i++) {
       zones[1] = i;
-      if ((sret = get_zone_type(zones, 2, &type))) {
-        ret = (int) sret;
-        break;
-      }
-      switch (type) {
-        case POWERCAP_RAPL_ZONE_CORE:
-          ret = open_all(zones, 2, &pkg->core, read_only);
-          break;
-        case POWERCAP_RAPL_ZONE_UNCORE:
-          ret = open_all(zones, 2, &pkg->uncore, read_only);
-          break;
-        case POWERCAP_RAPL_ZONE_DRAM:
-          ret = open_all(zones, 2, &pkg->dram, read_only);
-          break;
-        case POWERCAP_RAPL_ZONE_PSYS:
-          ret = open_all(zones, 2, &pkg->psys, read_only);
-          break;
-        case POWERCAP_RAPL_ZONE_PACKAGE:
-        default:
-          assert(0);
-          break;
+      if ((files = get_files_by_name(pkg, zones, 2)) == NULL) {
+        ret = -errno;
+      } else if (files->zone.name) {
+        // zone has already been opened ("name" is picked arbitrarily, but it is a required file)
+        LOG(ERROR, "powercap_rapl_init: Duplicate zone type detected at %"PRIu32":%"PRIu32"\n", zones[0], zones[1]);
+        errno = EBUSY;
+        ret = -errno;
+      } else {
+        ret = open_all(zones, 2, files, read_only);
       }
     }
   }

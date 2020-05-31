@@ -21,6 +21,10 @@
 * Binaries rapl-{info,set} - use powercap-{info,set}-intel-rapl instead
 * Interface powercap-rapl-sysfs.h - use powercap-sysfs.h directly instead
 
+### Fixed
+
+* Fixed [#4]: powercap-rapl now checks if parent zone is PACKAGE or PSYS
+
 
 ## [v0.2.0] - 2019-12-03
 
@@ -80,4 +84,5 @@
 [Unreleased]: https://github.com/powercap/powercap/compare/v0.2.0...HEAD
 [v0.2.0]: https://github.com/powercap/powercap/compare/v0.1.1...v0.2.0
 [v0.1.1]: https://github.com/powercap/powercap/compare/v0.1.0...v0.1.1
+[#4]: https://github.com/powercap/powercap/issues/4
 [#1]: https://github.com/powercap/powercap/issues/1
