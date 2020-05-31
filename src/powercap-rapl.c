@@ -8,12 +8,10 @@
  */
 #include <assert.h>
 #include <errno.h>
-#include <fcntl.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include "powercap.h"
 #include "powercap-common.h"
 #include "powercap-rapl.h"
@@ -37,70 +35,6 @@
 #define ZONE_NAME_DRAM "dram"
 #define ZONE_NAME_PSYS "psys"
 
-static int rapl_open_zone_file(const uint32_t* zones, uint32_t depth, powercap_zone_file type, int flags, int* fd) {
-  assert(fd != NULL);
-  char buf[PATH_MAX];
-  if (!get_zone_file_path(CONTROL_TYPE, zones, depth, type, buf, sizeof(buf))) {
-    return -errno;
-  }
-  if ((*fd = open(buf, flags)) < 0) {
-    if (errno == ENOENT) {
-      // No such file or directory
-      LOG(DEBUG, "rapl_open_zone_file: access: %s: %s\n", buf, strerror(errno));
-      *fd = 0;
-    } else if (errno == EACCES && type == POWERCAP_ZONE_FILE_ENERGY_UJ) {
-      // special case for energy_uj (it's actually read-only for RAPL)
-      errno = 0;
-      *fd = open(buf, O_RDONLY);
-      if (*fd < 0) {
-        LOG(ERROR, "rapl_open_zone_file: open (RO): %s: %s\n", buf, strerror(errno));
-      }
-    } else {
-      LOG(ERROR, "rapl_open_zone_file: open: %s: %s\n", buf, strerror(errno));
-    }
-  }
-  return *fd < 0 ? -errno : 0;
-}
-
-static int rapl_open_constraint_file(const uint32_t* zones, uint32_t depth, powercap_constraint_file type, uint32_t constraint, int flags, int* fd) {
-  assert(fd != NULL);
-  char buf[PATH_MAX];
-  if (!get_constraint_file_path(CONTROL_TYPE, zones, depth, constraint, type, buf, sizeof(buf))) {
-    return -errno;
-  }
-  if ((*fd = open(buf, flags)) < 0) {
-    if (errno == ENOENT) {
-      // No such file or directory
-      LOG(DEBUG, "rapl_open_constraint_file: access: %s: %s\n", buf, strerror(errno));
-      *fd = 0;
-    } else {
-      LOG(ERROR, "rapl_open_constraint_file: open: %s: %s\n", buf, strerror(errno));
-    }
-  }
-  return *fd < 0 ? -errno : 0;
-}
-
-static int open_zone(const uint32_t* zones, uint32_t depth, powercap_zone* fds, int ro) {
-  assert(fds != NULL);
-  return rapl_open_zone_file(zones, depth, POWERCAP_ZONE_FILE_MAX_ENERGY_RANGE_UJ, O_RDONLY, &fds->max_energy_range_uj) ||
-         rapl_open_zone_file(zones, depth, POWERCAP_ZONE_FILE_ENERGY_UJ, ro ? O_RDONLY : O_RDWR, &fds->energy_uj) ||
-         rapl_open_zone_file(zones, depth, POWERCAP_ZONE_FILE_MAX_POWER_RANGE_UW, O_RDONLY, &fds->max_power_range_uw) ||
-         rapl_open_zone_file(zones, depth, POWERCAP_ZONE_FILE_POWER_UW, O_RDONLY, &fds->power_uw) ||
-         rapl_open_zone_file(zones, depth, POWERCAP_ZONE_FILE_ENABLED, ro ? O_RDONLY : O_RDWR, &fds->enabled) ||
-         rapl_open_zone_file(zones, depth, POWERCAP_ZONE_FILE_NAME, O_RDONLY, &fds->name);
-}
-
-static int open_constraint(const uint32_t* zones, uint32_t depth, uint32_t constraint, powercap_constraint* fds, int ro) {
-  assert(fds != NULL);
-  return rapl_open_constraint_file(zones, depth, POWERCAP_CONSTRAINT_FILE_POWER_LIMIT_UW, constraint, ro ? O_RDONLY : O_RDWR, &fds->power_limit_uw) ||
-         rapl_open_constraint_file(zones, depth, POWERCAP_CONSTRAINT_FILE_TIME_WINDOW_US, constraint, ro ? O_RDONLY : O_RDWR, &fds->time_window_us) ||
-         rapl_open_constraint_file(zones, depth, POWERCAP_CONSTRAINT_FILE_MAX_POWER_UW, constraint, O_RDONLY, &fds->max_power_uw) ||
-         rapl_open_constraint_file(zones, depth, POWERCAP_CONSTRAINT_FILE_MIN_POWER_UW, constraint, O_RDONLY, &fds->min_power_uw) ||
-         rapl_open_constraint_file(zones, depth, POWERCAP_CONSTRAINT_FILE_MAX_TIME_WINDOW_US, constraint, O_RDONLY, &fds->max_time_window_us) ||
-         rapl_open_constraint_file(zones, depth, POWERCAP_CONSTRAINT_FILE_MIN_TIME_WINDOW_US, constraint, O_RDONLY, &fds->min_time_window_us) ||
-         rapl_open_constraint_file(zones, depth, POWERCAP_CONSTRAINT_FILE_NAME, constraint, O_RDONLY, &fds->name);
-}
-
 static int is_wrong_constraint(const powercap_constraint* fds, const char* expected_name) {
   assert(fds != NULL);
   assert(expected_name != NULL);
@@ -112,10 +46,12 @@ static int is_wrong_constraint(const powercap_constraint* fds, const char* expec
 
 static int open_all(const uint32_t* zones, uint32_t depth, powercap_rapl_zone_files* fds, int ro) {
   assert(fds != NULL);
+  char buf[PATH_MAX];
   powercap_constraint tmp;
-  if (open_zone(zones, depth, &fds->zone, ro) ||
-      open_constraint(zones, depth, CONSTRAINT_NUM_LONG, &fds->constraint_long, ro) ||
-      open_constraint(zones, depth, CONSTRAINT_NUM_SHORT, &fds->constraint_short, ro)) {
+  if (powercap_zone_open(&fds->zone, buf, sizeof(buf), CONTROL_TYPE, zones, depth, ro) ||
+      powercap_constraint_open(&fds->constraint_long, buf, sizeof(buf), CONTROL_TYPE, zones, depth, CONSTRAINT_NUM_LONG, ro) ||
+      powercap_constraint_open(&fds->constraint_short, buf, sizeof(buf), CONTROL_TYPE, zones, depth, CONSTRAINT_NUM_SHORT, ro)) {
+    LOG(ERROR, "open_all: %s: %s\n", buf, strerror(errno));
     return 1;
   }
   // verify that constraints aren't reversed
@@ -316,41 +252,12 @@ int powercap_rapl_init(uint32_t id, powercap_rapl_pkg* pkg, int read_only) {
   return ret;
 }
 
-static int powercap_rapl_close(int fd) {
-  return (fd > 0 && close(fd)) ? -errno : 0;
-}
-
-static int fds_destroy_zone(powercap_zone* fds) {
-  assert(fds != NULL);
-  int ret = 0;
-  ret |= powercap_rapl_close(fds->max_energy_range_uj);
-  ret |= powercap_rapl_close(fds->energy_uj);
-  ret |= powercap_rapl_close(fds->max_power_range_uw);
-  ret |= powercap_rapl_close(fds->power_uw);
-  ret |= powercap_rapl_close(fds->enabled);
-  ret |= powercap_rapl_close(fds->name);
-  return ret;
-}
-
-static int fds_destroy_zone_constraint(powercap_constraint* fds) {
-  assert(fds != NULL);
-  int ret = 0;
-  ret |= powercap_rapl_close(fds->power_limit_uw);
-  ret |= powercap_rapl_close(fds->time_window_us);
-  ret |= powercap_rapl_close(fds->max_power_uw);
-  ret |= powercap_rapl_close(fds->min_power_uw);
-  ret |= powercap_rapl_close(fds->max_time_window_us);
-  ret |= powercap_rapl_close(fds->min_time_window_us);
-  ret |= powercap_rapl_close(fds->name);
-  return ret;
-}
-
 static int fds_destroy_all(powercap_rapl_zone_files* files) {
   assert(files != NULL);
   int ret = 0;
-  ret |= fds_destroy_zone(&files->zone);
-  ret |= fds_destroy_zone_constraint(&files->constraint_long);
-  ret |= fds_destroy_zone_constraint(&files->constraint_short);
+  ret |= powercap_zone_close(&files->zone);
+  ret |= powercap_constraint_close(&files->constraint_long);
+  ret |= powercap_constraint_close(&files->constraint_short);
   return ret;
 }
 
