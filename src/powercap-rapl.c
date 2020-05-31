@@ -40,9 +40,10 @@
 static int rapl_open_zone_file(const uint32_t* zones, uint32_t depth, powercap_zone_file type, int flags, int* fd) {
   assert(fd != NULL);
   char buf[PATH_MAX];
-  if ((*fd = open_zone_file(CONTROL_TYPE, zones, depth, type, flags)) < 0) {
-    // for logging purposes only
-    get_zone_file_path(CONTROL_TYPE, zones, depth, type, buf, sizeof(buf));
+  if (!get_zone_file_path(CONTROL_TYPE, zones, depth, type, buf, sizeof(buf))) {
+    return -errno;
+  }
+  if ((*fd = open(buf, flags)) < 0) {
     if (errno == ENOENT) {
       // No such file or directory
       LOG(DEBUG, "rapl_open_zone_file: access: %s: %s\n", buf, strerror(errno));
@@ -50,7 +51,7 @@ static int rapl_open_zone_file(const uint32_t* zones, uint32_t depth, powercap_z
     } else if (errno == EACCES && type == POWERCAP_ZONE_FILE_ENERGY_UJ) {
       // special case for energy_uj (it's actually read-only for RAPL)
       errno = 0;
-      *fd = open_zone_file(CONTROL_TYPE, zones, depth, type, O_RDONLY);
+      *fd = open(buf, O_RDONLY);
       if (*fd < 0) {
         LOG(ERROR, "rapl_open_zone_file: open (RO): %s: %s\n", buf, strerror(errno));
       }
@@ -64,9 +65,10 @@ static int rapl_open_zone_file(const uint32_t* zones, uint32_t depth, powercap_z
 static int rapl_open_constraint_file(const uint32_t* zones, uint32_t depth, powercap_constraint_file type, uint32_t constraint, int flags, int* fd) {
   assert(fd != NULL);
   char buf[PATH_MAX];
-  if ((*fd = open_constraint_file(CONTROL_TYPE, zones, depth, constraint, type, flags)) < 0) {
-    // for logging purposes only
-    get_constraint_file_path(CONTROL_TYPE, zones, depth, constraint, type, buf, sizeof(buf));
+  if (!get_constraint_file_path(CONTROL_TYPE, zones, depth, constraint, type, buf, sizeof(buf))) {
+    return -errno;
+  }
+  if ((*fd = open(buf, flags)) < 0) {
     if (errno == ENOENT) {
       // No such file or directory
       LOG(DEBUG, "rapl_open_constraint_file: access: %s: %s\n", buf, strerror(errno));
