@@ -99,6 +99,56 @@ int open_zone_file(const char* control_type, const uint32_t* zones, uint32_t dep
 int open_constraint_file(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint,
                          powercap_constraint_file type, int flags);
 
+/* Return fd on success or ENOENT, -1 if buf is too small or on open failure */
+int powercap_control_type_file_open(char* buf, size_t bsize, const char* ct_name, powercap_control_type_file type,
+                                    int flags);
+
+/* Return fd on success or ENOENT, -1 if buf is too small or on open failure */
+int powercap_zone_file_open(char* buf, size_t bsize, const char* ct_name, const uint32_t* zones, uint32_t depth,
+                            powercap_zone_file type, int flags);
+
+/* Return fd on success or ENOENT, -1 if buf is too small or on open failure */
+int powercap_constraint_file_open(char* buf, size_t bsize, const char* ct_name, const uint32_t* zones, uint32_t depth,
+                                  uint32_t constraint, powercap_constraint_file type, int flags);
+
+/*
+ * Open all files in a control type, if they exist.
+ * Return 0 on success or ENOENT, -1 if buf is too small or on open failure.
+ */
+int powercap_control_type_open(powercap_control_type* pct, char* buf, size_t bsize, const char* ct_name, int ro);
+
+/*
+ * Open all files in a zone, if they exist.
+ * Return 0 on success or ENOENT, -1 if buf is too small or on open failure.
+ */
+int powercap_zone_open(powercap_zone* pz, char* buf, size_t bsize, const char* ct_name, const uint32_t* zones,
+                       uint32_t depth, int ro);
+
+/*
+ * Open all files in a constraint, if they exist.
+ * Return 0 on success or ENOENT, -1 if buf is too small or on open failure.
+ */
+int powercap_constraint_open(powercap_constraint* pc, char* buf, size_t bsize, const char* ct_name,
+                             const uint32_t* zones, uint32_t depth, uint32_t constraint, int ro);
+
+/*
+ * Close all files in a control type.
+ * Return 0 on success, negative error code on failure.
+ */
+int powercap_control_type_close(powercap_control_type* pct);
+
+/*
+ * Close all files in a zone.
+ * Return 0 on success, negative error code on failure.
+ */
+int powercap_zone_close(powercap_zone* pz);
+
+/*
+ * Close all files in a constraint.
+ * Return 0 on success, negative error code on failure.
+ */
+int powercap_constraint_close(powercap_constraint* pc);
+
 #pragma GCC visibility pop
 
 #ifdef __cplusplus
