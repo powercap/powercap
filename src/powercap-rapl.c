@@ -215,7 +215,7 @@ int powercap_rapl_init(uint32_t id, powercap_rapl_pkg* pkg, int read_only) {
   uint32_t i;
   uint32_t npp;
   uint32_t zones[2] = { id, 0 };
-  powercap_rapl_zone_files *files;
+  powercap_rapl_zone_files* files;
   if (pkg == NULL) {
     errno = EINVAL;
     return -errno;
