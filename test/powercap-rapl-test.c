@@ -276,7 +276,7 @@ int main(int argc, char** argv) {
     if (errno) {
       perror("powercap_rapl_get_num_packages");
     } else {
-      fprintf(stderr, "No RAPL packages found\n");
+      fprintf(stderr, "No RAPL zones found\n");
     }
     return EXIT_FAILURE;
   }
@@ -295,7 +295,7 @@ int main(int argc, char** argv) {
       goto cleanup;
     }
   }
-  printf("Initialized %"PRIu32" package(s)\n", npackages);
+  printf("Initialized %"PRIu32" top-level zone instance(s)\n", npackages);
 
   // test
   for (i = 0; i < npackages; i++) {
