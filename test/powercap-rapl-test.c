@@ -15,6 +15,22 @@ static const char* const ZONE_NAMES[] = { "Package", "Core", "Uncore", "DRAM", "
 static const powercap_rapl_constraint CONSTRAINTS[] = { POWERCAP_RAPL_CONSTRAINT_LONG, POWERCAP_RAPL_CONSTRAINT_SHORT };
 static const uint32_t NCONSTRAINTS = 2;
 
+static int test_root(int ro) {
+  int enabled = powercap_rapl_control_is_enabled();
+  if (enabled < 0) {
+    perror("powercap_rapl_control_is_enabled");
+    return -1;
+  } else {
+    printf("RAPL enabled: %s\n", enabled > 0 ? "yes" : "no");
+  }
+
+  if (!ro && powercap_rapl_control_set_enabled(enabled)) {
+    perror("powercap_rapl_control_set_enabled");
+  }
+
+  return 0;
+}
+
 static int test_pkg(const powercap_rapl_pkg* p, int ro) {
   uint32_t i, j;
   int supported;
@@ -268,6 +284,10 @@ int main(int argc, char** argv) {
   if (argc > 1) {
     // a value other than 0 enables read/write
     ro = !atoi(argv[1]);
+  }
+
+  if (test_root(ro)) {
+    return -1;
   }
 
   // initialize

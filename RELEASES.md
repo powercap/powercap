@@ -7,6 +7,7 @@
 * Binaries 'powercap-{info,set}-intel-rapl' (more faithful to Linux power capping framework interface than 'rapl-{info,set}')
 * Top-level 'powercap_control_type' type to powercap.h with file getters/setters (for 'enabled' field)
 * Functions 'powercap_sysfs_control_type_{get,set}_enabled' in powercap-sysfs.h
+* Functions 'powercap_rapl_control_is_enabled' and 'powercap_rapl_control_set_enabled' in powercap-rapl.h
 * Function 'powercap_rapl_get_num_instances' in powercap-rapl.h
 * Argument '--enabled' to powercap-{info,set} for getting/setting control type enabled field
 * Argument '--nconstraints' to powercap-info for getting the number of zone constraints
