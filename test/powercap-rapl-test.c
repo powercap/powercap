@@ -16,7 +16,17 @@ static const powercap_rapl_constraint CONSTRAINTS[] = { POWERCAP_RAPL_CONSTRAINT
 static const uint32_t NCONSTRAINTS = 2;
 
 static int test_root(int ro) {
-  int enabled = powercap_rapl_control_is_enabled();
+  int enabled;
+  int supported = powercap_rapl_control_is_supported();
+  if (supported < 0) {
+    perror("powercap_rapl_control_is_supported");
+    return -1;
+  } else if (supported == 0) {
+    printf("RAPL not supported\n");
+    return -1;
+  }
+
+  enabled = powercap_rapl_control_is_enabled();
   if (enabled < 0) {
     perror("powercap_rapl_control_is_enabled");
     return -1;

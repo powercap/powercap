@@ -75,6 +75,12 @@ typedef enum powercap_rapl_constraint {
 } powercap_rapl_constraint;
 
 /**
+ * Check if RAPL is supported.
+ * Returns 1 if enabled, 0 if disabled, a negative value in case of error.
+ */
+int powercap_rapl_control_is_supported(void);
+
+/**
  * Check if RAPL control is enabled.
  * Returns 1 if enabled, 0 if disabled, a negative value in case of error.
  */

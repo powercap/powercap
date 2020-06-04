@@ -197,6 +197,10 @@ static powercap_rapl_zone_files* get_files_by_name(powercap_rapl_pkg* pkg, const
   return NULL;
 }
 
+int powercap_rapl_control_is_supported(void) {
+  return !powercap_sysfs_control_type_exists(CONTROL_TYPE);
+}
+
 int powercap_rapl_control_is_enabled(void) {
   uint32_t enabled;
   if (powercap_sysfs_control_type_get_enabled(CONTROL_TYPE, &enabled)) {
