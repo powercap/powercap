@@ -197,16 +197,20 @@ static powercap_rapl_zone_files* get_files_by_name(powercap_rapl_pkg* pkg, const
   return NULL;
 }
 
-uint32_t powercap_rapl_get_num_packages(void) {
+uint32_t powercap_rapl_get_num_instances(void) {
   uint32_t n = 0;
   while (!powercap_sysfs_zone_exists(CONTROL_TYPE, &n, 1)) {
     n++;
   }
   if (!n) {
-    LOG(ERROR, "powercap_rapl_get_num_packages: No top-level zones found - is the intel_rapl kernel module loaded?\n");
+    LOG(ERROR, "powercap_rapl_get_num_instances: No top-level zones found - is the intel_rapl kernel module loaded?\n");
     errno = ENOENT;
   }
   return n;
+}
+
+uint32_t powercap_rapl_get_num_packages(void) {
+  return powercap_rapl_get_num_instances();
 }
 
 int powercap_rapl_init(uint32_t id, powercap_rapl_pkg* pkg, int read_only) {

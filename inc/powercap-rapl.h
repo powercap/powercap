@@ -78,6 +78,16 @@ typedef enum powercap_rapl_constraint {
  * Get the number of top-level (parent) RAPL instances found.
  * Returns 0 and sets errno if none are found.
  */
+uint32_t powercap_rapl_get_num_instances(void);
+
+/**
+ * @deprecated Use powercap_rapl_get_num_instances() instead.
+ *
+ * This function's name no longer accurately describes its scope.
+ *
+ * Get the number of top-level (parent) RAPL instances found.
+ * Returns 0 and sets errno if none are found.
+ */
 uint32_t powercap_rapl_get_num_packages(void);
 
 /**
