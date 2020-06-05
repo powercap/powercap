@@ -35,33 +35,54 @@
 #define ZONE_NAME_DRAM "dram"
 #define ZONE_NAME_PSYS "psys"
 
-static int is_wrong_constraint(const powercap_constraint* fds, const char* expected_name) {
+static powercap_constraint* get_constraint_by_rapl_name(powercap_rapl_zone_files* fds, const uint32_t* zones, uint32_t depth, uint32_t constraint) {
   assert(fds != NULL);
-  assert(expected_name != NULL);
-  char buf[MAX_NAME_SIZE];
-  return powercap_constraint_get_name(fds, buf, sizeof(buf)) <= 0 ||
-         strncmp(buf, expected_name, sizeof(buf)) != 0;
+  char name[MAX_NAME_SIZE];
+  if (powercap_sysfs_constraint_get_name(CONTROL_TYPE, zones, depth, constraint, name, sizeof(name)) < 0) {
+    return NULL;
+  }
+  if (!strncmp(name, CONSTRAINT_NAME_LONG, sizeof(CONSTRAINT_NAME_LONG))) {
+    return &fds->constraint_long;
+  } else if (!strncmp(name, CONSTRAINT_NAME_SHORT, sizeof(CONSTRAINT_NAME_SHORT))) {
+    return &fds->constraint_short;
+  } else {
+    LOG(ERROR, "powercap-rapl: Unrecognized constraint name: %s\n", name);
+    errno = EINVAL;
+  }
+  return NULL;
 }
 
 static int open_all(const uint32_t* zones, uint32_t depth, powercap_rapl_zone_files* fds, int ro) {
   assert(fds != NULL);
-  char buf[PATH_MAX];
-  powercap_constraint tmp;
-  if (powercap_zone_open(&fds->zone, buf, sizeof(buf), CONTROL_TYPE, zones, depth, ro) ||
-      powercap_constraint_open(&fds->constraint_long, buf, sizeof(buf), CONTROL_TYPE, zones, depth, CONSTRAINT_NUM_LONG, ro) ||
-      powercap_constraint_open(&fds->constraint_short, buf, sizeof(buf), CONTROL_TYPE, zones, depth, CONSTRAINT_NUM_SHORT, ro)) {
+  char buf[PATH_MAX] = { 0 };
+  powercap_constraint* pc;
+  uint32_t i = 0;
+  if (powercap_zone_open(&fds->zone, buf, sizeof(buf), CONTROL_TYPE, zones, depth, ro)) {
     LOG(ERROR, "powercap-rapl: %s: %s\n", buf, strerror(errno));
-    return 1;
+    return -1;
   }
-  // verify that constraints aren't reversed
+  // constraint 0 is supposed to be long_term and constraint 1 (if exists) should be short_term
   // note: never actually seen this problem, but not 100% sure it can't happen, so check anyway...
-  if (is_wrong_constraint(&fds->constraint_long, CONSTRAINT_NAME_LONG) &&
-      is_wrong_constraint(&fds->constraint_short, CONSTRAINT_NAME_SHORT)) {
-    get_base_path(CONTROL_TYPE, zones, depth, buf, sizeof(buf));
-    LOG(INFO, "powercap-rapl: Found long and short term constraints in unexpected order at: %s\n", buf);
-    memcpy(&tmp, &fds->constraint_short, sizeof(powercap_constraint));
-    memcpy(&fds->constraint_short, &fds->constraint_long, sizeof(powercap_constraint));
-    memcpy(&fds->constraint_long, &tmp, sizeof(powercap_constraint));
+  while (!powercap_sysfs_constraint_exists(CONTROL_TYPE, zones, depth, i)) {
+    if ((pc = get_constraint_by_rapl_name(fds, zones, depth, i)) == NULL) {
+      return -1;
+    }
+    // "power_limit_uw" is picked arbitrarily, but it is a required file
+    if (pc->power_limit_uw) {
+      if (depth == 1) {
+        LOG(ERROR, "powercap-rapl: Duplicate constraint detected at zone: %"PRIu32"\n", zones[0]);
+      } else {
+        LOG(ERROR, "powercap-rapl: Duplicate constraint detected at zone: %"PRIu32":%"PRIu32"\n", zones[0], zones[1]);
+      }
+      errno = EINVAL;
+      return -1;
+    }
+    buf[0] = '\0';
+    if (powercap_constraint_open(pc, buf, sizeof(buf), CONTROL_TYPE, zones, depth, i, ro)) {
+      LOG(ERROR, "powercap-rapl: %s: %s\n", buf, strerror(errno));
+      return -1;
+    }
+    i++;
   }
   return 0;
 }
