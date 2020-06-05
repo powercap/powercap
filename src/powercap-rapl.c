@@ -166,14 +166,6 @@ static int get_constraint_fd(const powercap_rapl_pkg* pkg, powercap_rapl_zone zo
   }
 }
 
-static uint32_t get_num_power_planes(uint32_t id) {
-  uint32_t zones[2] = { id, 0 };
-  while (!powercap_sysfs_zone_exists(CONTROL_TYPE, zones, 2)) {
-    zones[1]++;
-  }
-  return zones[1];
-}
-
 static powercap_rapl_zone_files* get_files_by_name(powercap_rapl_pkg* pkg, const uint32_t* zones, uint32_t depth) {
   assert(pkg != NULL);
   char name[MAX_NAME_SIZE];
@@ -232,8 +224,6 @@ uint32_t powercap_rapl_get_num_packages(void) {
 int powercap_rapl_init(uint32_t id, powercap_rapl_pkg* pkg, int read_only) {
   int ret;
   int err_save;
-  uint32_t i;
-  uint32_t npp;
   uint32_t zones[2] = { id, 0 };
   powercap_rapl_zone_files* files;
   if (pkg == NULL) {
@@ -249,9 +239,7 @@ int powercap_rapl_init(uint32_t id, powercap_rapl_pkg* pkg, int read_only) {
   // first populate parent zone
   if (!(ret = open_all(zones, 1, files, read_only))) {
     // get subordinate power zones
-    npp = get_num_power_planes(id);
-    for (i = 0; i < npp && !ret; i++) {
-      zones[1] = i;
+    while(!powercap_sysfs_zone_exists(CONTROL_TYPE, zones, 2) && !ret) {
       if ((files = get_files_by_name(pkg, zones, 2)) == NULL) {
         ret = -errno;
       } else if (files->zone.name) {
@@ -261,6 +249,7 @@ int powercap_rapl_init(uint32_t id, powercap_rapl_pkg* pkg, int read_only) {
         ret = -errno;
       } else {
         ret = open_all(zones, 2, files, read_only);
+        zones[1]++;
       }
     }
   }
