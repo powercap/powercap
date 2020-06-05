@@ -20,6 +20,7 @@
 * Increased minimum CMake version from 2.8.5 to 2.8.12 to support target_compile_definitions
 * Updated 'powercap-{info,set}' man pages
 * Argument '--zone' for powercap-set no longer required due to introduction of '--enabled' argument
+* Disabled logging by default (in general, libraries shouldn't print output unless requested)
 
 ### Deprecated
 

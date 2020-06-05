@@ -13,7 +13,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99 -D_GNU_SOURCE")
 include(GNUInstallDirs)
 
 # See powercap-common.h for enumeration
-set(POWERCAP_LOG_LEVEL 2 CACHE STRING "Set the log level: 0=DEBUG, 1=INFO, 2=WARN (default), 3=ERROR, 4=OFF")
+set(POWERCAP_LOG_LEVEL 4 CACHE STRING "Set the log level: 0=DEBUG, 1=INFO, 2=WARN, 3=ERROR, 4=OFF (default)")
 
 include_directories(${PROJECT_SOURCE_DIR}/inc)
 
