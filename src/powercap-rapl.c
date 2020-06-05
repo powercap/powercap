@@ -304,12 +304,12 @@ int powercap_rapl_destroy(powercap_rapl_pkg* pkg) {
 }
 
 int powercap_rapl_is_zone_supported(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone) {
-  // long constraint is always required for zones
-  return powercap_rapl_is_constraint_supported(pkg, zone, POWERCAP_RAPL_CONSTRAINT_LONG);
+  // POWERCAP_ZONE_FILE_NAME is picked arbitrarily, but it is a required file
+  return powercap_rapl_is_zone_file_supported(pkg, zone, POWERCAP_ZONE_FILE_NAME);
 }
 
 int powercap_rapl_is_constraint_supported(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, powercap_rapl_constraint constraint) {
-  // power limit is always required for constraints
+  // POWERCAP_CONSTRAINT_FILE_POWER_LIMIT_UW is picked arbitrarily, but it is a required file
   return powercap_rapl_is_constraint_file_supported(pkg, zone, constraint, POWERCAP_CONSTRAINT_FILE_POWER_LIMIT_UW);
 }
 
