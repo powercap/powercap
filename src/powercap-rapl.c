@@ -39,7 +39,6 @@ static int is_wrong_constraint(const powercap_constraint* fds, const char* expec
   assert(fds != NULL);
   assert(expected_name != NULL);
   char buf[MAX_NAME_SIZE];
-  // assume constraint is wrong unless we can prove it's correct
   return powercap_constraint_get_name(fds, buf, sizeof(buf)) <= 0 ||
          strncmp(buf, expected_name, sizeof(buf)) != 0;
 }
@@ -51,14 +50,15 @@ static int open_all(const uint32_t* zones, uint32_t depth, powercap_rapl_zone_fi
   if (powercap_zone_open(&fds->zone, buf, sizeof(buf), CONTROL_TYPE, zones, depth, ro) ||
       powercap_constraint_open(&fds->constraint_long, buf, sizeof(buf), CONTROL_TYPE, zones, depth, CONSTRAINT_NUM_LONG, ro) ||
       powercap_constraint_open(&fds->constraint_short, buf, sizeof(buf), CONTROL_TYPE, zones, depth, CONSTRAINT_NUM_SHORT, ro)) {
-    LOG(ERROR, "open_all: %s: %s\n", buf, strerror(errno));
+    LOG(ERROR, "powercap-rapl: %s: %s\n", buf, strerror(errno));
     return 1;
   }
   // verify that constraints aren't reversed
   // note: never actually seen this problem, but not 100% sure it can't happen, so check anyway...
   if (is_wrong_constraint(&fds->constraint_long, CONSTRAINT_NAME_LONG) &&
       is_wrong_constraint(&fds->constraint_short, CONSTRAINT_NAME_SHORT)) {
-    LOG(WARN, "open_all: long and short term constraints are out of order for zone ID: %"PRIu32"\n", zones[0]);
+    get_base_path(CONTROL_TYPE, zones, depth, buf, sizeof(buf));
+    LOG(INFO, "powercap-rapl: Found long and short term constraints in unexpected order at: %s\n", buf);
     memcpy(&tmp, &fds->constraint_short, sizeof(powercap_constraint));
     memcpy(&fds->constraint_short, &fds->constraint_long, sizeof(powercap_constraint));
     memcpy(&fds->constraint_long, &tmp, sizeof(powercap_constraint));
@@ -81,7 +81,7 @@ static const powercap_rapl_zone_files* get_files(const powercap_rapl_pkg* pkg, p
       return &pkg->psys;
     default:
       // somebody passed a bad zone type
-      LOG(ERROR, "get_files: Bad powercap_rapl_zone: %d\n", zone);
+      LOG(ERROR, "powercap-rapl: Bad powercap_rapl_zone: %d\n", zone);
       errno = EINVAL;
       return NULL;
   }
@@ -106,7 +106,7 @@ static const powercap_constraint* get_constraint_files(const powercap_rapl_pkg* 
       return &fds->constraint_short;
     default:
       // somebody passed a bad constraint type
-      LOG(ERROR, "get_constraint_files: Bad powercap_rapl_constraint: %d\n", constraint);
+      LOG(ERROR, "powercap-rapl: Bad powercap_rapl_constraint: %d\n", constraint);
       errno = EINVAL;
       return NULL;
   }
@@ -132,7 +132,7 @@ static int get_zone_fd(const powercap_rapl_pkg* pkg, powercap_rapl_zone zone, po
     case POWERCAP_ZONE_FILE_NAME:
       return fds->name;
     default:
-      LOG(ERROR, "get_zone_fd: Bad powercap_zone_file: %d\n", file);
+      LOG(ERROR, "powercap-rapl: Bad powercap_zone_file: %d\n", file);
       errno = EINVAL;
       return -errno;
   }
@@ -160,7 +160,7 @@ static int get_constraint_fd(const powercap_rapl_pkg* pkg, powercap_rapl_zone zo
     case POWERCAP_CONSTRAINT_FILE_NAME:
       return fds->name;
     default:
-      LOG(ERROR, "get_constraint_fd: Bad powercap_constraint_file: %d\n", file);
+      LOG(ERROR, "powercap-rapl: Bad powercap_constraint_file: %d\n", file);
       errno = EINVAL;
       return -errno;
   }
@@ -191,7 +191,7 @@ static powercap_rapl_zone_files* get_files_by_name(powercap_rapl_pkg* pkg, const
   } else if (!strncmp(name, ZONE_NAME_PSYS, sizeof(ZONE_NAME_PSYS))) {
     return &pkg->psys;
   } else {
-    LOG(ERROR, "get_files_by_name: Unrecognized zone name: %s\n", name);
+    LOG(ERROR, "powercap-rapl: Unrecognized zone name: %s\n", name);
     errno = EINVAL;
   }
   return NULL;
@@ -219,7 +219,7 @@ uint32_t powercap_rapl_get_num_instances(void) {
     n++;
   }
   if (!n) {
-    LOG(ERROR, "powercap_rapl_get_num_instances: No top-level zones found - is the intel_rapl kernel module loaded?\n");
+    LOG(ERROR, "powercap-rapl: No top-level "CONTROL_TYPE" zones found - is the intel_rapl kernel module loaded?\n");
     errno = ENOENT;
   }
   return n;
@@ -256,7 +256,7 @@ int powercap_rapl_init(uint32_t id, powercap_rapl_pkg* pkg, int read_only) {
         ret = -errno;
       } else if (files->zone.name) {
         // zone has already been opened ("name" is picked arbitrarily, but it is a required file)
-        LOG(ERROR, "powercap_rapl_init: Duplicate zone type detected at %"PRIu32":%"PRIu32"\n", zones[0], zones[1]);
+        LOG(ERROR, "powercap-rapl: Duplicate zone type detected at %"PRIu32":%"PRIu32"\n", zones[0], zones[1]);
         errno = EBUSY;
         ret = -errno;
       } else {
