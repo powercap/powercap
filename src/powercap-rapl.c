@@ -56,13 +56,13 @@ static int open_all(const uint32_t* zones, uint32_t depth, powercap_rapl_zone_fi
   uint32_t i = 0;
   if (powercap_zone_open(&fds->zone, buf, sizeof(buf), CONTROL_TYPE, zones, depth, ro)) {
     LOG(ERROR, "powercap-rapl: %s: %s\n", buf, strerror(errno));
-    return -1;
+    return -errno;
   }
   // constraint 0 is supposed to be long_term and constraint 1 (if exists) should be short_term
   // note: never actually seen this problem, but not 100% sure it can't happen, so check anyway...
   while (!powercap_sysfs_constraint_exists(CONTROL_TYPE, zones, depth, i)) {
     if ((pc = get_constraint_by_rapl_name(fds, zones, depth, i)) == NULL) {
-      return -1;
+      return -errno;
     }
     // "power_limit_uw" is picked arbitrarily, but it is a required file
     if (pc->power_limit_uw) {
@@ -72,15 +72,18 @@ static int open_all(const uint32_t* zones, uint32_t depth, powercap_rapl_zone_fi
         LOG(ERROR, "powercap-rapl: Duplicate constraint detected at zone: %"PRIu32":%"PRIu32"\n", zones[0], zones[1]);
       }
       errno = EINVAL;
-      return -1;
+      return -errno;
     }
     buf[0] = '\0';
     if (powercap_constraint_open(pc, buf, sizeof(buf), CONTROL_TYPE, zones, depth, i, ro)) {
       LOG(ERROR, "powercap-rapl: %s: %s\n", buf, strerror(errno));
-      return -1;
+      return -errno;
     }
     i++;
   }
+  // powercap_sysfs_constraint_exists returns error code when constraint does not exist - make sure it's not our fault
+  assert(errno != EINVAL);
+  assert(errno != ENOBUFS);
   return 0;
 }
 
@@ -214,10 +217,8 @@ int powercap_rapl_control_is_supported(void) {
 
 int powercap_rapl_control_is_enabled(void) {
   uint32_t enabled;
-  if (powercap_sysfs_control_type_get_enabled(CONTROL_TYPE, &enabled)) {
-    return -1;
-  }
-  return enabled ? 1 : 0;
+  int ret = powercap_sysfs_control_type_get_enabled(CONTROL_TYPE, &enabled);
+  return ret ? ret : (enabled ? 1 : 0);
 }
 
 int powercap_rapl_control_set_enabled(int val) {
