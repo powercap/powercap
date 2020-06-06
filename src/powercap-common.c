@@ -237,7 +237,7 @@ size_t get_constraint_file_path(const char* control_type, const uint32_t* zones,
 int open_control_type_file(const char* control_type, powercap_control_type_file type, int flags) {
   char path[PATH_MAX];
   if (!get_control_type_file_path(control_type, type, path, sizeof(path))) {
-    return -errno;
+    return -1;
   }
   return open(path, flags);
 }
@@ -245,7 +245,7 @@ int open_control_type_file(const char* control_type, powercap_control_type_file 
 int open_zone_file(const char* control_type, const uint32_t* zones, uint32_t depth, powercap_zone_file type, int flags) {
   char path[PATH_MAX];
   if (!get_zone_file_path(control_type, zones, depth, type, path, sizeof(path))) {
-    return -errno;
+    return -1;
   }
   return open(path, flags);
 }
@@ -254,7 +254,7 @@ int open_constraint_file(const char* control_type, const uint32_t* zones, uint32
                          powercap_constraint_file type, int flags) {
   char path[PATH_MAX];
   if (!get_constraint_file_path(control_type, zones, depth, constraint, type, path, sizeof(path))) {
-    return -errno;
+    return -1;
   }
   return open(path, flags);
 }
