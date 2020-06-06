@@ -208,7 +208,8 @@ static powercap_rapl_zone_files* get_files_by_name(powercap_rapl_pkg* pkg, const
 }
 
 int powercap_rapl_control_is_supported(void) {
-  return !powercap_sysfs_control_type_exists(CONTROL_TYPE);
+  int ret = powercap_sysfs_control_type_exists(CONTROL_TYPE);
+  return ret ? (errno == ENOSYS ? 0 : ret) : 1;
 }
 
 int powercap_rapl_control_is_enabled(void) {
