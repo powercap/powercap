@@ -23,9 +23,6 @@
 
 #define CONTROL_TYPE "intel-rapl"
 
-#define CONSTRAINT_NUM_LONG 0
-#define CONSTRAINT_NUM_SHORT 1
-
 #define CONSTRAINT_NAME_LONG "long_term"
 #define CONSTRAINT_NAME_SHORT "short_term"
 
