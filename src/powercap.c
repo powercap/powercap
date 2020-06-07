@@ -18,7 +18,7 @@ int powercap_control_type_file_get_name(powercap_control_type_file type, char* b
     errno = EINVAL;
     return -errno;
   }
-  return control_type_file_get_name(type, buf, size);
+  return snprintf_control_type_file(buf, size, type);
 }
 
 int powercap_zone_file_get_name(powercap_zone_file type, char* buf, size_t size) {
@@ -27,7 +27,7 @@ int powercap_zone_file_get_name(powercap_zone_file type, char* buf, size_t size)
     errno = EINVAL;
     return -errno;
   }
-  return zone_file_get_name(type, buf, size);
+  return snprintf_zone_file(buf, size, type);
 }
 
 int powercap_constraint_file_get_name(powercap_constraint_file type, uint32_t constraint, char* buf, size_t size) {
@@ -36,7 +36,7 @@ int powercap_constraint_file_get_name(powercap_constraint_file type, uint32_t co
     errno = EINVAL;
     return -errno;
   }
-  return constraint_file_get_name(type, constraint, buf, size);
+  return snprintf_constraint_file(buf, size, type, constraint);
 }
 
 #define VERIFY_ARG(arg) \

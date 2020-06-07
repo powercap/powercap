@@ -112,15 +112,15 @@ int write_u64(int fd, uint64_t val) {
   return 0;
 }
 
-int control_type_file_get_name(powercap_control_type_file type, char* buf, size_t size) {
+int snprintf_control_type_file(char* buf, size_t size, powercap_control_type_file type) {
   return snprintf(buf, size, "%s", CONTROL_TYPE_FILE[type]);
 }
 
-int zone_file_get_name(powercap_zone_file type, char* buf, size_t size) {
+int snprintf_zone_file(char* buf, size_t size, powercap_zone_file type) {
   return snprintf(buf, size, "%s", ZONE_FILE[type]);
 }
 
-int constraint_file_get_name(powercap_constraint_file type, uint32_t constraint, char* buf, size_t size) {
+int snprintf_constraint_file(char* buf, size_t size, powercap_constraint_file type, uint32_t constraint) {
   return snprintf(buf, size, "constraint_%"PRIu32"_%s", constraint, CONSTRAINT_FILE_SUFFIX[type]);
 }
 
@@ -182,7 +182,7 @@ size_t get_control_type_file_path(const char* control_type, powercap_control_typ
   size_t written;
   int n;
   if ((written = get_base_path(control_type, NULL, 0, path, size))) {
-    n = control_type_file_get_name(type, path + written, size - written);
+    n = snprintf_control_type_file(path + written, size - written, type);
     if (!snprintf_ret_to_size_t(n, size - written)) {
       return 0;
     }
@@ -196,7 +196,7 @@ size_t get_zone_file_path(const char* control_type, const uint32_t* zones, uint3
   size_t written;
   int n;
   if ((written = get_base_path(control_type, zones, depth, path, size))) {
-    n = zone_file_get_name(type, path + written, size - written);
+    n = snprintf_zone_file(path + written, size - written, type);
     if (!snprintf_ret_to_size_t(n, size - written)) {
       return 0;
     }
@@ -210,7 +210,7 @@ size_t get_constraint_file_path(const char* control_type, const uint32_t* zones,
   size_t written;
   int n;
   if ((written = get_base_path(control_type, zones, depth, path, size))) {
-    n = constraint_file_get_name(type, constraint, path + written, size - written);
+    n = snprintf_constraint_file(path + written, size - written, type, constraint);
     if (!snprintf_ret_to_size_t(n, size - written)) {
       return 0;
     }

@@ -65,13 +65,13 @@ int read_u64(int fd, uint64_t* val);
 int write_u64(int fd, uint64_t val);
 
 /* Return is like snprintf */
-int control_type_file_get_name(powercap_control_type_file type, char* buf, size_t size);
+int snprintf_control_type_file(char* buf, size_t size, powercap_control_type_file type);
 
 /* Return is like snprintf */
-int zone_file_get_name(powercap_zone_file type, char* buf, size_t size);
+int snprintf_zone_file(char* buf, size_t size, powercap_zone_file type);
 
 /* Return is like snprintf */
-int constraint_file_get_name(powercap_constraint_file type, uint32_t constraint, char* buf, size_t size);
+int snprintf_constraint_file(char* buf, size_t size, powercap_constraint_file type, uint32_t constraint);
 
 /*
  * Returns 0 on failure like insufficient buffer size or if control_type is NULL.
