@@ -113,29 +113,14 @@ int write_u64(int fd, uint64_t val) {
 }
 
 int control_type_file_get_name(powercap_control_type_file type, char* buf, size_t size) {
-  /* check type in case users pass bad int value instead of enum; int cast silences clang compiler */
-  if (!buf || !size || (int) type < 0 || (int) type > POWERCAP_CONTROL_TYPE_FILE_ENABLED) {
-    errno = EINVAL;
-    return -errno;
-  }
   return snprintf(buf, size, "%s", CONTROL_TYPE_FILE[type]);
 }
 
 int zone_file_get_name(powercap_zone_file type, char* buf, size_t size) {
-  /* check type in case users pass bad int value instead of enum; int cast silences clang compiler */
-  if (!buf || !size || (int) type < 0 || (int) type > POWERCAP_ZONE_FILE_NAME) {
-    errno = EINVAL;
-    return -errno;
-  }
   return snprintf(buf, size, "%s", ZONE_FILE[type]);
 }
 
 int constraint_file_get_name(powercap_constraint_file type, uint32_t constraint, char* buf, size_t size) {
-  /* check type in case users pass bad int value instead of enum; int cast silences clang compiler */
-  if (!buf || !size || (int) type < 0 || (int) type > POWERCAP_CONSTRAINT_FILE_NAME) {
-    errno = EINVAL;
-    return -errno;
-  }
   return snprintf(buf, size, "constraint_%"PRIu32"_%s", constraint, CONSTRAINT_FILE_SUFFIX[type]);
 }
 

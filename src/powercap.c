@@ -13,14 +13,29 @@
 #include "powercap-common.h"
 
 int powercap_control_type_file_get_name(powercap_control_type_file type, char* buf, size_t size) {
+  /* check type in case users pass bad int value instead of enum; int cast silences clang compiler */
+  if (!buf || !size || (int) type < 0 || (int) type > POWERCAP_CONTROL_TYPE_FILE_ENABLED) {
+    errno = EINVAL;
+    return -errno;
+  }
   return control_type_file_get_name(type, buf, size);
 }
 
 int powercap_zone_file_get_name(powercap_zone_file type, char* buf, size_t size) {
+  /* check type in case users pass bad int value instead of enum; int cast silences clang compiler */
+  if (!buf || !size || (int) type < 0 || (int) type > POWERCAP_ZONE_FILE_NAME) {
+    errno = EINVAL;
+    return -errno;
+  }
   return zone_file_get_name(type, buf, size);
 }
 
 int powercap_constraint_file_get_name(powercap_constraint_file type, uint32_t constraint, char* buf, size_t size) {
+  /* check type in case users pass bad int value instead of enum; int cast silences clang compiler */
+  if (!buf || !size || (int) type < 0 || (int) type > POWERCAP_CONSTRAINT_FILE_NAME) {
+    errno = EINVAL;
+    return -errno;
+  }
   return constraint_file_get_name(type, constraint, buf, size);
 }
 

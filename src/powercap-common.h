@@ -64,13 +64,13 @@ int read_u64(int fd, uint64_t* val);
 /* Return 0 on success, negative error code on failure */
 int write_u64(int fd, uint64_t val);
 
-/* Return is like snprintf, or negative error code if parameters are bad */
+/* Return is like snprintf */
 int control_type_file_get_name(powercap_control_type_file type, char* buf, size_t size);
 
-/* Return is like snprintf, or negative error code if parameters are bad */
+/* Return is like snprintf */
 int zone_file_get_name(powercap_zone_file type, char* buf, size_t size);
 
-/* Return is like snprintf, or negative error code if parameters are bad */
+/* Return is like snprintf */
 int constraint_file_get_name(powercap_constraint_file type, uint32_t constraint, char* buf, size_t size);
 
 /*
