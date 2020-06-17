@@ -4,15 +4,21 @@
 
 ### Added
 
+* Support for top-level control type
+  * Struct 'powercap_control_type', enum 'powercap_control_type_file', and associated functions in powercap.h:
+    * 'powercap_control_type_get_enabled'
+    * 'powercap_control_type_set_enabled'
+    * 'powercap_control_type_file_get_name'
+  * Functions in powercap-sysfs.h:
+    * 'powercap_sysfs_control_type_get_enabled'
+    * 'powercap_sysfs_control_type_set_enabled'
+  * Functions in powercap-rapl.h:
+    * 'powercap_rapl_control_is_supported'
+    * 'powercap_rapl_control_is_enabled'
+    * 'powercap_rapl_control_set_enabled'
+    * 'powercap_rapl_get_num_instances'
+  * Argument '--enabled' to powercap-{info,set} for getting/setting control type enabled field
 * Binaries 'powercap-{info,set}-intel-rapl' (more faithful to Linux power capping framework interface than 'rapl-{info,set}')
-* Top-level 'powercap_control_type' type to powercap.h with file getters/setters (for 'enabled' field)
-* Functions 'powercap_sysfs_control_type_{get,set}_enabled' in powercap-sysfs.h
-* Functions in powercap-rapl.h:
-  * 'powercap_rapl_control_is_supported'
-  * 'powercap_rapl_control_is_enabled'
-  * 'powercap_rapl_control_set_enabled'
-  * 'powercap_rapl_get_num_instances'
-* Argument '--enabled' to powercap-{info,set} for getting/setting control type enabled field
 * Argument '--nconstraints' to powercap-info for getting the number of zone constraints
 
 ### Changed
