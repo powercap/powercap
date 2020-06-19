@@ -23,7 +23,14 @@ If using this project for other scientific works or publications, please referen
 Powercap (with the RAPL implementation) was released with Linux kernel 3.13.
 You must be running this kernel or newer with the configs `CONFIG_POWERCAP` and `CONFIG_INTEL_RAPL` enabled.
 
-If the `intel_rapl` kernel module is not loaded at startup, run with proper privileges:
+To use the `intel-rapl` control type, ensure that the appropriate kernel module is loaded.
+Run with proper privileges:
+
+```sh
+modprobe intel_rapl_msr
+```
+
+Or on kernels older than 5.3:
 
 ```sh
 modprobe intel_rapl
