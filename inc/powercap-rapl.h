@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  *
- * A simple interface for configuring RAPL using the intel_rapl kernel module.
+ * A simple interface for configuring RAPL through a powercap control type.
  * Note that not all RAPL zones support short_term constraints.
  * Unless otherwise stated, all functions return 0 on success or a negative value on error.
  *

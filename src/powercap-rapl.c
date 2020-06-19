@@ -231,7 +231,7 @@ uint32_t powercap_rapl_get_num_instances(void) {
     n++;
   }
   if (!n) {
-    LOG(ERROR, "powercap-rapl: No top-level "CONTROL_TYPE" zones found - is the intel_rapl kernel module loaded?\n");
+    LOG(ERROR, "powercap-rapl: No top-level "CONTROL_TYPE" zones found - is its kernel module loaded?\n");
     errno = ENOENT;
   }
   return n;
