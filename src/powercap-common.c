@@ -112,6 +112,37 @@ int write_u64(int fd, uint64_t val) {
   return 0;
 }
 
+int snprintf_base_path(char* buf, size_t size, const char* control_type, const uint32_t* zones, uint32_t depth) {
+  int w;
+  int tot;
+  uint32_t i;
+  uint32_t j;
+  if ((tot = snprintf(buf, size, POWERCAP_PATH"/%s/", control_type)) < 0) {
+    return tot;
+  }
+  for (j = 1; j <= depth && (size_t) tot < size; j++) {
+    if ((w = snprintf(buf + (size_t) tot, size - (size_t) tot, "%s", control_type)) < 0) {
+      return w;
+    }
+    tot += w;
+    if ((size_t) tot >= size) {
+      break;
+    }
+    for (i = 0; i < j && (size_t) tot < size; i++, tot += w) {
+      if ((w = snprintf(buf + (size_t) tot, size - (size_t) tot, ":%x", zones[i])) < 0) {
+        return w;
+      }
+    }
+    if ((size_t) tot < size) {
+      buf[tot++] = '/';
+      if ((size_t) tot < size) {
+        buf[tot] = '\0';
+      }
+    }
+  }
+  return tot;
+}
+
 int snprintf_control_type_file(char* buf, size_t size, powercap_control_type_file type) {
   return snprintf(buf, size, "%s", CONTROL_TYPE_FILE[type]);
 }
@@ -140,42 +171,24 @@ static size_t snprintf_ret_to_size_t(int ret, size_t max_size) {
   return (size_t) ret;
 }
 
-/* Returns 0 on failure like insufficient buffer size */
-static size_t append_zone_dir(const char* control_type, const uint32_t* zones, uint32_t depth, char* path, size_t size) {
-  size_t written;
-  size_t n;
-  uint32_t i;
-  if ((written = snprintf_ret_to_size_t(snprintf(path, size - 1, "%s", control_type), size - 1))) {
-    for (i = 0; i < depth; i++) {
-      if (!(n = snprintf_ret_to_size_t(snprintf(path + written, size - written - 1, ":%x", zones[i]), size - written - 1))) {
-        return 0;
-      }
-      written += n;
-    }
-    path[written++] = '/';
-    path[written] = '\0';
-  }
-  return written;
+static int is_valid_control_type(const char* control_type) {
+  /* simple names only, trying to look outside the powercap directory is not allowed */
+  return control_type && strlen(control_type) && strcspn(control_type, "./") == strlen(control_type);
 }
 
 size_t get_base_path(const char* control_type, const uint32_t* zones, uint32_t depth, char* path, size_t size) {
-  size_t written;
-  size_t n;
-  uint32_t i;
-  /* simple names only, trying to look outside the powercap directory is not allowed */
-  if (!control_type || !strlen(control_type) || strcspn(control_type, "./") != strlen(control_type) || (depth && !zones)) {
+  int w;
+  if (!is_valid_control_type(control_type) || (depth && !zones)) {
     errno = EINVAL;
     return 0;
   }
-  if ((written = snprintf_ret_to_size_t(snprintf(path, size, POWERCAP_PATH"/%s/", control_type), size))) {
-    for (i = 1; i <= depth; i++) {
-      if (!(n = append_zone_dir(control_type, zones, i, path + written, size - written))) {
-        return 0;
-      }
-      written += n;
-    }
+  if ((w = snprintf_base_path(path, size, control_type, zones, depth)) < 0) {
+    return 0;
+  } else if (w >= size - 1) {
+    errno = ENOBUFS;
+    return 0;
   }
-  return written;
+  return (size_t) w;
 }
 
 size_t get_control_type_file_path(const char* control_type, powercap_control_type_file type, char* path, size_t size) {

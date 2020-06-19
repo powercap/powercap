@@ -65,6 +65,9 @@ int read_u64(int fd, uint64_t* val);
 int write_u64(int fd, uint64_t val);
 
 /* Return is like snprintf */
+int snprintf_base_path(char* buf, size_t size, const char* control_type, const uint32_t* zones, uint32_t depth);
+
+/* Return is like snprintf */
 int snprintf_control_type_file(char* buf, size_t size, powercap_control_type_file type);
 
 /* Return is like snprintf */
