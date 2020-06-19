@@ -226,9 +226,6 @@ static void print_usage(void) {
 static void print_common_help(void) {
   printf("Considerations for common errors:\n");
   printf("- Ensure that the control type exists, which may require loading a kernel module\n");
-  #ifdef POWERCAP_KMOD_NAME
-  printf("  (e.g., "POWERCAP_KMOD_NAME")\n");
-#endif
   printf("- Some files may simply not exist\n");
 }
 

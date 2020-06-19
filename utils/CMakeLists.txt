@@ -1,9 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
-function(POWERCAP_UTIL_ADD app control_type module_name)
+function(POWERCAP_UTIL_ADD app control_type)
   add_executable(${app}-${control_type} ${app}.c util-common.c)
-  target_compile_definitions(${app}-${control_type} PRIVATE POWERCAP_CONTROL_TYPE="${control_type}"
-                                                            POWERCAP_KMOD_NAME="${module_name}")
+  target_compile_definitions(${app}-${control_type} PRIVATE POWERCAP_CONTROL_TYPE="${control_type}")
   target_link_libraries(${app}-${control_type} powercap)
 
   string(REPLACE "-" "\\-" MAN_CONTROL_TYPE "${control_type}")
@@ -31,8 +30,8 @@ target_link_libraries(powercap-set powercap)
 install(TARGETS powercap-info powercap-set DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES man/man1/powercap-info.1 man/man1/powercap-set.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
-POWERCAP_UTIL_ADD("powercap-info" "intel-rapl" "intel_rapl")
-POWERCAP_UTIL_ADD("powercap-set" "intel-rapl" "intel_rapl")
+POWERCAP_UTIL_ADD("powercap-info" "intel-rapl")
+POWERCAP_UTIL_ADD("powercap-set" "intel-rapl")
 
 # Deprecated Binaries
 

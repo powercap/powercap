@@ -67,9 +67,6 @@ static void print_usage(void) {
 static void print_common_help(void) {
   printf("Considerations for common errors:\n");
   printf("- Ensure that the control type exists, which may require loading a kernel module\n");
-#ifdef POWERCAP_KMOD_NAME
-  printf("  (e.g., "POWERCAP_KMOD_NAME")\n");
-#endif
   printf("- Ensure that you run with administrative (super-user) privileges\n");
   printf("- Enabling/disabling a control type is an optional feature not supported by all control types\n");
   printf("- Resetting a zone energy counter is an optional powercap feature not supported by all control types\n");
