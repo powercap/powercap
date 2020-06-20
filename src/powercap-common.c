@@ -202,40 +202,39 @@ int snprintf_constraint_file_path(char* path, size_t size, const char* control_t
   return tot;
 }
 
-int open_control_type_file(const char* control_type, powercap_control_type_file type, int flags) {
-  char path[PATH_MAX];
-  int w = snprintf_control_type_file_path(path, sizeof(path), control_type, type);
+int open_control_type_file(char* path, size_t size, const char* control_type, powercap_control_type_file type,
+                           int flags) {
+  int w = snprintf_control_type_file_path(path, size, control_type, type);
   if (w < 0) {
     return w;
   }
-  if ((size_t) w >= sizeof(path)) {
+  if ((size_t) w >= size) {
     errno = ENOBUFS;
     return -1;
   }
   return open(path, flags);
 }
 
-int open_zone_file(const char* control_type, const uint32_t* zones, uint32_t depth, powercap_zone_file type, int flags) {
-  char path[PATH_MAX];
-  int w = snprintf_zone_file_path(path, sizeof(path), control_type, zones, depth, type);
+int open_zone_file(char* path, size_t size, const char* control_type, const uint32_t* zones, uint32_t depth,
+                   powercap_zone_file type, int flags) {
+  int w = snprintf_zone_file_path(path, size, control_type, zones, depth, type);
   if (w < 0) {
     return w;
   }
-  if ((size_t) w >= sizeof(path)) {
+  if ((size_t) w >= size) {
     errno = ENOBUFS;
     return -1;
   }
   return open(path, flags);
 }
 
-int open_constraint_file(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint,
-                         powercap_constraint_file type, int flags) {
-  char path[PATH_MAX];
-  int w = snprintf_constraint_file_path(path, sizeof(path), control_type, zones, depth, constraint, type);
+int open_constraint_file(char* path, size_t size, const char* control_type, const uint32_t* zones, uint32_t depth,
+                         uint32_t constraint, powercap_constraint_file type, int flags) {
+  int w = snprintf_constraint_file_path(path, size, control_type, zones, depth, constraint, type);
   if (w < 0) {
     return w;
   }
-  if ((size_t) w >= sizeof(path)) {
+  if ((size_t) w >= size) {
     errno = ENOBUFS;
     return -1;
   }
@@ -243,48 +242,24 @@ int open_constraint_file(const char* control_type, const uint32_t* zones, uint32
 }
 
 // like open(2), but returns 0 on ENOENT (No such file or directory)
-static int powercap_open(const char* buf, int flags) {
-  int fd = open(buf, flags);
+int powercap_control_type_file_open(char* buf, size_t bsize, const char* ct_name, powercap_control_type_file type,
+                                    int flags) {
+  int fd = open_control_type_file(buf, bsize, ct_name, type, flags);
   return (fd < 0 && errno == ENOENT) ? 0 : fd;
 }
 
-int powercap_control_type_file_open(char* buf, size_t bsize, const char* ct_name, powercap_control_type_file type,
-                                    int flags) {
-  int w = snprintf_control_type_file_path(buf, bsize, ct_name, type);
-  if (w < 0) {
-    return w;
-  }
-  if ((size_t) w >= bsize) {
-    errno = ENOBUFS;
-    return -1;
-  }
-  return powercap_open(buf, flags);
-}
-
+// like open(2), but returns 0 on ENOENT (No such file or directory)
 int powercap_zone_file_open(char* buf, size_t bsize, const char* ct_name, const uint32_t* zones, uint32_t depth,
                             powercap_zone_file type, int flags) {
-  int w = snprintf_zone_file_path(buf, bsize, ct_name, zones, depth, type);
-  if (w < 0) {
-    return w;
-  }
-  if ((size_t) w >= bsize) {
-    errno = ENOBUFS;
-    return -1;
-  }
-  return powercap_open(buf, flags);
+  int fd = open_zone_file(buf, bsize, ct_name, zones, depth, type, flags);
+  return (fd < 0 && errno == ENOENT) ? 0 : fd;
 }
 
+// like open(2), but returns 0 on ENOENT (No such file or directory)
 int powercap_constraint_file_open(char* buf, size_t bsize, const char* ct_name, const uint32_t* zones, uint32_t depth,
                                   uint32_t constraint, powercap_constraint_file type, int flags) {
-  int w = snprintf_constraint_file_path(buf, bsize, ct_name, zones, depth, constraint, type);
-  if (w < 0) {
-    return w;
-  }
-  if ((size_t) w >= bsize) {
-    errno = ENOBUFS;
-    return -1;
-  }
-  return powercap_open(buf, flags);
+  int fd = open_constraint_file(buf, bsize, ct_name, zones, depth, constraint, type, flags);
+  return (fd < 0 && errno == ENOENT) ? 0 : fd;
 }
 
 int powercap_control_type_open(powercap_control_type* pct, char* buf, size_t bsize, const char* ct_name, int ro) {

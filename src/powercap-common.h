@@ -88,14 +88,16 @@ int snprintf_constraint_file_path(char* path, size_t size, const char* control_t
                                   uint32_t depth, uint32_t constraint, powercap_constraint_file type);
 
 /* Return fd on success, negative error code if path is too large, -1 on open failure */
-int open_control_type_file(const char* control_type, powercap_control_type_file type, int flags);
+int open_control_type_file(char* path, size_t size, const char* control_type, powercap_control_type_file type,
+                           int flags);
 
 /* Return fd on success, negative error code if path is too large, -1 on open failure */
-int open_zone_file(const char* control_type, const uint32_t* zones, uint32_t depth, powercap_zone_file type, int flags);
+int open_zone_file(char* path, size_t size, const char* control_type, const uint32_t* zones, uint32_t depth,
+                   powercap_zone_file type, int flags);
 
 /* Return fd on success, negative error code if path is too large, -1 on open failure */
-int open_constraint_file(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint,
-                         powercap_constraint_file type, int flags);
+int open_constraint_file(char* path, size_t size, const char* control_type, const uint32_t* zones, uint32_t depth,
+                         uint32_t constraint, powercap_constraint_file type, int flags);
 
 /* Return fd on success or ENOENT, -1 if buf is too small or on open failure */
 int powercap_control_type_file_open(char* buf, size_t bsize, const char* ct_name, powercap_control_type_file type,
