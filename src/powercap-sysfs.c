@@ -117,12 +117,17 @@ int powercap_sysfs_zone_exists(const char* control_type, const uint32_t* zones, 
 int powercap_sysfs_constraint_exists(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint) {
   char path[PATH_MAX];
   struct stat ss;
+  int w;
   if (!is_valid_control_type(control_type) || (depth && !zones)) {
     errno = EINVAL;
     return -errno;
   }
   /* power_limit_uw file must exist */
-  if (!get_constraint_file_path(control_type, zones, depth, constraint, POWERCAP_CONSTRAINT_FILE_POWER_LIMIT_UW, path, sizeof(path))) {
+  if ((w = snprintf_constraint_file_path(path, sizeof(path), control_type, zones, depth, constraint, POWERCAP_CONSTRAINT_FILE_POWER_LIMIT_UW)) < 0) {
+    return -errno;
+  }
+  if ((size_t) w >= sizeof(path)) {
+    errno = ENOBUFS;
     return -errno;
   }
   if (stat(path, &ss) || !S_ISREG(ss.st_mode)) {

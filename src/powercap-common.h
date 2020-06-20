@@ -76,16 +76,16 @@ int snprintf_zone_file(char* buf, size_t size, powercap_zone_file type);
 /* Return is like snprintf */
 int snprintf_constraint_file(char* buf, size_t size, powercap_constraint_file type, uint32_t constraint);
 
-/* Returns 0 on failure like insufficient buffer size */
-size_t get_control_type_file_path(const char* control_type, powercap_control_type_file type, char* path, size_t size);
+/* Return is like snprintf */
+int snprintf_control_type_file_path(char* path, size_t size, const char* control_type, powercap_control_type_file type);
 
 /* Returns 0 on failure like insufficient buffer size */
-size_t get_zone_file_path(const char* control_type, const uint32_t* zones, uint32_t depth, powercap_zone_file type,
-                          char* path, size_t size);
+int snprintf_zone_file_path(char* path, size_t size, const char* control_type, const uint32_t* zones, uint32_t depth,
+                            powercap_zone_file type);
 
 /* Returns 0 on failure like insufficient buffer size */
-size_t get_constraint_file_path(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint,
-                                powercap_constraint_file type, char* path, size_t size);
+int snprintf_constraint_file_path(char* path, size_t size, const char* control_type, const uint32_t* zones,
+                                  uint32_t depth, uint32_t constraint, powercap_constraint_file type);
 
 /* Return fd on success, negative error code if path is too large, -1 on open failure */
 int open_control_type_file(const char* control_type, powercap_control_type_file type, int flags);
