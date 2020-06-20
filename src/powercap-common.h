@@ -76,12 +76,6 @@ int snprintf_zone_file(char* buf, size_t size, powercap_zone_file type);
 /* Return is like snprintf */
 int snprintf_constraint_file(char* buf, size_t size, powercap_constraint_file type, uint32_t constraint);
 
-/*
- * Returns 0 on failure like insufficient buffer size or if control_type is NULL.
- * zones can be NULL only if depth is 0; path must not be NULL.
- */
-size_t get_base_path(const char* control_type, const uint32_t* zones, uint32_t depth, char* path, size_t size);
-
 /* Returns 0 on failure like insufficient buffer size */
 size_t get_control_type_file_path(const char* control_type, powercap_control_type_file type, char* path, size_t size);
 

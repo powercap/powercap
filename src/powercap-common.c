@@ -155,81 +155,66 @@ int snprintf_constraint_file(char* buf, size_t size, powercap_constraint_file ty
   return snprintf(buf, size, "constraint_%"PRIu32"_%s", constraint, CONSTRAINT_FILE_SUFFIX[type]);
 }
 
-/* Returns 0 on error or if no more buffer space, with errno set */
-static size_t snprintf_ret_to_size_t(int ret, size_t max_size) {
-  if (ret < 0) {
-    /* shouldn't happen */
-    if (!errno) {
-      errno = EINVAL;
-    }
-    return 0;
-  }
-  if (ret == 0 || (size_t) ret >= max_size) {
-    errno = ENOBUFS;
-    return 0;
-  }
-  return (size_t) ret;
-}
-
-static int is_valid_control_type(const char* control_type) {
-  /* simple names only, trying to look outside the powercap directory is not allowed */
-  return control_type && strlen(control_type) && strcspn(control_type, "./") == strlen(control_type);
-}
-
-size_t get_base_path(const char* control_type, const uint32_t* zones, uint32_t depth, char* path, size_t size) {
-  int w;
-  if (!is_valid_control_type(control_type) || (depth && !zones)) {
-    errno = EINVAL;
-    return 0;
-  }
-  if ((w = snprintf_base_path(path, size, control_type, zones, depth)) < 0) {
-    return 0;
-  } else if (w >= size - 1) {
-    errno = ENOBUFS;
-    return 0;
-  }
-  return (size_t) w;
-}
-
 size_t get_control_type_file_path(const char* control_type, powercap_control_type_file type, char* path, size_t size) {
-  size_t written;
+  int written;
   int n;
-  if ((written = get_base_path(control_type, NULL, 0, path, size))) {
-    n = snprintf_control_type_file(path + written, size - written, type);
-    if (!snprintf_ret_to_size_t(n, size - written)) {
-      return 0;
-    }
-    written += (size_t) n;
+  if ((written = snprintf_base_path(path, size, control_type, NULL, 0)) < 0) {
+    return 0;
+  } else if (written >= size - 1) {
+    errno = ENOBUFS;
+    return 0;
   }
-  return written;
+  if ((n = snprintf_control_type_file(path + written, size - written, type)) < 0) {
+    return 0;
+  }
+  written += n;
+  if (written >= size) {
+    errno = ENOBUFS;
+    return 0;
+  }
+  return (size_t) written;
 }
 
 size_t get_zone_file_path(const char* control_type, const uint32_t* zones, uint32_t depth, powercap_zone_file type,
                           char* path, size_t size) {
-  size_t written;
+  int written;
   int n;
-  if ((written = get_base_path(control_type, zones, depth, path, size))) {
-    n = snprintf_zone_file(path + written, size - written, type);
-    if (!snprintf_ret_to_size_t(n, size - written)) {
-      return 0;
-    }
-    written += (size_t) n;
+  if ((written = snprintf_base_path(path, size, control_type, zones, depth)) < 0) {
+    return 0;
+  } else if (written >= size - 1) {
+    errno = ENOBUFS;
+    return 0;
   }
-  return written;
+  if ((n = snprintf_zone_file(path + written, size - written, type)) < 0) {
+    return 0;
+  }
+  written += n;
+  if (written >= size) {
+    errno = ENOBUFS;
+    return 0;
+  }
+  return (size_t) written;
 }
 
 size_t get_constraint_file_path(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint,
                                 powercap_constraint_file type, char* path, size_t size) {
-  size_t written;
+  int written;
   int n;
-  if ((written = get_base_path(control_type, zones, depth, path, size))) {
-    n = snprintf_constraint_file(path + written, size - written, type, constraint);
-    if (!snprintf_ret_to_size_t(n, size - written)) {
-      return 0;
-    }
-    written += (size_t) n;
+  if ((written = snprintf_base_path(path, size, control_type, zones, depth)) < 0) {
+    return 0;
+  } else if (written >= size - 1) {
+    errno = ENOBUFS;
+    return 0;
   }
-  return written;
+  if ((n = snprintf_constraint_file(path + written, size - written, type, constraint)) < 0) {
+    return 0;
+  }
+  written += n;
+  if (written >= size) {
+    errno = ENOBUFS;
+    return 0;
+  }
+  return (size_t) written;
 }
 
 int open_control_type_file(const char* control_type, powercap_control_type_file type, int flags) {
