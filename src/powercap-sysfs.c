@@ -101,8 +101,9 @@ int powercap_sysfs_zone_exists(const char* control_type, const uint32_t* zones, 
     return -errno;
   }
   if ((w = snprintf_base_path(path, sizeof(path), control_type, zones, depth)) < 0) {
-    return w;
-  } else if (w >= sizeof(path) - 1) {
+    return -errno;
+  }
+  if ((size_t) w >= sizeof(path)) {
     errno = ENOBUFS;
     return -errno;
   }
