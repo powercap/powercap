@@ -34,6 +34,8 @@ endif()
 
 # Tests
 
+add_executable(powercap-common-test test/powercap-common-test.c src/powercap-common.c)
+
 add_executable(powercap-test test/powercap-test.c)
 target_link_libraries(powercap-test powercap)
 
@@ -48,6 +50,7 @@ macro(add_unit_test target)
   add_test(${target} ${EXECUTABLE_OUTPUT_PATH}/${target})
 endmacro(add_unit_test)
 
+add_unit_test(powercap-common-test)
 add_unit_test(powercap-test)
 # Requires a real system with root privileges
 # add_unit_test(powercap-rapl-test)
