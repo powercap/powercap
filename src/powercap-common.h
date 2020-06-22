@@ -64,26 +64,30 @@ int read_u64(int fd, uint64_t* val);
 /* Return 0 on success, negative error code on failure */
 int write_u64(int fd, uint64_t val);
 
-/* Return is like snprintf */
+/*
+ * Return is like snprintf, except if the output was truncated due to the size limit, the return value is still >= size,
+ * but not necessarily the number of characters (excluding the terminating null byte) which would have been written to
+ * the final string if enough space had been available.
+ */
 int snprintf_base_path(char* buf, size_t size, const char* control_type, const uint32_t* zones, uint32_t depth);
 
-/* Return is like snprintf */
+/* Return is like snprintf_base_path */
 int snprintf_control_type_file(char* buf, size_t size, powercap_control_type_file type);
 
-/* Return is like snprintf */
+/* Return is like snprintf_base_path */
 int snprintf_zone_file(char* buf, size_t size, powercap_zone_file type);
 
-/* Return is like snprintf */
+/* Return is like snprintf_base_path */
 int snprintf_constraint_file(char* buf, size_t size, powercap_constraint_file type, uint32_t constraint);
 
-/* Return is like snprintf */
+/* Return is like snprintf_base_path */
 int snprintf_control_type_file_path(char* path, size_t size, const char* control_type, powercap_control_type_file type);
 
-/* Returns 0 on failure like insufficient buffer size */
+/* Return is like snprintf_base_path */
 int snprintf_zone_file_path(char* path, size_t size, const char* control_type, const uint32_t* zones, uint32_t depth,
                             powercap_zone_file type);
 
-/* Returns 0 on failure like insufficient buffer size */
+/* Return is like snprintf_base_path */
 int snprintf_constraint_file_path(char* path, size_t size, const char* control_type, const uint32_t* zones,
                                   uint32_t depth, uint32_t constraint, powercap_constraint_file type);
 
