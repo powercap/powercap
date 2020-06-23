@@ -6,6 +6,7 @@
  * @author Connor Imes
  * @date 2017-08-24
  */
+#include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
@@ -206,6 +207,9 @@ int open_control_type_file(char* path, size_t size, const char* control_type, po
                            int flags) {
   int w = snprintf_control_type_file_path(path, size, control_type, type);
   if (w < 0) {
+    // POSIX says snprintf should only fail if size > INT_MAX, which it's not, so this code branch should never run
+    // If we're here, we don't even know what the error should be, so assert that errno is set
+    assert(errno);
     return w;
   }
   if ((size_t) w >= size) {
@@ -219,6 +223,9 @@ int open_zone_file(char* path, size_t size, const char* control_type, const uint
                    powercap_zone_file type, int flags) {
   int w = snprintf_zone_file_path(path, size, control_type, zones, depth, type);
   if (w < 0) {
+    // POSIX says snprintf should only fail if size > INT_MAX, which it's not, so this code branch should never run
+    // If we're here, we don't even know what the error should be, so assert that errno is set
+    assert(errno);
     return w;
   }
   if ((size_t) w >= size) {
@@ -232,6 +239,9 @@ int open_constraint_file(char* path, size_t size, const char* control_type, cons
                          uint32_t constraint, powercap_constraint_file type, int flags) {
   int w = snprintf_constraint_file_path(path, size, control_type, zones, depth, constraint, type);
   if (w < 0) {
+    // POSIX says snprintf should only fail if size > INT_MAX, which it's not, so this code branch should never run
+    // If we're here, we don't even know what the error should be, so assert that errno is set
+    assert(errno);
     return w;
   }
   if ((size_t) w >= size) {
