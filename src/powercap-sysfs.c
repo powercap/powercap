@@ -6,6 +6,7 @@
  * @author Connor Imes
  * @date 2017-08-24
  */
+#include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
@@ -105,7 +106,10 @@ int powercap_sysfs_zone_exists(const char* control_type, const uint32_t* zones, 
     return -errno;
   }
   if ((w = snprintf_base_path(path, sizeof(path), control_type, zones, depth)) < 0) {
-    return -errno;
+    // POSIX says snprintf should only fail if size > INT_MAX, which it's not, so this code branch should never run
+    // If we're here, we don't even know what the error should be, so assert that errno is set, don't risk returning 0
+    assert(errno);
+    return -1;
   }
   if ((size_t) w >= sizeof(path)) {
     errno = ENOBUFS;
@@ -128,7 +132,10 @@ int powercap_sysfs_constraint_exists(const char* control_type, const uint32_t* z
   }
   /* power_limit_uw file must exist */
   if ((w = snprintf_constraint_file_path(path, sizeof(path), control_type, zones, depth, constraint, POWERCAP_CONSTRAINT_FILE_POWER_LIMIT_UW)) < 0) {
-    return -errno;
+    // POSIX says snprintf should only fail if size > INT_MAX, which it's not, so this code branch should never run
+    // If we're here, we don't even know what the error should be, so assert that errno is set, don't risk returning 0
+    assert(errno);
+    return -1;
   }
   if ((size_t) w >= sizeof(path)) {
     errno = ENOBUFS;
