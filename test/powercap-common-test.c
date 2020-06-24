@@ -28,6 +28,7 @@
 static void test_snprintf_base_path(void) {
   char path[PATH_MAX] = { 0 };
   uint32_t zones[PATH_MAX]; // can produce paths that exceed PATH_MAX length
+  int rc;
   // root path
   assert(snprintf_base_path(path, sizeof(path), CONTROL_TYPE, NULL, 0) == ROOT_LEN);
   assert(strncmp(path, POWERCAP_PATH"/"CONTROL_TYPE"/", sizeof(path)) == 0);
@@ -41,7 +42,8 @@ static void test_snprintf_base_path(void) {
   assert(snprintf_base_path(path, sizeof(path), CONTROL_TYPE, zones, 2) == BASE_D2_LEN);
   assert(strncmp(path, POWERCAP_PATH"/"CONTROL_TYPE"/"CONTROL_TYPE":0/"CONTROL_TYPE":0:1/", sizeof(path)) == 0);
   // too long to fit in buffer
-  assert(snprintf_base_path(path, sizeof(path), CONTROL_TYPE, zones, PATH_MAX) > sizeof(path));
+  rc = snprintf_base_path(path, sizeof(path), CONTROL_TYPE, zones, PATH_MAX);
+  assert(rc >= 0 && (size_t) rc > sizeof(path)); // can't safely cast to size_t without checking >= 0 first
 }
 
 static void test_snprintf_control_type_file(void) {
