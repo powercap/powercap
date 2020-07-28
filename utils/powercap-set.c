@@ -14,18 +14,11 @@
 #include "powercap-sysfs.h"
 #include "util-common.h"
 
-static const char short_options[] =
-#ifdef POWERCAP_CONTROL_TYPE
-    "hz:c:E:je:l:s:"; // no "p:"
-#else
-    "hp:z:c:E:je:l:s:";
-#endif
+static const char short_options[] = "hp:z:c:E:je:l:s:";
 
 static const struct option long_options[] = {
   {"help",                no_argument,        NULL, 'h'},
-#ifndef POWERCAP_CONTROL_TYPE
   {"control-type",        required_argument,  NULL, 'p'},
-#endif
   {"zone",                required_argument,  NULL, 'z'},
   {"constraint",          required_argument,  NULL, 'c'},
   {"enabled",             required_argument,  NULL, 'E'},
@@ -37,17 +30,11 @@ static const struct option long_options[] = {
 };
 
 static void print_usage(void) {
-#ifdef POWERCAP_CONTROL_TYPE
-  printf("Usage: powercap-set-"POWERCAP_CONTROL_TYPE" [OPTION]...\n");
-#else
   printf("Usage: powercap-set -p NAME [OPTION]...\n");
-#endif
   printf("Options:\n");
   printf("  -h, --help                   Print this message and exit\n");
-#ifndef POWERCAP_CONTROL_TYPE
   printf("  -p, --control-type=NAME      [REQUIRED] The powercap control type name\n");
   printf("                               Must not be empty or contain a '.' or '/'\n");
-#endif
   printf("  -z, --zone=ZONE(S)           The zone/subzone numbers in the control type's\n");
   printf("                               powercap tree\n");
   printf("                               Separate zones/subzones with a colon\n");
@@ -73,12 +60,7 @@ static void print_common_help(void) {
 }
 
 int main(int argc, char** argv) {
-  const char* control_type =
-#ifdef POWERCAP_CONTROL_TYPE
-    POWERCAP_CONTROL_TYPE;
-#else
-    NULL;
-#endif
+  const char* control_type = NULL;
   u32_param ct_enabled = {0, 0};
   uint32_t zones[MAX_ZONE_DEPTH] = { 0 };
   uint32_t depth = 0;
@@ -103,7 +85,6 @@ int main(int argc, char** argv) {
     case 'h':
       print_usage();
       return EXIT_SUCCESS;
-#ifndef POWERCAP_CONTROL_TYPE
     case 'p':
       if (control_type) {
         cont = 0;
@@ -111,7 +92,6 @@ int main(int argc, char** argv) {
       }
       control_type = optarg;
       break;
-#endif
     case 'E':
       ret = set_u32_param(&ct_enabled, optarg, &cont);
       break;
@@ -152,11 +132,9 @@ int main(int argc, char** argv) {
   /* Verify argument combinations */
   if (ret) {
     fprintf(stderr, "Invalid arguments\n");
-#ifndef POWERCAP_CONTROL_TYPE
   } else if (!is_valid_control_type(control_type)) {
     fprintf(stderr, "Must specify -p/--control-type; value must not be empty or contain any '.' or '/' characters\n");
     ret = -EINVAL;
-#endif
   } else if (!depth && (is_set_zone || is_set_constraint)) {
     fprintf(stderr, "Must specify -z/--zone with zone-level or constraint-level argument\n");
     ret = -EINVAL;
