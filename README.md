@@ -7,8 +7,6 @@ It also provides the following applications:
 
 * `powercap-info` - view powercap control type hierarchies or zone/constraint-specific configurations
 * `powercap-set` - set powercap control type zone/constraint-specific configurations
-* `powercap-info-intel-rapl` - `powercap-info` abstraction for the "intel-rapl" control type
-* `powercap-set-intel-rapl` - `powercap-set` abstraction for the "intel-rapl" control type
 
 These bindings were originally created for use with [RAPLCap](https://github.com/powercap/raplcap), but can be used independently.
 See the RAPLCap project for a more general interface for managing RAPL power caps, including other command line utilities.
