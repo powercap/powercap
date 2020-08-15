@@ -1,6 +1,6 @@
 # Release Notes
 
-## [Unreleased]
+## [v0.3.0] - 2020-08-15
 
 ### Added
 
@@ -16,8 +16,8 @@
     * 'powercap_rapl_control_is_supported'
     * 'powercap_rapl_control_is_enabled'
     * 'powercap_rapl_control_set_enabled'
-    * 'powercap_rapl_get_num_instances'
   * Argument '--enabled' to powercap-{info,set} for getting/setting control type enabled field
+* Function 'powercap_rapl_get_num_instances' in powercap-rapl.h (supersedes 'powercap_rapl_get_num_packages')
 * Argument '--nconstraints' to powercap-info for getting the number of zone constraints
 
 ### Changed
@@ -93,7 +93,7 @@
 
 * Initial public release
 
-[Unreleased]: https://github.com/powercap/powercap/compare/v0.2.0...HEAD
+[v0.3.0]: https://github.com/powercap/powercap/compare/v0.2.0...v0.3.0
 [v0.2.0]: https://github.com/powercap/powercap/compare/v0.1.1...v0.2.0
 [v0.1.1]: https://github.com/powercap/powercap/compare/v0.1.0...v0.1.1
 [#4]: https://github.com/powercap/powercap/issues/4
