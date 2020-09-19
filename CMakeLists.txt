@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
-cmake_minimum_required(VERSION 2.8.5)
+cmake_minimum_required(VERSION 2.8.12)
 
 project(powercap)
 set(VERSION_MAJOR 0)
-set(VERSION_MINOR 2)
+set(VERSION_MINOR 3)
 set(VERSION_PATCH 0)
 set(PROJECT_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 
@@ -13,7 +13,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99 -D_GNU_SOURCE")
 include(GNUInstallDirs)
 
 # See powercap-common.h for enumeration
-set(POWERCAP_LOG_LEVEL 2 CACHE STRING "Set the log level: 0=DEBUG, 1=INFO, 2=WARN (default), 3=ERROR, 4=OFF")
+set(POWERCAP_LOG_LEVEL 4 CACHE STRING "Set the log level: 0=DEBUG, 1=INFO, 2=WARN, 3=ERROR, 4=OFF (default)")
 
 include_directories(${PROJECT_SOURCE_DIR}/inc)
 
@@ -34,6 +34,8 @@ endif()
 
 # Tests
 
+add_executable(powercap-common-test test/powercap-common-test.c src/powercap-common.c)
+
 add_executable(powercap-test test/powercap-test.c)
 target_link_libraries(powercap-test powercap)
 
@@ -48,6 +50,7 @@ macro(add_unit_test target)
   add_test(${target} ${EXECUTABLE_OUTPUT_PATH}/${target})
 endmacro(add_unit_test)
 
+add_unit_test(powercap-common-test)
 add_unit_test(powercap-test)
 # Requires a real system with root privileges
 # add_unit_test(powercap-rapl-test)

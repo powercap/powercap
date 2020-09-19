@@ -12,12 +12,31 @@
 #include "powercap.h"
 #include "powercap-common.h"
 
+int powercap_control_type_file_get_name(powercap_control_type_file type, char* buf, size_t size) {
+  /* check type in case users pass bad int value instead of enum; int cast silences clang compiler */
+  if (!buf || !size || (int) type < 0 || (int) type > POWERCAP_CONTROL_TYPE_FILE_ENABLED) {
+    errno = EINVAL;
+    return -errno;
+  }
+  return snprintf_control_type_file(buf, size, type);
+}
+
 int powercap_zone_file_get_name(powercap_zone_file type, char* buf, size_t size) {
-  return zone_file_get_name(type, buf, size);
+  /* check type in case users pass bad int value instead of enum; int cast silences clang compiler */
+  if (!buf || !size || (int) type < 0 || (int) type > POWERCAP_ZONE_FILE_NAME) {
+    errno = EINVAL;
+    return -errno;
+  }
+  return snprintf_zone_file(buf, size, type);
 }
 
 int powercap_constraint_file_get_name(powercap_constraint_file type, uint32_t constraint, char* buf, size_t size) {
-  return constraint_file_get_name(type, constraint, buf, size);
+  /* check type in case users pass bad int value instead of enum; int cast silences clang compiler */
+  if (!buf || !size || (int) type < 0 || (int) type > POWERCAP_CONSTRAINT_FILE_NAME) {
+    errno = EINVAL;
+    return -errno;
+  }
+  return snprintf_constraint_file(buf, size, type, constraint);
 }
 
 #define VERIFY_ARG(arg) \
@@ -25,6 +44,22 @@ int powercap_constraint_file_get_name(powercap_constraint_file type, uint32_t co
     errno = EINVAL; \
     return -errno; \
   }
+
+int powercap_control_type_set_enabled(const powercap_control_type* control_type, int val) {
+  VERIFY_ARG(control_type);
+  return write_u64(control_type->enabled, (uint64_t) val);
+}
+
+int powercap_control_type_get_enabled(const powercap_control_type* control_type, int* val) {
+  uint64_t enabled;
+  int ret;
+  VERIFY_ARG(control_type);
+  VERIFY_ARG(val);
+  if (!(ret = read_u64(control_type->enabled, &enabled))) {
+    *val = enabled ? 1 : 0;
+  }
+  return ret;
+}
 
 int powercap_zone_get_max_energy_range_uj(const powercap_zone* zone, uint64_t* val) {
   VERIFY_ARG(zone);

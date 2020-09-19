@@ -147,6 +147,7 @@ static const struct option long_options[] = {
 };
 
 static void print_usage(void) {
+  printf("\nThis utility is deprecated, use powercap-info instead.\n\n");
   printf("Usage: rapl-info [OPTION]...\n");
   printf("Options:\n");
   printf("  -h, --help                   Print this message and exit\n");

@@ -11,6 +11,12 @@
 #include <string.h>
 #include "powercap.h"
 
+static void test_powercap_control_type_file_get_name(void) {
+  char buf[24];
+  assert(powercap_control_type_file_get_name(POWERCAP_CONTROL_TYPE_FILE_ENABLED, buf, sizeof(buf)) > 0);
+  assert(strncmp(buf, "enabled", sizeof(buf)) == 0);
+}
+
 static void test_powercap_zone_file_get_name(void) {
   char buf[24];
   assert(powercap_zone_file_get_name(POWERCAP_ZONE_FILE_MAX_ENERGY_RANGE_UJ, buf, sizeof(buf)) > 0);
@@ -46,6 +52,7 @@ static void test_powercap_constraint_file_get_name(void) {
 }
 
 int main(void) {
+  test_powercap_control_type_file_get_name();
   test_powercap_zone_file_get_name();
   test_powercap_constraint_file_get_name();
   return EXIT_SUCCESS;

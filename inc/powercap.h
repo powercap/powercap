@@ -23,6 +23,13 @@ extern "C" {
 #include <unistd.h>
 
 /**
+ * File descriptors for a control type.
+ */
+typedef struct powercap_control_type {
+  int enabled;
+} powercap_control_type;
+
+/**
  * File descriptors for a zone.
  */
 typedef struct powercap_zone {
@@ -46,6 +53,13 @@ typedef struct powercap_constraint {
   int min_time_window_us;
   int name;
 } powercap_constraint;
+
+/**
+ * Control type file enumeration.
+ */
+typedef enum powercap_control_type_file {
+  POWERCAP_CONTROL_TYPE_FILE_ENABLED
+} powercap_control_type_file;
 
 /**
  * Zone file enumeration.
@@ -73,6 +87,12 @@ typedef enum powercap_constraint_file {
 } powercap_constraint_file;
 
 /**
+ * Get the filename for a control type file type.
+ * Returns the number of characters written excluding the terminating null byte, or a negative value in case of error.
+ */
+int powercap_control_type_file_get_name(powercap_control_type_file type, char* buf, size_t size);
+
+/**
  * Get the filename for a zone file type.
  * Returns the number of characters written excluding the terminating null byte, or a negative value in case of error.
  */
@@ -83,6 +103,16 @@ int powercap_zone_file_get_name(powercap_zone_file type, char* buf, size_t size)
  * Returns the number of characters written excluding the terminating null byte, or a negative value in case of error.
  */
 int powercap_constraint_file_get_name(powercap_constraint_file type, uint32_t constraint, char* buf, size_t size);
+
+/**
+ * Set the control type's enabled value.
+ */
+int powercap_control_type_set_enabled(const powercap_control_type* control, int val);
+
+/**
+ * Get the control type's enabled value.
+ */
+int powercap_control_type_get_enabled(const powercap_control_type* control, int* val);
 
 /**
  * Get the zone's maximum energy range in microjoules.

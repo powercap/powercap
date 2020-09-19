@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  *
- * A simple interface for configuring RAPL using the intel_rapl kernel module.
+ * A simple interface for configuring RAPL through a powercap control type.
  * Note that not all RAPL zones support short_term constraints.
  * Unless otherwise stated, all functions return 0 on success or a negative value on error.
  *
@@ -75,6 +75,33 @@ typedef enum powercap_rapl_constraint {
 } powercap_rapl_constraint;
 
 /**
+ * Check if RAPL is supported.
+ * Returns 1 if enabled, 0 if disabled, a negative value in case of error.
+ */
+int powercap_rapl_control_is_supported(void);
+
+/**
+ * Check if RAPL control is enabled.
+ * Returns 1 if enabled, 0 if disabled, a negative value in case of error.
+ */
+int powercap_rapl_control_is_enabled(void);
+
+/**
+ * Enable/disable RAPL control.
+ */
+int powercap_rapl_control_set_enabled(int val);
+
+/**
+ * Get the number of top-level (parent) RAPL instances found.
+ * Returns 0 and sets errno if none are found.
+ */
+uint32_t powercap_rapl_get_num_instances(void);
+
+/**
+ * @deprecated Use powercap_rapl_get_num_instances() instead.
+ *
+ * This function's name no longer accurately describes its scope.
+ *
  * Get the number of top-level (parent) RAPL instances found.
  * Returns 0 and sets errno if none are found.
  */

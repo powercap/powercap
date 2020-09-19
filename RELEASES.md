@@ -1,5 +1,43 @@
 # Release Notes
 
+## [v0.3.0] - 2020-08-15
+
+### Added
+
+* Support for top-level control type
+  * Struct 'powercap_control_type', enum 'powercap_control_type_file', and associated functions in powercap.h:
+    * 'powercap_control_type_get_enabled'
+    * 'powercap_control_type_set_enabled'
+    * 'powercap_control_type_file_get_name'
+  * Functions in powercap-sysfs.h:
+    * 'powercap_sysfs_control_type_get_enabled'
+    * 'powercap_sysfs_control_type_set_enabled'
+  * Functions in powercap-rapl.h:
+    * 'powercap_rapl_control_is_supported'
+    * 'powercap_rapl_control_is_enabled'
+    * 'powercap_rapl_control_set_enabled'
+  * Argument '--enabled' to powercap-{info,set} for getting/setting control type enabled field
+* Function 'powercap_rapl_get_num_instances' in powercap-rapl.h (supersedes 'powercap_rapl_get_num_packages')
+* Argument '--nconstraints' to powercap-info for getting the number of zone constraints
+
+### Changed
+
+* Increased minimum CMake version from 2.8.5 to 2.8.12 to support target_compile_definitions
+* Updated 'powercap-{info,set}' man pages
+* Argument '--zone' for powercap-set no longer required due to introduction of '--enabled' argument
+* Disabled logging by default (in general, libraries shouldn't print output unless requested)
+
+### Deprecated
+
+* Binaries rapl-{info,set} - use powercap-{info,set} instead
+* Interface powercap-rapl-sysfs.h - use powercap-sysfs.h directly instead
+* Function 'powercap_rapl_get_num_packages' in powercap-rapl.h - use 'powercap_rapl_get_num_instances' instead
+
+### Fixed
+
+* Fixed [#4]: powercap-rapl now checks if parent zone is PACKAGE or PSYS
+
+
 ## [v0.2.0] - 2019-12-03
 
 ### Added
@@ -55,6 +93,8 @@
 
 * Initial public release
 
+[v0.3.0]: https://github.com/powercap/powercap/compare/v0.2.0...v0.3.0
 [v0.2.0]: https://github.com/powercap/powercap/compare/v0.1.1...v0.2.0
 [v0.1.1]: https://github.com/powercap/powercap/compare/v0.1.0...v0.1.1
+[#4]: https://github.com/powercap/powercap/issues/4
 [#1]: https://github.com/powercap/powercap/issues/1

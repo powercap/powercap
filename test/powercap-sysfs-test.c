@@ -82,6 +82,29 @@ static void test_bad_constraint_exists(void) {
   assert(errno == EINVAL);
 }
 
+static void test_get_set_control_type_all_bad(void) {
+  uint32_t val32;
+  /* Good parameters, bad control type */
+  errno = 0;
+  assert(powercap_sysfs_control_type_get_enabled("foo", &val32) == -ENOENT);
+  assert(errno == ENOENT);
+  errno = 0;
+  assert(powercap_sysfs_control_type_set_enabled("foo", 1) == -ENOENT);
+  assert(errno == ENOENT);
+  /* Bad parameters */
+  /* get u32 */
+  errno = 0;
+  assert(powercap_sysfs_control_type_get_enabled(NULL, &val32) == -EINVAL);
+  assert(errno == EINVAL);
+  errno = 0;
+  assert(powercap_sysfs_control_type_get_enabled("foo", NULL) == -EINVAL);
+  assert(errno == EINVAL);
+  /* set u32 */
+  errno = 0;
+  assert(powercap_sysfs_control_type_set_enabled(NULL, 1) == -EINVAL);
+  assert(errno == EINVAL);
+}
+
 static void test_get_set_zone_all_bad(void) {
   uint64_t val64;
   uint32_t val32;
@@ -255,6 +278,7 @@ int main(void) {
   test_bad_control_type_exists();
   test_bad_zone_exists();
   test_bad_constraint_exists();
+  test_get_set_control_type_all_bad();
   test_get_set_zone_all_bad();
   test_get_set_constraint_all_bad();
   return EXIT_SUCCESS;

@@ -14,12 +14,14 @@
 #include "powercap-sysfs.h"
 #include "util-common.h"
 
-static const char short_options[] = "hp:z:c:je:l:s:";
+static const char short_options[] = "hp:z:c:E:je:l:s:";
+
 static const struct option long_options[] = {
   {"help",                no_argument,        NULL, 'h'},
   {"control-type",        required_argument,  NULL, 'p'},
   {"zone",                required_argument,  NULL, 'z'},
   {"constraint",          required_argument,  NULL, 'c'},
+  {"enabled",             required_argument,  NULL, 'E'},
   {"z-energy",            no_argument      ,  NULL, 'j'},
   {"z-enabled",           required_argument,  NULL, 'e'},
   {"c-power-limit",       required_argument,  NULL, 'l'},
@@ -28,20 +30,21 @@ static const struct option long_options[] = {
 };
 
 static void print_usage(void) {
-  printf("Usage: powercap-set -p NAME -z ZONE(S) [OPTION]...\n");
+  printf("Usage: powercap-set -p NAME [OPTION]...\n");
   printf("Options:\n");
   printf("  -h, --help                   Print this message and exit\n");
   printf("  -p, --control-type=NAME      [REQUIRED] The powercap control type name\n");
   printf("                               Must not be empty or contain a '.' or '/'\n");
-  printf("  -z, --zone=ZONE(S)           [REQUIRED] The zone/subzone numbers in the\n");
-  printf("                               control type's powercap tree\n");
+  printf("  -z, --zone=ZONE(S)           The zone/subzone numbers in the control type's\n");
+  printf("                               powercap tree\n");
   printf("                               Separate zones/subzones with a colon\n");
   printf("                               E.g., for zone 0, subzone 2: \"-z 0:2\"\n");
   printf("  -c, --constraint=CONSTRAINT  The constraint number (none by default)\n");
-  printf("The following zone-level arguments may be used together:\n");
+  printf("  -E, --enabled=1|0            Enable/disable the control type\n");
+  printf("The following zone-level arguments may be used together and require -z/--zone:\n");
   printf("  -j, --z-energy               Reset zone energy counter\n");
   printf("  -e, --z-enabled=1|0          Enable/disable a zone\n");
-  printf("The following constraint-level arguments may be used together and require -c/--constraint:\n");
+  printf("The following constraint-level arguments may be used together and require -z/--zone and -c/--constraint:\n");
   printf("  -l, --c-power-limit=UW       Set constraint power limit\n");
   printf("  -s, --c-time-window=US       Set constraint time window\n");
   printf("\nPower units: microwatts (uW)\n");
@@ -50,13 +53,15 @@ static void print_usage(void) {
 
 static void print_common_help(void) {
   printf("Considerations for common errors:\n");
-  printf("- Ensure that the control type exists (may require loading a kernel module, e.g., intel_rapl)\n");
+  printf("- Ensure that the control type exists, which may require loading a kernel module\n");
   printf("- Ensure that you run with administrative (super-user) privileges\n");
+  printf("- Enabling/disabling a control type is an optional feature not supported by all control types\n");
   printf("- Resetting a zone energy counter is an optional powercap feature not supported by all control types\n");
 }
 
 int main(int argc, char** argv) {
   const char* control_type = NULL;
+  u32_param ct_enabled = {0, 0};
   uint32_t zones[MAX_ZONE_DEPTH] = { 0 };
   uint32_t depth = 0;
   u32_param constraint = {0, 0};
@@ -64,6 +69,8 @@ int main(int argc, char** argv) {
   u32_param enabled = {0, 0};
   u64_param power_limit = {0, 0};
   u64_param time_window = {0, 0};
+  int is_set_zone = 0;
+  int is_set_constraint = 0;
   int c;
   int cont = 1;
   int ret = 0;
@@ -85,6 +92,9 @@ int main(int argc, char** argv) {
       }
       control_type = optarg;
       break;
+    case 'E':
+      ret = set_u32_param(&ct_enabled, optarg, &cont);
+      break;
     case 'z':
       ret = parse_zones(optarg, zones, MAX_ZONE_DEPTH, &depth, &cont);
       break;
@@ -97,15 +107,19 @@ int main(int argc, char** argv) {
         ret = -EINVAL;
       }
       reset_energy = 1;
+      is_set_zone = 1;
       break;
     case 'e':
       ret = set_u32_param(&enabled, optarg, &cont);
+      is_set_zone = 1;
       break;
     case 'l':
       ret = set_u64_param(&power_limit, optarg, &cont);
+      is_set_constraint = 1;
       break;
     case 's':
       ret = set_u64_param(&time_window, optarg, &cont);
+      is_set_constraint = 1;
       break;
     case '?':
     default:
@@ -121,20 +135,21 @@ int main(int argc, char** argv) {
   } else if (!is_valid_control_type(control_type)) {
     fprintf(stderr, "Must specify -p/--control-type; value must not be empty or contain any '.' or '/' characters\n");
     ret = -EINVAL;
-  } else if (!depth) {
-    fprintf(stderr, "Must specify -z/--zone\n");
+  } else if (!depth && (is_set_zone || is_set_constraint)) {
+    fprintf(stderr, "Must specify -z/--zone with zone-level or constraint-level argument\n");
     ret = -EINVAL;
-  } else if (constraint.set && !(power_limit.set || time_window.set)) {
-    fprintf(stderr, "Must set at least one constraint-level argument when using -c/--constraint\n");
+  } else if (depth && !(is_set_zone || is_set_constraint)) {
+    fprintf(stderr, "Must specify zone-level or constraint-level argument with -z/--zone\n");
     ret = -EINVAL;
-  } else if (!constraint.set) {
-    if (power_limit.set || time_window.set) {
-      fprintf(stderr, "Must specify -c/--constraint when using constraint-level arguments\n");
-      ret = -EINVAL;
-    } else if (!(reset_energy || enabled.set)) {
-      fprintf(stderr, "Nothing to do\n");
-      ret = -EINVAL;
-    }
+  } else if (!constraint.set && is_set_constraint) {
+    fprintf(stderr, "Must specify -c/--constraint with constraint-level argument\n");
+    ret = -EINVAL;
+  } else if (constraint.set && !is_set_constraint) {
+    fprintf(stderr, "Must specify constraint-level argument with -c/--constraint\n");
+    ret = -EINVAL;
+  } else if (!ct_enabled.set && !is_set_zone && !is_set_constraint) {
+    fprintf(stderr, "Nothing to do\n");
+    ret = -EINVAL;
   }
   if (ret) {
     print_usage();
@@ -158,31 +173,38 @@ int main(int argc, char** argv) {
   }
 
   /* Perform requested action(s) */
+  if (ct_enabled.set) {
+    c = powercap_sysfs_control_type_set_enabled(control_type, ct_enabled.val);
+    if (c) {
+      perror("Error setting control type enabled/disabled");
+      ret |= c;
+    }
+  }
   if (reset_energy) {
     c = powercap_sysfs_zone_reset_energy_uj(control_type, zones, depth);
     if (c) {
-      perror("Error setting energy counter");
+      perror("Error setting zone energy counter");
       ret |= c;
     }
   }
   if (enabled.set) {
     c = powercap_sysfs_zone_set_enabled(control_type, zones, depth, enabled.val);
     if (c) {
-      perror("Error setting enabled/disabled");
+      perror("Error setting zone enabled/disabled");
       ret |= c;
     }
   }
   if (power_limit.set) {
     c = powercap_sysfs_constraint_set_power_limit_uw(control_type, zones, depth, constraint.val, power_limit.val);
     if (c) {
-      perror("Error setting power limit");
+      perror("Error setting constraint power limit");
       ret |= c;
     }
   }
   if (time_window.set) {
     c = powercap_sysfs_constraint_set_time_window_us(control_type, zones, depth, constraint.val, time_window.val);
     if (c) {
-      perror("Error setting time window");
+      perror("Error setting constraint time window");
       ret |= c;
     }
   }

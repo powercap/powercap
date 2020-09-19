@@ -64,32 +64,94 @@ int read_u64(int fd, uint64_t* val);
 /* Return 0 on success, negative error code on failure */
 int write_u64(int fd, uint64_t val);
 
-/* Return is like snprintf, or negative error code if parameters are bad */
-int zone_file_get_name(powercap_zone_file type, char* buf, size_t size);
+/*
+ * Return is like snprintf, except if the output was truncated due to the size limit, the return value is still >= size,
+ * but not necessarily the number of characters (excluding the terminating null byte) which would have been written to
+ * the final string if enough space had been available.
+ */
+int snprintf_base_path(char* buf, size_t size, const char* control_type, const uint32_t* zones, uint32_t depth);
 
-/* Return is like snprintf, or negative error code if parameters are bad */
-int constraint_file_get_name(powercap_constraint_file type, uint32_t constraint, char* buf, size_t size);
+/* Return is like snprintf_base_path */
+int snprintf_control_type_file(char* buf, size_t size, powercap_control_type_file type);
+
+/* Return is like snprintf_base_path */
+int snprintf_zone_file(char* buf, size_t size, powercap_zone_file type);
+
+/* Return is like snprintf_base_path */
+int snprintf_constraint_file(char* buf, size_t size, powercap_constraint_file type, uint32_t constraint);
+
+/* Return is like snprintf_base_path */
+int snprintf_control_type_file_path(char* path, size_t size, const char* control_type, powercap_control_type_file type);
+
+/* Return is like snprintf_base_path */
+int snprintf_zone_file_path(char* path, size_t size, const char* control_type, const uint32_t* zones, uint32_t depth,
+                            powercap_zone_file type);
+
+/* Return is like snprintf_base_path */
+int snprintf_constraint_file_path(char* path, size_t size, const char* control_type, const uint32_t* zones,
+                                  uint32_t depth, uint32_t constraint, powercap_constraint_file type);
+
+/* Return fd on success, negative error code if path is too large, -1 on open failure */
+int open_control_type_file(char* path, size_t size, const char* control_type, powercap_control_type_file type,
+                           int flags);
+
+/* Return fd on success, negative error code if path is too large, -1 on open failure */
+int open_zone_file(char* path, size_t size, const char* control_type, const uint32_t* zones, uint32_t depth,
+                   powercap_zone_file type, int flags);
+
+/* Return fd on success, negative error code if path is too large, -1 on open failure */
+int open_constraint_file(char* path, size_t size, const char* control_type, const uint32_t* zones, uint32_t depth,
+                         uint32_t constraint, powercap_constraint_file type, int flags);
+
+/* Return fd on success or ENOENT, -1 if buf is too small or on open failure */
+int powercap_control_type_file_open(char* buf, size_t bsize, const char* ct_name, powercap_control_type_file type,
+                                    int flags);
+
+/* Return fd on success or ENOENT, -1 if buf is too small or on open failure */
+int powercap_zone_file_open(char* buf, size_t bsize, const char* ct_name, const uint32_t* zones, uint32_t depth,
+                            powercap_zone_file type, int flags);
+
+/* Return fd on success or ENOENT, -1 if buf is too small or on open failure */
+int powercap_constraint_file_open(char* buf, size_t bsize, const char* ct_name, const uint32_t* zones, uint32_t depth,
+                                  uint32_t constraint, powercap_constraint_file type, int flags);
 
 /*
- * Returns 0 on failure like insufficient buffer size or if control_type is NULL.
- * zones can be NULL only if depth is 0; path must not be NULL.
+ * Open all files in a control type, if they exist.
+ * Return 0 on success or ENOENT, -1 if buf is too small or on open failure.
  */
-size_t get_base_path(const char* control_type, const uint32_t* zones, uint32_t depth, char* path, size_t size);
+int powercap_control_type_open(powercap_control_type* pct, char* buf, size_t bsize, const char* ct_name, int ro);
 
-/* Returns 0 on failure like insufficient buffer size */
-size_t get_zone_file_path(const char* control_type, const uint32_t* zones, uint32_t depth, powercap_zone_file type,
-                          char* path, size_t size);
+/*
+ * Open all files in a zone, if they exist.
+ * Return 0 on success or ENOENT, -1 if buf is too small or on open failure.
+ */
+int powercap_zone_open(powercap_zone* pz, char* buf, size_t bsize, const char* ct_name, const uint32_t* zones,
+                       uint32_t depth, int ro);
 
-/* Returns 0 on failure like insufficient buffer size */
-size_t get_constraint_file_path(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint,
-                                powercap_constraint_file type, char* path, size_t size);
+/*
+ * Open all files in a constraint, if they exist.
+ * Return 0 on success or ENOENT, -1 if buf is too small or on open failure.
+ */
+int powercap_constraint_open(powercap_constraint* pc, char* buf, size_t bsize, const char* ct_name,
+                             const uint32_t* zones, uint32_t depth, uint32_t constraint, int ro);
 
-/* Return fd on success, negative error code if path is too large, -1 on open failure */
-int open_zone_file(const char* control_type, const uint32_t* zones, uint32_t depth, powercap_zone_file type, int flags);
+/*
+ * Close all files in a control type.
+ * Return 0 on success, negative error code on failure.
+ */
+int powercap_control_type_close(powercap_control_type* pct);
 
-/* Return fd on success, negative error code if path is too large, -1 on open failure */
-int open_constraint_file(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint,
-                         powercap_constraint_file type, int flags);
+/*
+ * Close all files in a zone.
+ * Return 0 on success, negative error code on failure.
+ */
+int powercap_zone_close(powercap_zone* pz);
+
+/*
+ * Close all files in a constraint.
+ * Return 0 on success, negative error code on failure.
+ */
+int powercap_constraint_close(powercap_constraint* pc);
 
 #pragma GCC visibility pop
 

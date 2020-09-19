@@ -1,6 +1,11 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  *
+ * This interface is deprecated - use powercap-sysfs.h directly instead.
+ * By limiting zone depth to 2, this interface will break if Intel RAPL extends its tree depth in the future.
+ * The only other abstraction it provides is to mask the control type parameter, which doesn't add much value.
+ * Intel also added the intel-rapl-mmio control type, so even the control type abstraction is not as useful as before.
+ *
  * Read/write RAPL sysfs files.
  * This is a wrapper around powercap-sysfs.h.
  *
@@ -24,6 +29,7 @@
  *
  * @author Connor Imes
  * @date 2017-08-24
+ * @deprecated Use powercap-sysfs.h directly instead.
  */
 
 #ifndef _RAPL_SYSFS_H

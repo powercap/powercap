@@ -92,6 +92,12 @@ static void analyze_zone(const char* control_type, const uint32_t* zones, uint32
   }
 }
 
+static void analyze_control_type(const char* control_type, int verbose) {
+  uint32_t val32;
+  int ret = powercap_sysfs_control_type_get_enabled(control_type, &val32);
+  u64_or_verbose(verbose, 0, "enabled", (uint64_t) val32, ret);
+}
+
 /* depth must be > 0 */
 static void analyze_all_zones_recurse(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t max_depth, int verbose) {
   if (!powercap_sysfs_zone_exists(control_type, zones, depth)) {
@@ -128,14 +134,25 @@ static void print_num_zones(const char* control_type, uint32_t* zones, uint32_t 
   printf("%"PRIu32"\n", zones[depth]);
 }
 
-static const char short_options[] = "hvp:z:c:njJwWexlsUuTty";
+static void print_num_constraints(const char* control_type, uint32_t* zones, uint32_t depth) {
+  uint32_t n = 0;
+  while (!powercap_sysfs_constraint_exists(control_type, zones, depth, n)) {
+    n++;
+  }
+  printf("%"PRIu32"\n", n);
+}
+
+static const char short_options[] = "hvp:z:c:EnNjJwWexlsUuTty";
+
 static const struct option long_options[] = {
   {"help",                no_argument,        NULL, 'h'},
   {"verbose",             no_argument,        NULL, 'v'},
   {"control-type",        required_argument,  NULL, 'p'},
   {"zone",                required_argument,  NULL, 'z'},
   {"constraint",          required_argument,  NULL, 'c'},
+  {"enabled",             no_argument,        NULL, 'E'},
   {"nzones",              no_argument,        NULL, 'n'},
+  {"nconstraints",        no_argument,        NULL, 'N'},
   {"z-energy",            no_argument,        NULL, 'j'},
   {"z-max-energy-range",  no_argument,        NULL, 'J'},
   {"z-power",             no_argument,        NULL, 'w'},
@@ -167,9 +184,11 @@ static void print_usage(void) {
   printf("                               E.g., for zone 0, but not subzones: \"-z 0:\"\n");
   printf("  -c, --constraint=CONSTRAINT  The constraint number\n");
   printf("All remaining options below are mutually exclusive:\n");
+  printf("  -E, --enabled                Print control type enabled/disabled status\n");
   printf("  -n, --nzones                 Print the number of zones (control type's root by\n");
   printf("                               default; within the -z/--zone level, if set)\n");
   printf("The following are zone-level arguments and require -z/--zone:\n");
+  printf("  -N, --nconstraints           Print the number of zone constraints\n");
   printf("  -j, --z-energy               Print zone energy counter\n");
   printf("  -J, --z-max-energy-range     Print zone maximum energy counter range\n");
   printf("  -w, --z-power                Print zone current power\n");
@@ -193,7 +212,7 @@ static void print_usage(void) {
 
 static void print_common_help(void) {
   printf("Considerations for common errors:\n");
-  printf("- Ensure that the control type exists (may require loading a kernel module, e.g., intel_rapl)\n");
+  printf("- Ensure that the control type exists, which may require loading a kernel module\n");
   printf("- Some files may simply not exist\n");
 }
 
@@ -239,7 +258,9 @@ int main(int argc, char** argv) {
     case 'c':
       ret = set_u32_param(&constraint, optarg, &cont);
       break;
+    case 'E':
     case 'n':
+    case 'N':
     case 'j':
     case 'J':
     case 'w':
@@ -254,7 +275,7 @@ int main(int argc, char** argv) {
     case 't':
     case 'y':
       if (unique_set) {
-        fprintf(stderr, "Only one of -n/--nzones, a zone-level argument, or a constraint-level argument is allowed at a time\n");
+        fprintf(stderr, "Must not specify multiple mutually exclusive arguments\n");
         cont = 0;
         ret = -EINVAL;
         break;
@@ -276,48 +297,51 @@ int main(int argc, char** argv) {
   } else if (!is_valid_control_type(control_type)) {
     fprintf(stderr, "Must specify -p/--control-type; value must not be empty or contain any '.' or '/' characters\n");
     ret = -EINVAL;
-  } else if (!depth && constraint.set) {
-    fprintf(stderr, "Must specify -z/--zone with -c/--constraint\n");
-    ret = -EINVAL;
   } else if (unique_set) {
-    if (unique_set == 'n') {
-      if (constraint.set) {
-        fprintf(stderr, "-n/--nzones cannot be used with -c/--constraint\n");
+    switch (unique_set) {
+    case 'E':
+      if (depth || constraint.set) {
+        fprintf(stderr, "Must not specify -z/--zone or -c/--constraint with -E/--enabled\n");
         ret = -EINVAL;
       }
-    } else if (!depth) {
-      fprintf(stderr, "-z/--zone must be set for zone-level and constraint-level arguments\n");
-      ret = -EINVAL;
-    } else {
-      switch (unique_set) {
-      case 'n':
-        /* special case handled above */
-        break;
-      case 'j':
-      case 'J':
-      case 'w':
-      case 'W':
-      case 'e':
-      case 'x':
-        if (constraint.set) {
-          fprintf(stderr, "-c/--constraint cannot be set for zone-level arguments\n");
-          ret = -EINVAL;
-        }
-        break;
-      case 'l':
-      case 's':
-      case 'U':
-      case 'u':
-      case 'T':
-      case 't':
-      case 'y':
-        if (!constraint.set) {
-          fprintf(stderr, "-c/--constraint must be set for constraint-level arguments\n");
-          ret = -EINVAL;
-        }
-        break;
+      break;
+    case 'n':
+      if (constraint.set) {
+        fprintf(stderr, "Must not specify -c/--constraint with -n/--nzones\n");
+        ret = -EINVAL;
       }
+      break;
+    case 'N':
+    case 'j':
+    case 'J':
+    case 'w':
+    case 'W':
+    case 'e':
+    case 'x':
+      if (!depth) {
+        fprintf(stderr, "Must specify -z/--zone with zone-level argument\n");
+        ret = -EINVAL;
+      } else if (constraint.set) {
+        fprintf(stderr, "Must not specify -c/--constraint with zone-level argument\n");
+        ret = -EINVAL;
+      }
+      break;
+    case 'l':
+    case 's':
+    case 'U':
+    case 'u':
+    case 'T':
+    case 't':
+    case 'y':
+      if (!depth || !constraint.set) {
+        fprintf(stderr, "Must specify -z/--zone and -c/--constraint with constraint-level argument\n");
+        ret = -EINVAL;
+      }
+      break;
     }
+  } else if (constraint.set && !depth) {
+    fprintf(stderr, "Must specify -z/--zone with -c/--constraint\n");
+    ret = -EINVAL;
   }
   if (ret) {
     print_usage();
@@ -343,9 +367,21 @@ int main(int argc, char** argv) {
   /* Perform requested action */
   if (unique_set) {
     switch (unique_set) {
+    case 'E':
+      /* Get control type enabled */
+      if (!(ret = powercap_sysfs_control_type_get_enabled(control_type, &val32))) {
+        printf("%"PRIu32"\n", val32);
+      } else {
+        perror("Failed to get control type enabled");
+      }
+      break;
     case 'n':
       /* Print number of zones at the specified tree location */
       print_num_zones(control_type, zones, depth);
+      break;
+    case 'N':
+      /* Print number of constraints at the specified tree location */
+      print_num_constraints(control_type, zones, depth);
       break;
     case 'j':
       /* Get zone energy */
@@ -470,6 +506,7 @@ int main(int argc, char** argv) {
       }
     }
   } else {
+    analyze_control_type(control_type, verbose);
     /* print all zones */
     analyze_all_zones_recurse(control_type, zones, 1, MAX_ZONE_DEPTH, verbose);
   }

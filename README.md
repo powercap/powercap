@@ -6,9 +6,7 @@ It includes an implementation for working with Intel Running Average Power Limit
 It also provides the following applications:
 
 * `powercap-info` - view powercap control type hierarchies or zone/constraint-specific configurations
-* `powercap-set` - set powercap control zone/constraint-specific configurations
-* `rapl-info` - view Intel RAPL hierarchies or zone/constraint-specific configurations
-* `rapl-set` - set Intel RAPL zone/constraint-specific configurations
+* `powercap-set` - set powercap control type zone/constraint-specific configurations
 
 These bindings were originally created for use with [RAPLCap](https://github.com/powercap/raplcap), but can be used independently.
 See the RAPLCap project for a more general interface for managing RAPL power caps, including other command line utilities.
@@ -23,7 +21,14 @@ If using this project for other scientific works or publications, please referen
 Powercap (with the RAPL implementation) was released with Linux kernel 3.13.
 You must be running this kernel or newer with the configs `CONFIG_POWERCAP` and `CONFIG_INTEL_RAPL` enabled.
 
-If the `intel_rapl` kernel module is not loaded at startup, run with proper privileges:
+To use the `intel-rapl` control type, ensure that the appropriate kernel module is loaded.
+Run with proper privileges:
+
+```sh
+modprobe intel_rapl_msr
+```
+
+Or on kernels older than 5.3:
 
 ```sh
 modprobe intel_rapl
@@ -51,8 +56,8 @@ See the man pages or run the applications with the `-h` or `--help` option for i
 
 ### Library
 
-First, there are the `powercap-sysfs.h` and `powercap-rapl-sysfs.h` interfaces for reading/writing to sysfs without the need to maintain state.
-These are reasonable for simple use cases.
+First, there is the `powercap-sysfs.h` interface for reading/writing to sysfs without the need to maintain state.
+This is reasonable for simple use cases.
 See the header files for documentation.
 
 The `powercap.h` interface provides read/write functions for generic powercap `zone` and `constraint` file sets.
@@ -65,10 +70,10 @@ Basic lifecycle example:
 
 ```C
   // get number of top-level (parent) RAPL instances
-  uint32_t count = powercap_rapl_get_num_packages();
+  uint32_t count = powercap_rapl_get_num_instances();
   if (count == 0) {
     // none found (maybe the kernel module isn't loaded?)
-    perror("powercap_rapl_get_num_packages")
+    perror("powercap_rapl_get_num_instances")
     return -1;
   }
   powercap_rapl_pkg* pkgs = malloc(count * sizeof(powercap_rapl_pkg));
@@ -97,7 +102,7 @@ Basic lifecycle example:
 The interfaces do _NOT_ guarantee that values are actually accepted by the kernel, they only notice errors if I/O operations fail.
 It is recommended that, at least during development/debugging, users read back to see if their write operations were successful.
 
-Additionally, the kernel sysfs bindings (and thus the `powercap-rapl` interface) do _NOT_ guarantee that RAPL instances are presented in package order.
+Additionally, the kernel sysfs bindings (and thus the `powercap-rapl` interface) do _NOT_ guarantee that RAPL instances are presented in any particular order.
 For example, the first instance (sysfs directory `intel-rapl:0`) on a dual-socket system may actually provide access to `package-1` instead of `package-0`, and vice versa.
 In cases where order matters, e.g., when sockets are managed asymmetrically, the user is responsible for ensuring that the correct powercap instance is being operated on, e.g., by checking its name with `powercap_rapl_get_name(...)`.
 More concretely, in the example above, `powercap_rapl_get_name(&pkgs[0], POWERCAP_RAPL_ZONE_PACKAGE, ...)` gives name `package-1`, and `powercap_rapl_get_name(&pkgs[1], POWERCAP_RAPL_ZONE_PACKAGE, ...)` is `package-0`.
