@@ -10,6 +10,12 @@ libpowercap.so.0 libpowercap0 #MINVER#
  powercap_constraint_get_time_window_us@Base 0.1.1
  powercap_constraint_set_power_limit_uw@Base 0.1.1
  powercap_constraint_set_time_window_us@Base 0.1.1
+ powercap_control_type_file_get_name@Base 0.3.0
+ powercap_control_type_get_enabled@Base 0.3.0
+ powercap_control_type_set_enabled@Base 0.3.0
+ powercap_rapl_control_is_enabled@Base 0.3.0
+ powercap_rapl_control_is_supported@Base 0.3.0
+ powercap_rapl_control_set_enabled@Base 0.3.0
  powercap_rapl_destroy@Base 0.1.1
  powercap_rapl_get_constraint_name@Base 0.1.1
  powercap_rapl_get_energy_uj@Base 0.1.1
@@ -20,6 +26,7 @@ libpowercap.so.0 libpowercap0 #MINVER#
  powercap_rapl_get_min_power_uw@Base 0.1.1
  powercap_rapl_get_min_time_window_us@Base 0.1.1
  powercap_rapl_get_name@Base 0.1.1
+ powercap_rapl_get_num_instances@Base 0.3.0
  powercap_rapl_get_num_packages@Base 0.1.1
  powercap_rapl_get_power_limit_uw@Base 0.1.1
  powercap_rapl_get_power_uw@Base 0.1.1
@@ -45,6 +52,8 @@ libpowercap.so.0 libpowercap0 #MINVER#
  powercap_sysfs_constraint_set_power_limit_uw@Base 0.1.1
  powercap_sysfs_constraint_set_time_window_us@Base 0.1.1
  powercap_sysfs_control_type_exists@Base 0.1.1
+ powercap_sysfs_control_type_get_enabled@Base 0.3.0
+ powercap_sysfs_control_type_set_enabled@Base 0.3.0
  powercap_sysfs_zone_exists@Base 0.1.1
  powercap_sysfs_zone_get_enabled@Base 0.1.1
  powercap_sysfs_zone_get_energy_uj@Base 0.1.1
