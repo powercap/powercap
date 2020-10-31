@@ -27,7 +27,7 @@
 
 static void test_snprintf_base_path(void) {
   char path[PATH_MAX] = { 0 };
-  uint32_t zones[PATH_MAX]; // can produce paths that exceed PATH_MAX length
+  uint32_t zones[PATH_MAX] = { 0 }; // can produce paths that exceed PATH_MAX length
   int rc;
   // root path
   assert(snprintf_base_path(path, sizeof(path), CONTROL_TYPE, NULL, 0) == ROOT_LEN);
