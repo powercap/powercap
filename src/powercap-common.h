@@ -65,7 +65,7 @@ int read_u64(int fd, uint64_t* val);
 int write_u64(int fd, uint64_t val);
 
 /*
- * Return is like snprintf, except if the output was truncated due to the size limit, the return value is still >= size,
+ * Return is like snprintf, except if the output was truncated due to the size limit, the return value is still > size,
  * but not necessarily the number of characters (excluding the terminating null byte) which would have been written to
  * the final string if enough space had been available.
  */
