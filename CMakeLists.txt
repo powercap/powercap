@@ -72,11 +72,40 @@ configure_file(
   ${CMAKE_CURRENT_BINARY_DIR}/pkgconfig/powercap.pc
 )
 
+# CMake package helper
+
+include(CMakePackageConfigHelpers)
+
+set(POWERCAP_CMAKE_CONFIG_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/powercap)
+set(CONFIG_PACKAGE_NAME POWERCAP)
+set(CONFIG_INCLUDE_DIRS ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
+set(CONFIG_LIB_DIRS ${CMAKE_INSTALL_LIBDIR})
+set(CONFIG_LIBRARIES powercap)
+
+configure_package_config_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfig.cmake
+  INSTALL_DESTINATION ${POWERCAP_CMAKE_CONFIG_DIR}
+  PATH_VARS
+    CONFIG_INCLUDE_DIRS
+    CONFIG_LIB_DIRS
+  NO_CHECK_REQUIRED_COMPONENTS_MACRO
+)
+
+write_basic_package_version_file(
+  ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfigVersion.cmake
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY SameMajorVersion
+)
+
 # Install
 
 install(TARGETS powercap DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES inc/powercap.h inc/powercap-sysfs.h inc/powercap-rapl.h inc/powercap-rapl-sysfs.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
 install(DIRECTORY ${CMAKE_BINARY_DIR}/pkgconfig/ DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfig.cmake
+              ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfigVersion.cmake
+        DESTINATION ${POWERCAP_CMAKE_CONFIG_DIR})
 
 # Uninstall
 

@@ -1,5 +1,12 @@
 # Release Notes
 
+## [Unreleased]
+
+### Added
+
+* CMake helper to find powercap without using pkg-config
+
+
 ## [v0.3.0] - 2020-08-15
 
 ### Added
@@ -93,6 +100,7 @@
 
 * Initial public release
 
+[Unreleased]: https://github.com/powercap/powercap/compare/v0.3.0...HEAD
 [v0.3.0]: https://github.com/powercap/powercap/compare/v0.2.0...v0.3.0
 [v0.2.0]: https://github.com/powercap/powercap/compare/v0.1.1...v0.2.0
 [v0.1.1]: https://github.com/powercap/powercap/compare/v0.1.0...v0.1.1
