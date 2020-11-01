@@ -1,20 +1,3 @@
-set(@CONFIG_PACKAGE_NAME@_VERSION       "@PROJECT_VERSION@")
-set(@CONFIG_PACKAGE_NAME@_VERSION_MAJOR "@VERSION_MAJOR@")
-set(@CONFIG_PACKAGE_NAME@_VERSION_MINOR "@VERSION_MINOR@")
-set(@CONFIG_PACKAGE_NAME@_VERSION_PATCH "@VERSION_PATCH@")
-
 @PACKAGE_INIT@
 
-set_and_check(@CONFIG_PACKAGE_NAME@_INCLUDE_DIRS  "@PACKAGE_CONFIG_INCLUDE_DIRS@")
-set_and_check(@CONFIG_PACKAGE_NAME@_LIBRARY_DIRS  "@PACKAGE_CONFIG_LIB_DIRS@")
-
-foreach(lib "@CONFIG_LIBRARIES@")
-  find_library(${lib}_LIB ${lib} PATHS "@PACKAGE_CONFIG_LIB_DIRS@"
-                                 NO_DEFAULT_PATH)
-  if(${lib}_LIB-NOTFOUND)
-    message(FATAL_ERROR "Could not find library: ${lib}")
-  else()
-    list(APPEND @CONFIG_PACKAGE_NAME@_LIBRARIES ${${lib}_LIB})
-    unset(${lib}_LIB CACHE)
-  endif()
-endforeach()
+include(${CMAKE_CURRENT_LIST_DIR}/@CONFIG_TARGETS_FILE@)

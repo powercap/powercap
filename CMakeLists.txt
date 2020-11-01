@@ -15,8 +15,6 @@ include(GNUInstallDirs)
 # See powercap-common.h for enumeration
 set(POWERCAP_LOG_LEVEL 4 CACHE STRING "Set the log level: 0=DEBUG, 1=INFO, 2=WARN, 3=ERROR, 4=OFF (default)")
 
-include_directories(${PROJECT_SOURCE_DIR}/inc)
-
 add_subdirectory(utils)
 
 # Libraries
@@ -26,6 +24,8 @@ add_library(powercap src/powercap.c
                      src/powercap-rapl.c
                      src/powercap-rapl-sysfs.c
                      src/powercap-common.c)
+target_include_directories(powercap PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+                                           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}>)
 target_compile_definitions(powercap PRIVATE POWERCAP_LOG_LEVEL=${POWERCAP_LOG_LEVEL})
 if (BUILD_SHARED_LIBS)
   set_target_properties(powercap PROPERTIES VERSION ${PROJECT_VERSION}
@@ -35,6 +35,7 @@ endif()
 # Tests
 
 add_executable(powercap-common-test test/powercap-common-test.c src/powercap-common.c)
+target_include_directories(powercap-common-test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/inc)
 
 add_executable(powercap-test test/powercap-test.c)
 target_link_libraries(powercap-test powercap)
@@ -77,19 +78,12 @@ configure_file(
 include(CMakePackageConfigHelpers)
 
 set(POWERCAP_CMAKE_CONFIG_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/powercap)
-set(CONFIG_PACKAGE_NAME POWERCAP)
-set(CONFIG_INCLUDE_DIRS ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
-set(CONFIG_LIB_DIRS ${CMAKE_INSTALL_LIBDIR})
-set(CONFIG_LIBRARIES powercap)
+set(CONFIG_TARGETS_FILE PowercapTargets.cmake)
 
 configure_package_config_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfig.cmake
   INSTALL_DESTINATION ${POWERCAP_CMAKE_CONFIG_DIR}
-  PATH_VARS
-    CONFIG_INCLUDE_DIRS
-    CONFIG_LIB_DIRS
-  NO_CHECK_REQUIRED_COMPONENTS_MACRO
 )
 
 write_basic_package_version_file(
@@ -100,12 +94,13 @@ write_basic_package_version_file(
 
 # Install
 
-install(TARGETS powercap DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS powercap EXPORT PowercapTargets DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES inc/powercap.h inc/powercap-sysfs.h inc/powercap-rapl.h inc/powercap-rapl-sysfs.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
 install(DIRECTORY ${CMAKE_BINARY_DIR}/pkgconfig/ DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfig.cmake
               ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfigVersion.cmake
         DESTINATION ${POWERCAP_CMAKE_CONFIG_DIR})
+install(EXPORT PowercapTargets FILE PowercapTargets.cmake DESTINATION ${POWERCAP_CMAKE_CONFIG_DIR})
 
 # Uninstall
 
