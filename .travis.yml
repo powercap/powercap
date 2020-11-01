@@ -1,11 +1,22 @@
 os:
   - linux
 
-language: c
+matrix:
+  include:
+    - dist: xenial
+      compiler: gcc
+    - dist: xenial
+      compiler: clang
+    - dist: bionic
+      compiler: gcc
+    - dist: bionic
+      compiler: clang
+    - dist: focal
+      compiler: gcc
+    - dist: focal
+      compiler: clang
 
-compiler:
-  - gcc
-  - clang
+language: c
 
 script:
   - mkdir _build
