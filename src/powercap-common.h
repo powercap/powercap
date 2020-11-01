@@ -71,13 +71,13 @@ int write_u64(int fd, uint64_t val);
  */
 int snprintf_base_path(char* buf, size_t size, const char* control_type, const uint32_t* zones, uint32_t depth);
 
-/* Return is like snprintf_base_path */
+/* Return is like snprintf */
 int snprintf_control_type_file(char* buf, size_t size, powercap_control_type_file type);
 
-/* Return is like snprintf_base_path */
+/* Return is like snprintf */
 int snprintf_zone_file(char* buf, size_t size, powercap_zone_file type);
 
-/* Return is like snprintf_base_path */
+/* Return is like snprintf */
 int snprintf_constraint_file(char* buf, size_t size, powercap_constraint_file type, uint32_t constraint);
 
 /* Return is like snprintf_base_path */
