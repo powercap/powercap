@@ -1,8 +1,15 @@
 os:
   - linux
 
+arch:
+  - amd64
+  - arm64
+  - ppc64le
+  - s390x
+
 matrix:
   include:
+    # Different distros and compilers on amd64
     - dist: xenial
       compiler: gcc
     - dist: xenial
@@ -15,6 +22,11 @@ matrix:
       compiler: gcc
     - dist: focal
       compiler: clang
+    # Different architectures, gcc only
+    # We test these b/c Debian and Ubuntu packaging builds them
+    - arch: arm64
+    - arch: ppc64le
+    - arch: s390x
 
 language: c
 
