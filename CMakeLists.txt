@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 2.8.12)
 project(powercap)
 set(VERSION_MAJOR 0)
 set(VERSION_MINOR 3)
-set(VERSION_PATCH 0)
+set(VERSION_PATCH 1)
 set(PROJECT_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99 -D_GNU_SOURCE")
@@ -14,8 +14,6 @@ include(GNUInstallDirs)
 
 # See powercap-common.h for enumeration
 set(POWERCAP_LOG_LEVEL 4 CACHE STRING "Set the log level: 0=DEBUG, 1=INFO, 2=WARN, 3=ERROR, 4=OFF (default)")
-
-include_directories(${PROJECT_SOURCE_DIR}/inc)
 
 add_subdirectory(utils)
 
@@ -26,6 +24,8 @@ add_library(powercap src/powercap.c
                      src/powercap-rapl.c
                      src/powercap-rapl-sysfs.c
                      src/powercap-common.c)
+target_include_directories(powercap PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+                                           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}>)
 target_compile_definitions(powercap PRIVATE POWERCAP_LOG_LEVEL=${POWERCAP_LOG_LEVEL})
 if (BUILD_SHARED_LIBS)
   set_target_properties(powercap PROPERTIES VERSION ${PROJECT_VERSION}
@@ -35,6 +35,7 @@ endif()
 # Tests
 
 add_executable(powercap-common-test test/powercap-common-test.c src/powercap-common.c)
+target_include_directories(powercap-common-test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/inc)
 
 add_executable(powercap-test test/powercap-test.c)
 target_link_libraries(powercap-test powercap)
@@ -72,11 +73,38 @@ configure_file(
   ${CMAKE_CURRENT_BINARY_DIR}/pkgconfig/powercap.pc
 )
 
+# CMake package helper
+
+include(CMakePackageConfigHelpers)
+
+set(POWERCAP_CMAKE_CONFIG_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/powercap)
+set(CONFIG_TARGETS_FILE PowercapTargets.cmake)
+
+configure_package_config_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfig.cmake
+  INSTALL_DESTINATION ${POWERCAP_CMAKE_CONFIG_DIR}
+)
+
+write_basic_package_version_file(
+  ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfigVersion.cmake
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY SameMajorVersion
+)
+
 # Install
 
-install(TARGETS powercap DESTINATION ${CMAKE_INSTALL_LIBDIR})
+set(POWERCAP_CMAKE_CONFIG_INSTALL OFF CACHE BOOL "Install cmake package helpers (experimental)")
+
+install(TARGETS powercap EXPORT PowercapTargets DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES inc/powercap.h inc/powercap-sysfs.h inc/powercap-rapl.h inc/powercap-rapl-sysfs.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
 install(DIRECTORY ${CMAKE_BINARY_DIR}/pkgconfig/ DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+if(POWERCAP_CMAKE_CONFIG_INSTALL)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfig.cmake
+                ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfigVersion.cmake
+          DESTINATION ${POWERCAP_CMAKE_CONFIG_DIR})
+  install(EXPORT PowercapTargets FILE PowercapTargets.cmake DESTINATION ${POWERCAP_CMAKE_CONFIG_DIR})
+endif()
 
 # Uninstall
 
