@@ -65,19 +65,19 @@ int read_u64(int fd, uint64_t* val);
 int write_u64(int fd, uint64_t val);
 
 /*
- * Return is like snprintf, except if the output was truncated due to the size limit, the return value is still >= size,
+ * Return is like snprintf, except if the output was truncated due to the size limit, the return value is still > size,
  * but not necessarily the number of characters (excluding the terminating null byte) which would have been written to
  * the final string if enough space had been available.
  */
 int snprintf_base_path(char* buf, size_t size, const char* control_type, const uint32_t* zones, uint32_t depth);
 
-/* Return is like snprintf_base_path */
+/* Return is like snprintf */
 int snprintf_control_type_file(char* buf, size_t size, powercap_control_type_file type);
 
-/* Return is like snprintf_base_path */
+/* Return is like snprintf */
 int snprintf_zone_file(char* buf, size_t size, powercap_zone_file type);
 
-/* Return is like snprintf_base_path */
+/* Return is like snprintf */
 int snprintf_constraint_file(char* buf, size_t size, powercap_constraint_file type, uint32_t constraint);
 
 /* Return is like snprintf_base_path */

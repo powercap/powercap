@@ -121,25 +121,29 @@ int snprintf_base_path(char* buf, size_t size, const char* control_type, const u
   if ((tot = snprintf(buf, size, POWERCAP_PATH"/%s/", control_type)) < 0) {
     return tot;
   }
-  for (j = 1; j <= depth && (size_t) tot < size; j++) {
+  for (j = 1; j <= depth; j++) {
+    if ((size_t) tot >= size) {
+      return size + 1; // strictly > size since there was still more work to do
+    }
     if ((w = snprintf(buf + (size_t) tot, size - (size_t) tot, "%s", control_type)) < 0) {
       return w;
     }
     tot += w;
     if ((size_t) tot >= size) {
-      break;
+      return size + 1; // strictly > size since there was still more work to do
     }
     for (i = 0; i < j && (size_t) tot < size; i++, tot += w) {
       if ((w = snprintf(buf + (size_t) tot, size - (size_t) tot, ":%x", zones[i])) < 0) {
         return w;
       }
     }
-    if ((size_t) tot < size) {
-      buf[tot++] = '/';
-      if ((size_t) tot < size) {
-        buf[tot] = '\0';
-      }
+    if ((size_t) tot >= size) {
+      return size + 1; // strictly > size since there was still more work to do
     }
+    buf[tot++] = '/';
+  }
+  if ((size_t) tot < size) {
+    buf[tot] = '\0';
   }
   return tot;
 }
@@ -162,13 +166,13 @@ int snprintf_control_type_file_path(char* path, size_t size, const char* control
   if ((tot = snprintf_base_path(path, size, control_type, NULL, 0)) < 0) {
     return tot;
   }
-  if ((size_t) tot < size) {
-    if ((w = snprintf_control_type_file(path + (size_t) tot, size - (size_t) tot, type)) < 0) {
-      return w;
-    }
-    tot += w;
+  if ((size_t) tot >= size) {
+    return size + 1; // strictly > size since there was still more work to do
   }
-  return tot;
+  if ((w = snprintf_control_type_file(path + (size_t) tot, size - (size_t) tot, type)) < 0) {
+    return w;
+  }
+  return tot + w;
 }
 
 int snprintf_zone_file_path(char* path, size_t size, const char* control_type, const uint32_t* zones, uint32_t depth,
@@ -178,13 +182,13 @@ int snprintf_zone_file_path(char* path, size_t size, const char* control_type, c
   if ((tot = snprintf_base_path(path, size, control_type, zones, depth)) < 0) {
     return tot;
   }
-  if ((size_t) tot < size) {
-    if ((w = snprintf_zone_file(path + tot, size - tot, type)) < 0) {
-      return w;
-    }
-    tot += w;
+  if ((size_t) tot >= size) {
+    return size + 1; // strictly > size since there was still more work to do
   }
-  return tot;
+  if ((w = snprintf_zone_file(path + tot, size - tot, type)) < 0) {
+    return w;
+  }
+  return tot + w;
 }
 
 int snprintf_constraint_file_path(char* path, size_t size, const char* control_type, const uint32_t* zones,
@@ -194,13 +198,13 @@ int snprintf_constraint_file_path(char* path, size_t size, const char* control_t
   if ((tot = snprintf_base_path(path, size, control_type, zones, depth)) < 0) {
     return tot;
   }
-  if ((size_t) tot < size) {
-    if ((w = snprintf_constraint_file(path + tot, size - tot, type, constraint)) < 0) {
-      return w;
-    }
-    tot += w;
+  if ((size_t) tot >= size) {
+    return size + 1; // strictly > size since there was still more work to do
   }
-  return tot;
+  if ((w = snprintf_constraint_file(path + tot, size - tot, type, constraint)) < 0) {
+    return w;
+  }
+  return tot + w;
 }
 
 int open_control_type_file(char* path, size_t size, const char* control_type, powercap_control_type_file type,

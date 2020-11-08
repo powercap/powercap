@@ -1,5 +1,12 @@
 # Release Notes
 
+## [v0.3.1] - 2020-11-08
+
+### Fixed
+
+* [#6] powercap-common-test:test_snprintf_base_path fails on ppc64el architecture
+
+
 ## [v0.3.0] - 2020-08-15
 
 ### Added
@@ -93,8 +100,10 @@
 
 * Initial public release
 
+[v0.3.1]: https://github.com/powercap/powercap/compare/v0.3.0...v0.3.1
 [v0.3.0]: https://github.com/powercap/powercap/compare/v0.2.0...v0.3.0
 [v0.2.0]: https://github.com/powercap/powercap/compare/v0.1.1...v0.2.0
 [v0.1.1]: https://github.com/powercap/powercap/compare/v0.1.0...v0.1.1
+[#6]: https://github.com/powercap/powercap/issues/6
 [#4]: https://github.com/powercap/powercap/issues/4
 [#1]: https://github.com/powercap/powercap/issues/1
