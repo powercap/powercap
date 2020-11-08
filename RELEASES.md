@@ -2,10 +2,6 @@
 
 ## [Unreleased]
 
-### Added
-
-* CMake helper to find powercap without using pkg-config
-
 ### Fixed
 
 * [#6] powercap-common-test:test_snprintf_base_path fails on ppc64el architecture
