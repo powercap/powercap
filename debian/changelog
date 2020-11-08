@@ -1,3 +1,10 @@
+powercap (0.3.1-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Fix unit test error on ppc64el architecture.
+
+ -- Connor Imes <ckimes@ubuntu.com>  Sun, 08 Nov 2020 13:29:31 -0500
+
 powercap (0.3.0-1) unstable; urgency=medium
 
   * New upstream release.
