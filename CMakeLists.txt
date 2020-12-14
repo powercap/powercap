@@ -98,7 +98,7 @@ set(POWERCAP_CMAKE_CONFIG_INSTALL OFF CACHE BOOL "Install cmake package helpers 
 
 install(TARGETS powercap EXPORT PowercapTargets DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES inc/powercap.h inc/powercap-sysfs.h inc/powercap-rapl.h inc/powercap-rapl-sysfs.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
-install(DIRECTORY ${CMAKE_BINARY_DIR}/pkgconfig/ DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/pkgconfig/ DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 if(POWERCAP_CMAKE_CONFIG_INSTALL)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfig.cmake
                 ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfigVersion.cmake
