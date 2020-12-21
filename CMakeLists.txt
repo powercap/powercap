@@ -84,7 +84,9 @@ if(POWERCAP_CMAKE_CONFIG_INSTALL)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfig.cmake
                 ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfigVersion.cmake
           DESTINATION ${POWERCAP_CMAKE_CONFIG_DIR})
-  install(EXPORT PowercapTargets FILE PowercapTargets.cmake DESTINATION ${POWERCAP_CMAKE_CONFIG_DIR})
+  install(EXPORT PowercapTargets
+          DESTINATION ${POWERCAP_CMAKE_CONFIG_DIR}
+          NAMESPACE Powercap::)
 endif()
 
 # Uninstall
