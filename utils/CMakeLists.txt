@@ -8,7 +8,9 @@ target_link_libraries(powercap-info powercap)
 add_executable(powercap-set powercap-set.c util-common.c)
 target_link_libraries(powercap-set powercap)
 
-install(TARGETS powercap-info powercap-set DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS powercap-info powercap-set
+        EXPORT PowercapTargets
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES man/man1/powercap-info.1 man/man1/powercap-set.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
 # Deprecated Binaries
@@ -19,5 +21,6 @@ target_link_libraries(rapl-info powercap)
 add_executable(rapl-set rapl-set.c util-common.c)
 target_link_libraries(rapl-set powercap)
 
+# Don't export deprecated targets
 install(TARGETS rapl-info rapl-set DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES man/man1/rapl-info.1 man/man1/rapl-set.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
