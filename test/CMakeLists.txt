@@ -9,14 +9,14 @@ target_include_directories(powercap-common-test PRIVATE ${PROJECT_SOURCE_DIR}/in
 add_unit_test(powercap-common-test)
 
 add_executable(powercap-test powercap-test.c)
-target_link_libraries(powercap-test powercap)
+target_link_libraries(powercap-test PRIVATE powercap)
 add_unit_test(powercap-test)
 
 add_executable(powercap-rapl-test powercap-rapl-test.c)
-target_link_libraries(powercap-rapl-test powercap)
+target_link_libraries(powercap-rapl-test PRIVATE powercap)
 # Requires a real system with root privileges
 # add_unit_test(powercap-rapl-test)
 
 add_executable(powercap-sysfs-test powercap-sysfs-test.c)
-target_link_libraries(powercap-sysfs-test powercap)
+target_link_libraries(powercap-sysfs-test PRIVATE powercap)
 add_unit_test(powercap-sysfs-test)
