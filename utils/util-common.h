@@ -21,7 +21,7 @@ extern "C" {
 #define MAX_ZONE_DEPTH 64
 #endif // MAX_ZONE_DEPTH
 #ifndef MAX_NAME_SIZE
-#define MAX_NAME_SIZE 64
+#define MAX_NAME_SIZE 1024
 #endif // MAX_NAME_SIZE
 
 typedef struct u32_param {
