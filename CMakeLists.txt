@@ -1,14 +1,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.1)
 
-project(powercap)
-set(VERSION_MAJOR 0)
-set(VERSION_MINOR 3)
-set(VERSION_PATCH 1)
-set(PROJECT_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
+project(powercap VERSION 0.3.1
+                 LANGUAGES C)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99 -D_GNU_SOURCE")
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS ON)
+add_compile_options(-Wall)
 
 include(GNUInstallDirs)
 
@@ -32,7 +32,7 @@ set_target_properties(powercap PROPERTIES PUBLIC_HEADER "inc/powercap.h;inc/powe
 target_compile_definitions(powercap PRIVATE POWERCAP_LOG_LEVEL=${POWERCAP_LOG_LEVEL})
 if (BUILD_SHARED_LIBS)
   set_target_properties(powercap PROPERTIES VERSION ${PROJECT_VERSION}
-                                            SOVERSION ${VERSION_MAJOR})
+                                            SOVERSION ${PROJECT_VERSION_MAJOR})
 endif()
 
 # pkg-config

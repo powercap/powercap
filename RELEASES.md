@@ -6,6 +6,10 @@
 
 * CMake helper to find powercap without using pkg-config
 
+### Changed
+
+* Increased minimum CMake version from 2.8.12 to 3.1
+
 
 ## [v0.3.1] - 2020-11-08
 
