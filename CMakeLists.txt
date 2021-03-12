@@ -72,22 +72,18 @@ write_basic_package_version_file(
 
 # Install
 
-set(POWERCAP_CMAKE_CONFIG_INSTALL OFF CACHE BOOL "Install cmake package helpers (experimental)")
-
 install(TARGETS powercap
         EXPORT PowercapTargets
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/pkgconfig/ DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-if(POWERCAP_CMAKE_CONFIG_INSTALL)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfig.cmake
-                ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfigVersion.cmake
-          DESTINATION ${POWERCAP_CMAKE_CONFIG_DIR})
-  install(EXPORT PowercapTargets
-          DESTINATION ${POWERCAP_CMAKE_CONFIG_DIR}
-          NAMESPACE Powercap::)
-endif()
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfig.cmake
+              ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfigVersion.cmake
+        DESTINATION ${POWERCAP_CMAKE_CONFIG_DIR})
+install(EXPORT PowercapTargets
+        DESTINATION ${POWERCAP_CMAKE_CONFIG_DIR}
+        NAMESPACE Powercap::)
 
 # Uninstall
 
