@@ -9,6 +9,11 @@
 ### Changed
 
 * Increased minimum CMake version from 2.8.12 to 3.1
+* Binaries powercap-{info,set} now accept the control type argument without requiring a preceding -p flag
+
+### Deprecated
+
+* Flag '-p/--control-type' in powercap-{info,set} - specify control type name as the first positional argument instead
 
 
 ## [v0.3.1] - 2020-11-08

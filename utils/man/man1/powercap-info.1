@@ -1,13 +1,15 @@
-.TH "POWERCAP-INFO" "1" "2020-05-27" "powercap" "powercap\-info"
+.TH "POWERCAP-INFO" "1" "2021-03-14" "powercap" "powercap\-info"
 .SH "NAME"
 .LP
 powercap\-info \- get information from the Linux power capping framework
 .SH "SYNPOSIS"
 .LP
-\fBpowercap\-info \-p\fP \fINAME\fP [\fIOPTION\fP]...
+\fBpowercap\-info\fP \fINAME\fP [\fIOPTION\fP]...
 .SH "DESCRIPTION"
 .LP
 Prints configurations for a powercap control type.
+.LP
+The control type \fINAME\fP must not be empty or contain a '.' or '/'.
 .SH "OPTIONS"
 .LP
 .TP
@@ -18,8 +20,7 @@ Prints the help screen
 Print errors when files are not available
 .TP
 \fB\-p,\fR \fB\-\-control\-type\fR=\fINAME\fP
-[REQUIRED] The powercap control type name.
-Must not be empty or contain a '.' or '/'.
+Deprecated, provide \fINAME\fP as the first positional argument instead.
 .TP
 \fB\-z,\fR \fB\-\-zone=\fR\fIZONE(S)\fP
 The zone/subzone numbers in the control type's powercap tree (control
@@ -97,22 +98,22 @@ Print constraint name
 These examples use Intel RAPL, for which the control type is
 \fBintel\-rapl\fR.
 .TP
-\fBpowercap\-info \-p intel\-rapl\fP
+\fBpowercap\-info intel\-rapl\fP
 Print all zones.
 .TP
-\fBpowercap\-info \-p intel\-rapl \-z 0\fP
+\fBpowercap\-info intel\-rapl \-z 0\fP
 Print only zone 0.
 .TP
-\fBpowercap\-info \-p intel\-rapl \-z 0:1\fP
+\fBpowercap\-info intel\-rapl \-z 0:1\fP
 Print zone 0, subzone 1.
 .TP
-\fBpowercap\-info \-p intel\-rapl \-z 0 \-c 1\fP
+\fBpowercap\-info intel\-rapl \-z 0 \-c 1\fP
 Print zone 0, constraint 1.
 .TP
-\fBpowercap\-info \-p intel\-rapl \-z 0 \-j\fP
+\fBpowercap\-info intel\-rapl \-z 0 \-j\fP
 Print the energy counter for zone 0.
 .TP
-\fBpowercap\-info \-p intel\-rapl \-z 1:0 \-c 0 \-l\fP
+\fBpowercap\-info intel\-rapl \-z 1:0 \-c 0 \-l\fP
 Print the power limit for zone 1, subzone 0, constraint 0.
 .SH "REMARKS"
 .LP

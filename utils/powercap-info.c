@@ -142,7 +142,7 @@ static void print_num_constraints(const char* control_type, uint32_t* zones, uin
   printf("%"PRIu32"\n", n);
 }
 
-static const char short_options[] = "hvp:z:c:EnNjJwWexlsUuTty";
+static const char short_options[] = "-hvp:z:c:EnNjJwWexlsUuTty";
 
 static const struct option long_options[] = {
   {"help",                no_argument,        NULL, 'h'},
@@ -170,12 +170,14 @@ static const struct option long_options[] = {
 };
 
 static void print_usage(void) {
-  printf("Usage: powercap-info -p NAME [OPTION]...\n");
+  printf("Usage: powercap-info NAME [OPTION]...\n\n");
+  printf("Prints configurations for a powercap control type.\n");
+  printf("The control type NAME must not be empty or contain a '.' or '/'.\n\n");
   printf("Options:\n");
   printf("  -h, --help                   Print this message and exit\n");
   printf("  -v, --verbose                Print errors when files are not available\n");
-  printf("  -p, --control-type=NAME      [REQUIRED] The powercap control type name\n");
-  printf("                               Must not be empty or contain a '.' or '/'\n");
+  printf("  -p, --control-type=NAME      Deprecated, provide NAME as the first\n");
+  printf("                               positional argument instead\n");
   printf("  -z, --zone=ZONE(S)           The zone/subzone numbers in the control type's\n");
   printf("                               powercap tree (control type's root by default)\n");
   printf("                               Separate zones/subzones with a colon\n");
@@ -244,6 +246,7 @@ int main(int argc, char** argv) {
     case 'v':
       verbose = 1;
       break;
+    case 1:
     case 'p':
       if (control_type) {
         cont = 0;

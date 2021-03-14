@@ -14,7 +14,7 @@
 #include "powercap-sysfs.h"
 #include "util-common.h"
 
-static const char short_options[] = "hp:z:c:E:je:l:s:";
+static const char short_options[] = "-hp:z:c:E:je:l:s:";
 
 static const struct option long_options[] = {
   {"help",                no_argument,        NULL, 'h'},
@@ -30,11 +30,13 @@ static const struct option long_options[] = {
 };
 
 static void print_usage(void) {
-  printf("Usage: powercap-set -p NAME [OPTION]...\n");
+  printf("Usage: powercap-set NAME [OPTION]...\n\n");
+  printf("Sets configurations for a powercap control type.\n");
+  printf("The control type NAME must not be empty or contain a '.' or '/'.\n\n");
   printf("Options:\n");
   printf("  -h, --help                   Print this message and exit\n");
-  printf("  -p, --control-type=NAME      [REQUIRED] The powercap control type name\n");
-  printf("                               Must not be empty or contain a '.' or '/'\n");
+  printf("  -p, --control-type=NAME      Deprecated, provide NAME as the first\n");
+  printf("                               positional argument instead\n");
   printf("  -z, --zone=ZONE(S)           The zone/subzone numbers in the control type's\n");
   printf("                               powercap tree\n");
   printf("                               Separate zones/subzones with a colon\n");
@@ -85,6 +87,7 @@ int main(int argc, char** argv) {
     case 'h':
       print_usage();
       return EXIT_SUCCESS;
+    case 1:
     case 'p':
       if (control_type) {
         cont = 0;
