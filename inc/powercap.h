@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * A simple interface for configuring powercaps using sysfs.
- * Parameters are never allowed to be NULL.
+ * Unless otherwise stated, parameters are never allowed to be NULL.
  * Unless otherwise stated, all functions return 0 on success or a negative value on error.
  *
  * These operations do basic file I/O.
@@ -112,6 +112,44 @@ int powercap_zone_file_get_name(powercap_zone_file type, char* buf, size_t size)
  * Returns a negative value in case of other error.
  */
 int powercap_constraint_file_get_name(powercap_constraint_file type, uint32_t constraint, char* buf, size_t size);
+
+/**
+ * Get the full path to a control type if depth is 0 (in which case zones may be NULL), or a control type's zone.
+ * Return is like snprintf, except if the output was truncated due to the size limit, the return value is still > size,
+ * but not necessarily the number of characters (excluding the terminating null byte) which would have been written to
+ * the final string if enough space had been available.
+ * Returns a negative value in case of other error.
+ */
+int powercap_get_path(const char* control_type_name, const uint32_t* zones, uint32_t depth, char* buf, size_t size);
+/**
+ * Get the full path to a control type file.
+ * Return is like snprintf, except if the output was truncated due to the size limit, the return value is still > size,
+ * but not necessarily the number of characters (excluding the terminating null byte) which would have been written to
+ * the final string if enough space had been available.
+ * Returns a negative value in case of other error.
+ */
+int powercap_control_type_file_get_path(powercap_control_type_file type, const char* control_type_name, char* buf,
+                                        size_t size);
+/**
+ * Get the full path to a zone file.
+ * Return is like snprintf, except if the output was truncated due to the size limit, the return value is still > size,
+ * but not necessarily the number of characters (excluding the terminating null byte) which would have been written to
+ * the final string if enough space had been available.
+ * Returns a negative value in case of other error.
+ */
+int powercap_zone_file_get_path(powercap_zone_file type, const char* control_type_name, const uint32_t* zones,
+                                uint32_t depth, char* buf, size_t size);
+
+/**
+ * Get the full path to a constraint file.
+ * Return is like snprintf, except if the output was truncated due to the size limit, the return value is still > size,
+ * but not necessarily the number of characters (excluding the terminating null byte) which would have been written to
+ * the final string if enough space had been available.
+ * Returns a negative value in case of other error.
+ */
+int powercap_constraint_file_get_path(powercap_constraint_file type, const char* control_type_name,
+                                      const uint32_t* zones, uint32_t depth, uint32_t constraint, char* buf,
+                                      size_t size);
 
 /**
  * Set the control type's enabled value.

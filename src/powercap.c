@@ -39,6 +39,47 @@ int powercap_constraint_file_get_name(powercap_constraint_file type, uint32_t co
   return snprintf_constraint_file(buf, size, type, constraint);
 }
 
+int powercap_get_path(const char* control_type_name, const uint32_t* zones, uint32_t depth, char* buf, size_t size) {
+  if (!control_type_name || !buf || !size || (depth && !zones)) {
+    errno = EINVAL;
+    return -errno;
+  }
+  return snprintf_base_path(buf, size, control_type_name, zones, depth);
+}
+
+int powercap_control_type_file_get_path(powercap_control_type_file type, const char* control_type_name, char* buf,
+                                        size_t size) {
+  /* check type in case users pass bad int value instead of enum; int cast silences clang compiler */
+  if (!control_type_name || !buf || !size || (int) type < 0 || (int) type > POWERCAP_CONTROL_TYPE_FILE_ENABLED) {
+    errno = EINVAL;
+    return -errno;
+  }
+  return snprintf_control_type_file_path(buf, size, control_type_name, type);
+}
+
+int powercap_zone_file_get_path(powercap_zone_file type, const char* control_type_name, const uint32_t* zones,
+                                uint32_t depth, char* buf, size_t size) {
+  /* check type in case users pass bad int value instead of enum; int cast silences clang compiler */
+  if (!control_type_name || !buf || !size || (int) type < 0 || (int) type > POWERCAP_ZONE_FILE_NAME ||
+      (depth && !zones)) {
+    errno = EINVAL;
+    return -errno;
+  }
+  return snprintf_zone_file_path(buf, size, control_type_name, zones, depth, type);
+}
+
+int powercap_constraint_file_get_path(powercap_constraint_file type, const char* control_type_name,
+                                      const uint32_t* zones, uint32_t depth, uint32_t constraint, char* buf,
+                                      size_t size) {
+  /* check type in case users pass bad int value instead of enum; int cast silences clang compiler */
+  if (!control_type_name || !buf || !size || (int) type < 0 || (int) type > POWERCAP_CONSTRAINT_FILE_NAME ||
+      (depth && !zones)) {
+    errno = EINVAL;
+    return -errno;
+  }
+  return snprintf_constraint_file_path(buf, size, control_type_name, zones, depth, constraint, type);
+}
+
 #define VERIFY_ARG(arg) \
   if (!(arg)) { \
     errno = EINVAL; \
