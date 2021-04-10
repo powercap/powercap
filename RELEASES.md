@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+* powercap.h: header documentation for 'powercap_*_file_get_name' functions' return behavior
+
 ### Added
 
 * CMake helper to find powercap without using pkg-config

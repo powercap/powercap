@@ -88,19 +88,28 @@ typedef enum powercap_constraint_file {
 
 /**
  * Get the filename for a control type file type.
- * Returns the number of characters written excluding the terminating null byte, or a negative value in case of error.
+ * Return is like snprintf, except if the output was truncated due to the size limit, the return value is still > size,
+ * but not necessarily the number of characters (excluding the terminating null byte) which would have been written to
+ * the final string if enough space had been available.
+ * Returns a negative value in case of other error.
  */
 int powercap_control_type_file_get_name(powercap_control_type_file type, char* buf, size_t size);
 
 /**
  * Get the filename for a zone file type.
- * Returns the number of characters written excluding the terminating null byte, or a negative value in case of error.
+ * Return is like snprintf, except if the output was truncated due to the size limit, the return value is still > size,
+ * but not necessarily the number of characters (excluding the terminating null byte) which would have been written to
+ * the final string if enough space had been available.
+ * Returns a negative value in case of other error.
  */
 int powercap_zone_file_get_name(powercap_zone_file type, char* buf, size_t size);
 
 /**
  * Get the filename for a constraint file type.
- * Returns the number of characters written excluding the terminating null byte, or a negative value in case of error.
+ * Return is like snprintf, except if the output was truncated due to the size limit, the return value is still > size,
+ * but not necessarily the number of characters (excluding the terminating null byte) which would have been written to
+ * the final string if enough space had been available.
+ * Returns a negative value in case of other error.
  */
 int powercap_constraint_file_get_name(powercap_constraint_file type, uint32_t constraint, char* buf, size_t size);
 
