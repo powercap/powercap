@@ -113,6 +113,10 @@ int write_u64(int fd, uint64_t val) {
   return 0;
 }
 
+int is_valid_control_type(const char* control_type) {
+  return control_type && strlen(control_type) && strcspn(control_type, "./") == strlen(control_type);
+}
+
 int snprintf_base_path(char* buf, size_t size, const char* control_type, const uint32_t* zones, uint32_t depth) {
   int w;
   int tot;

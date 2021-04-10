@@ -64,6 +64,9 @@ int read_u64(int fd, uint64_t* val);
 /* Return 0 on success, negative error code on failure */
 int write_u64(int fd, uint64_t val);
 
+/* Simple names only, trying to look outside the powercap directory is not allowed */
+int is_valid_control_type(const char* control_type);
+
 /*
  * Return is like snprintf, except if the output was truncated due to the size limit, the return value is still > size,
  * but not necessarily the number of characters (excluding the terminating null byte) which would have been written to
