@@ -106,18 +106,6 @@ int open_zone_file(char* path, size_t size, const char* control_type, const uint
 int open_constraint_file(char* path, size_t size, const char* control_type, const uint32_t* zones, uint32_t depth,
                          uint32_t constraint, powercap_constraint_file type, int flags);
 
-/* Return fd on success or ENOENT, -1 if buf is too small or on open failure */
-int powercap_control_type_file_open(char* buf, size_t bsize, const char* ct_name, powercap_control_type_file type,
-                                    int flags);
-
-/* Return fd on success or ENOENT, -1 if buf is too small or on open failure */
-int powercap_zone_file_open(char* buf, size_t bsize, const char* ct_name, const uint32_t* zones, uint32_t depth,
-                            powercap_zone_file type, int flags);
-
-/* Return fd on success or ENOENT, -1 if buf is too small or on open failure */
-int powercap_constraint_file_open(char* buf, size_t bsize, const char* ct_name, const uint32_t* zones, uint32_t depth,
-                                  uint32_t constraint, powercap_constraint_file type, int flags);
-
 /*
  * Open all files in a control type, if they exist.
  * Return 0 on success or ENOENT, -1 if buf is too small or on open failure.
