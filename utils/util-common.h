@@ -46,7 +46,7 @@ void str_or_verbose(int verbose, uint32_t in, const char* base, const char* val,
 
 void u64_or_verbose(int verbose, uint32_t in, const char* base, uint64_t val, int retval);
 
-int is_valid_control_type(const char* control_type);
+int is_valid_powercap_control_type(const char* control_type);
 
 int get_recurse(char* optarg);
 

@@ -122,7 +122,7 @@ void u64_or_verbose(int verbose, uint32_t in, const char* base, uint64_t val, in
   }
 }
 
-int is_valid_control_type(const char* control_type) {
+int is_valid_powercap_control_type(const char* control_type) {
   return control_type && strlen(control_type) && strcspn(control_type, "./") == strlen(control_type);
 }
 
