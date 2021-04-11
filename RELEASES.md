@@ -14,6 +14,10 @@
   * 'powercap_control_type_file_get_path'
   * 'powercap_zone_file_get_path'
   * 'powercap_constraint_file_get_path'
+* Functions to support opening files powercap.h:
+ * 'powercap_control_type_file_open'
+ * 'powercap_zone_file_open'
+ * 'powercap_constraint_file_open'
 
 ### Changed
 
