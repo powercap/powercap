@@ -39,6 +39,14 @@ int powercap_constraint_file_get_name(powercap_constraint_file type, uint32_t co
   return snprintf_constraint_file(buf, size, type, constraint);
 }
 
+#if 0
+/**
+ * Get the full path to a control type if depth is 0 (in which case zones may be NULL), or a control type's zone.
+ * Return is like snprintf, except if the output was truncated due to the size limit, the return value is still > size,
+ * but not necessarily the number of characters (excluding the terminating null byte) which would have been written to
+ * the final string if enough space had been available.
+ * Returns a negative value in case of other error.
+ */
 int powercap_get_path(const char* control_type_name, const uint32_t* zones, uint32_t depth, char* buf, size_t size) {
   if (!is_valid_control_type(control_type_name) || !buf || !size || (depth && !zones)) {
     errno = EINVAL;
@@ -47,6 +55,13 @@ int powercap_get_path(const char* control_type_name, const uint32_t* zones, uint
   return snprintf_base_path(buf, size, control_type_name, zones, depth);
 }
 
+/**
+ * Get the full path to a control type file.
+ * Return is like snprintf, except if the output was truncated due to the size limit, the return value is still > size,
+ * but not necessarily the number of characters (excluding the terminating null byte) which would have been written to
+ * the final string if enough space had been available.
+ * Returns a negative value in case of other error.
+ */
 int powercap_control_type_file_get_path(powercap_control_type_file type, const char* control_type_name, char* buf,
                                         size_t size) {
   /* check type in case users pass bad int value instead of enum; int cast silences clang compiler */
@@ -58,6 +73,13 @@ int powercap_control_type_file_get_path(powercap_control_type_file type, const c
   return snprintf_control_type_file_path(buf, size, control_type_name, type);
 }
 
+/**
+ * Get the full path to a zone file.
+ * Return is like snprintf, except if the output was truncated due to the size limit, the return value is still > size,
+ * but not necessarily the number of characters (excluding the terminating null byte) which would have been written to
+ * the final string if enough space had been available.
+ * Returns a negative value in case of other error.
+ */
 int powercap_zone_file_get_path(powercap_zone_file type, const char* control_type_name, const uint32_t* zones,
                                 uint32_t depth, char* buf, size_t size) {
   /* check type in case users pass bad int value instead of enum; int cast silences clang compiler */
@@ -69,6 +91,13 @@ int powercap_zone_file_get_path(powercap_zone_file type, const char* control_typ
   return snprintf_zone_file_path(buf, size, control_type_name, zones, depth, type);
 }
 
+/**
+ * Get the full path to a constraint file.
+ * Return is like snprintf, except if the output was truncated due to the size limit, the return value is still > size,
+ * but not necessarily the number of characters (excluding the terminating null byte) which would have been written to
+ * the final string if enough space had been available.
+ * Returns a negative value in case of other error.
+ */
 int powercap_constraint_file_get_path(powercap_constraint_file type, const char* control_type_name,
                                       const uint32_t* zones, uint32_t depth, uint32_t constraint, char* buf,
                                       size_t size) {
@@ -80,6 +109,7 @@ int powercap_constraint_file_get_path(powercap_constraint_file type, const char*
   }
   return snprintf_constraint_file_path(buf, size, control_type_name, zones, depth, constraint, type);
 }
+#endif
 
 int powercap_control_type_file_open(powercap_control_type* control, powercap_control_type_file type,
                                     const char* control_type_name, int flags) {

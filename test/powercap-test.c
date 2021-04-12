@@ -57,6 +57,7 @@ static void test_powercap_constraint_file_get_name(void) {
   assert(strncmp(buf, "constraint_0_name", sizeof(buf)) == 0);
 }
 
+#if 0
 static void test_powercap_get_path(void) {
   char buf[4096];
   uint32_t zones[2];
@@ -115,14 +116,17 @@ static void test_powercap_constraint_file_get_path(void) {
   assert(powercap_constraint_file_get_path(POWERCAP_CONSTRAINT_FILE_NAME, "foo", &zones, 1, 7, buf, sizeof(buf)) > 0);
   assert(strncmp(buf, POWERCAP_PATH"/foo/foo:3/constraint_7_name", sizeof(buf)) == 0);
 }
+#endif
 
 int main(void) {
   test_powercap_control_type_file_get_name();
   test_powercap_zone_file_get_name();
   test_powercap_constraint_file_get_name();
+#if 0
   test_powercap_get_path();
   test_powercap_control_type_file_get_path();
   test_powercap_zone_file_get_path();
   test_powercap_constraint_file_get_path();
+#endif
   return EXIT_SUCCESS;
 }

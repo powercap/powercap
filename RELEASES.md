@@ -9,11 +9,6 @@
 ### Added
 
 * CMake helper to find powercap without using pkg-config
-* Functions to support getting complete paths in powercap.h:
-  * 'powercap_get_path'
-  * 'powercap_control_type_file_get_path'
-  * 'powercap_zone_file_get_path'
-  * 'powercap_constraint_file_get_path'
 * Functions to support opening files powercap.h:
  * 'powercap_control_type_file_open'
  * 'powercap_zone_file_open'
