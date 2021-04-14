@@ -5,6 +5,7 @@
 ### Fixed
 
 * powercap.h: header documentation for 'powercap_*_file_get_name' functions' return behavior
+* rapl-{info,set}: deprecation messages that specified non-existent alternatives
 
 ### Added
 
