@@ -136,7 +136,7 @@ int main(int argc, char** argv) {
   if (ret) {
     fprintf(stderr, "Invalid arguments\n");
   } else if (!is_valid_powercap_control_type(control_type)) {
-    fprintf(stderr, "Must specify -p/--control-type; value must not be empty or contain any '.' or '/' characters\n");
+    fprintf(stderr, "Must specify control type NAME; value must not be empty or contain any '.' or '/' characters\n");
     ret = -EINVAL;
   } else if (!depth && (is_set_zone || is_set_constraint)) {
     fprintf(stderr, "Must specify -z/--zone with zone-level or constraint-level argument\n");
