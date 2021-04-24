@@ -16,9 +16,11 @@ install(FILES man/man1/powercap-info.1 man/man1/powercap-set.1 DESTINATION ${CMA
 # Deprecated Binaries
 
 add_executable(rapl-info rapl-info.c util-common.c)
+target_compile_definitions(rapl-info PRIVATE POWERCAP_ALLOW_DEPRECATED)
 target_link_libraries(rapl-info PRIVATE powercap)
 
 add_executable(rapl-set rapl-set.c util-common.c)
+target_compile_definitions(rapl-set PRIVATE POWERCAP_ALLOW_DEPRECATED)
 target_link_libraries(rapl-set PRIVATE powercap)
 
 # Don't export deprecated targets
