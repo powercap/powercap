@@ -11,9 +11,9 @@
 
 * CMake helper to find powercap without using pkg-config
 * Functions to support opening files powercap.h:
- * 'powercap_control_type_file_open'
- * 'powercap_zone_file_open'
- * 'powercap_constraint_file_open'
+  * 'powercap_control_type_file_open'
+  * 'powercap_zone_file_open'
+  * 'powercap_constraint_file_open'
 
 ### Changed
 
