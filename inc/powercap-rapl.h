@@ -35,6 +35,18 @@ extern "C" {
 #include <unistd.h>
 #include "powercap.h"
 
+#if !defined(POWERCAP_DEPRECATED)
+#if defined(POWERCAP_ALLOW_DEPRECATED)
+#define POWERCAP_DEPRECATED(x)
+#elif defined(__GNUC__) || defined(__clang__)
+#define POWERCAP_DEPRECATED(x) __attribute__((deprecated(x)))
+#elif defined(_MSC_VER)
+#define POWERCAP_DEPRECATED(x) __declspec(deprecated(x))
+#else
+#define POWERCAP_DEPRECATED(x)
+#endif
+#endif
+
 /**
  * Files for each zone.
  */
@@ -105,6 +117,7 @@ uint32_t powercap_rapl_get_num_instances(void);
  * Get the number of top-level (parent) RAPL instances found.
  * Returns 0 and sets errno if none are found.
  */
+POWERCAP_DEPRECATED("Call powercap_rapl_get_num_instances() instead")
 uint32_t powercap_rapl_get_num_packages(void);
 
 /**
