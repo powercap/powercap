@@ -1,4 +1,4 @@
-.TH "POWERCAP-INFO" "1" "2021-03-14" "powercap" "powercap\-info"
+.TH "POWERCAP-INFO" "1" "2021-04-24" "powercap" "powercap\-info"
 .SH "NAME"
 .LP
 powercap\-info \- get information from the Linux power capping framework
@@ -17,7 +17,7 @@ The control type \fINAME\fP must not be empty or contain a '.' or '/'.
 Prints the help screen
 .TP
 \fB\-v,\fR \fB\-\-verbose\fR
-Print errors when files are not available
+Print errors when files cannot be read
 .TP
 \fB\-p,\fR \fB\-\-control\-type\fR=\fINAME\fP
 Deprecated, provide \fINAME\fP as the first positional argument instead.
@@ -117,8 +117,11 @@ Print the energy counter for zone 0.
 Print the power limit for zone 1, subzone 0, constraint 0.
 .SH "REMARKS"
 .LP
-Some fields are optional and will only be printed if they are available
-unless \-v/\-\-verbose is set.
+Some fields are optional and/or may require administrative (super\-user)
+privileges to read.
+.br
+Fields will only be printed if they are available and readable, unless
+\-v/\-\-verbose is set.
 .br
 If no subzone/constraint\-specific outputs are requested, all available
 zones and constraints will be shown.

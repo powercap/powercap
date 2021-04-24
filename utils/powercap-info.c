@@ -175,7 +175,7 @@ static void print_usage(void) {
   printf("The control type NAME must not be empty or contain a '.' or '/'.\n\n");
   printf("Options:\n");
   printf("  -h, --help                   Print this message and exit\n");
-  printf("  -v, --verbose                Print errors when files are not available\n");
+  printf("  -v, --verbose                Print errors when files cannot be read\n");
   printf("  -p, --control-type=NAME      Deprecated, provide NAME as the first\n");
   printf("                               positional argument instead\n");
   printf("  -z, --zone=ZONE(S)           The zone/subzone numbers in the control type's\n");
@@ -205,7 +205,8 @@ static void print_usage(void) {
   printf("  -T, --c-max-time-window      Print constraint maximum allowed time window\n");
   printf("  -t, --c-min-time-window      Print constraint minimum allowed time window\n");
   printf("  -y, --c-name                 Print constraint name\n");
-  printf("\nSome fields are optional and will only be printed if they are available unless -v/--verbose is set.\n");
+  printf("\nSome fields are optional and/or may require administrative (super-user) privileges to read.\n");
+  printf("Fields will only be printed if they are available and readable, unless -v/--verbose is set.\n");
   printf("If no zone/constraint-specific outputs are requested, all available zones and constraints will be shown.\n");
   printf("\nEnergy units: microjoules (uJ)\n");
   printf("Power units: microwatts (uW)\n");
