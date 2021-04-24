@@ -22,6 +22,7 @@
 
 ### Deprecated
 
+* Add compiler deprecation attributes to deprecated functions
 * Flag '-p/--control-type' in powercap-{info,set} - specify control type name as the first positional argument instead
 
 
