@@ -21,11 +21,6 @@
 #include "powercap-common.h"
 #include "powercap-sysfs.h"
 
-static int is_valid_control_type(const char* control_type) {
-  /* simple names only, trying to look outside the powercap directory is not allowed */
-  return control_type && strlen(control_type) && strcspn(control_type, "./") == strlen(control_type);
-}
-
 static int control_type_read_u64(const char* control_type, uint64_t* val, powercap_control_type_file type) {
   char path[PATH_MAX];
   int ret;
