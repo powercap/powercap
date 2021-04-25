@@ -1,6 +1,6 @@
 # Release Notes
 
-## [Unreleased]
+## [v0.4.0] - 2021-04-25
 
 ### Fixed
 
@@ -9,21 +9,21 @@
 
 ### Added
 
-* CMake helper to find powercap without using pkg-config
-* Functions to support opening files powercap.h:
+* Functions to support opening files in powercap.h:
   * 'powercap_control_type_file_open'
   * 'powercap_zone_file_open'
   * 'powercap_constraint_file_open'
+* CMake helper to find powercap without relying on pkg-config
 
 ### Changed
 
-* Increased minimum CMake version from 2.8.12 to 3.1
 * Binaries powercap-{info,set} now accept the control type argument without requiring a preceding -p flag
+* Increased minimum CMake version from 2.8.12 to 3.1
 
 ### Deprecated
 
-* Add compiler deprecation attributes to deprecated functions
 * Flag '-p/--control-type' in powercap-{info,set} - specify control type name as the first positional argument instead
+* Add compiler deprecation attributes to deprecated functions
 
 
 ## [v0.3.1] - 2020-11-08
@@ -126,7 +126,7 @@
 
 * Initial public release
 
-[Unreleased]: https://github.com/powercap/powercap/compare/v0.3.1...HEAD
+[v0.4.0]: https://github.com/powercap/powercap/compare/v0.3.1...v0.4.0
 [v0.3.1]: https://github.com/powercap/powercap/compare/v0.3.0...v0.3.1
 [v0.3.0]: https://github.com/powercap/powercap/compare/v0.2.0...v0.3.0
 [v0.2.0]: https://github.com/powercap/powercap/compare/v0.1.1...v0.2.0
