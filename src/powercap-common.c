@@ -113,6 +113,10 @@ int write_u64(int fd, uint64_t val) {
   return 0;
 }
 
+int is_valid_control_type(const char* control_type) {
+  return control_type && strlen(control_type) && strcspn(control_type, "./") == strlen(control_type);
+}
+
 int snprintf_base_path(char* buf, size_t size, const char* control_type, const uint32_t* zones, uint32_t depth) {
   int w;
   int tot;
@@ -256,85 +260,85 @@ int open_constraint_file(char* path, size_t size, const char* control_type, cons
 }
 
 // like open(2), but returns 0 on ENOENT (No such file or directory)
-int powercap_control_type_file_open(char* buf, size_t bsize, const char* ct_name, powercap_control_type_file type,
-                                    int flags) {
+static int maybe_open_control_type_file(char* buf, size_t bsize, const char* ct_name, powercap_control_type_file type,
+                                        int flags) {
   int fd = open_control_type_file(buf, bsize, ct_name, type, flags);
   return (fd < 0 && errno == ENOENT) ? 0 : fd;
 }
 
 // like open(2), but returns 0 on ENOENT (No such file or directory)
-int powercap_zone_file_open(char* buf, size_t bsize, const char* ct_name, const uint32_t* zones, uint32_t depth,
-                            powercap_zone_file type, int flags) {
+static int maybe_open_zone_file(char* buf, size_t bsize, const char* ct_name, const uint32_t* zones, uint32_t depth,
+                                powercap_zone_file type, int flags) {
   int fd = open_zone_file(buf, bsize, ct_name, zones, depth, type, flags);
   return (fd < 0 && errno == ENOENT) ? 0 : fd;
 }
 
 // like open(2), but returns 0 on ENOENT (No such file or directory)
-int powercap_constraint_file_open(char* buf, size_t bsize, const char* ct_name, const uint32_t* zones, uint32_t depth,
-                                  uint32_t constraint, powercap_constraint_file type, int flags) {
+static int maybe_open_constraint_file(char* buf, size_t bsize, const char* ct_name, const uint32_t* zones,
+                                      uint32_t depth, uint32_t constraint, powercap_constraint_file type, int flags) {
   int fd = open_constraint_file(buf, bsize, ct_name, zones, depth, constraint, type, flags);
   return (fd < 0 && errno == ENOENT) ? 0 : fd;
 }
 
 int powercap_control_type_open(powercap_control_type* pct, char* buf, size_t bsize, const char* ct_name, int ro) {
-  return ((pct->enabled = powercap_control_type_file_open(buf, bsize, ct_name, POWERCAP_CONTROL_TYPE_FILE_ENABLED,
-                                                          ro ? O_RDONLY : O_RDWR)) < 0)
+  return ((pct->enabled = maybe_open_control_type_file(buf, bsize, ct_name, POWERCAP_CONTROL_TYPE_FILE_ENABLED,
+                                                       ro ? O_RDONLY : O_RDWR)) < 0)
          ? -1 : 0;
 }
 
 int powercap_zone_open(powercap_zone* pz, char* buf, size_t bsize, const char* ct_name, const uint32_t* zones,
                        uint32_t depth, int ro) {
   return ((pz->max_energy_range_uj =
-            powercap_zone_file_open(buf, bsize, ct_name, zones, depth,
-                                    POWERCAP_ZONE_FILE_MAX_ENERGY_RANGE_UJ, O_RDONLY)) < 0) ||
+            maybe_open_zone_file(buf, bsize, ct_name, zones, depth,
+                                 POWERCAP_ZONE_FILE_MAX_ENERGY_RANGE_UJ, O_RDONLY)) < 0) ||
          // special case for energy_uj - it's allowed to be either RW or RO
          (
           ((pz->energy_uj =
-              powercap_zone_file_open(buf, bsize, ct_name, zones, depth,
-                                      POWERCAP_ZONE_FILE_ENERGY_UJ, ro ? O_RDONLY : O_RDWR)) < 0) &&
+              maybe_open_zone_file(buf, bsize, ct_name, zones, depth,
+                                   POWERCAP_ZONE_FILE_ENERGY_UJ, ro ? O_RDONLY : O_RDWR)) < 0) &&
           (ro ||
             ((pz->energy_uj =
-                powercap_zone_file_open(buf, bsize, ct_name, zones, depth,
-                                        POWERCAP_ZONE_FILE_ENERGY_UJ, O_RDONLY)) < 0))
+                maybe_open_zone_file(buf, bsize, ct_name, zones, depth,
+                                     POWERCAP_ZONE_FILE_ENERGY_UJ, O_RDONLY)) < 0))
          ) ||
          ((pz->max_power_range_uw =
-            powercap_zone_file_open(buf, bsize, ct_name, zones, depth,
-                                    POWERCAP_ZONE_FILE_MAX_POWER_RANGE_UW, O_RDONLY)) < 0) ||
+            maybe_open_zone_file(buf, bsize, ct_name, zones, depth,
+                                 POWERCAP_ZONE_FILE_MAX_POWER_RANGE_UW, O_RDONLY)) < 0) ||
          ((pz->power_uw =
-            powercap_zone_file_open(buf, bsize, ct_name, zones, depth,
-                                    POWERCAP_ZONE_FILE_POWER_UW, O_RDONLY)) < 0) ||
+            maybe_open_zone_file(buf, bsize, ct_name, zones, depth,
+                                 POWERCAP_ZONE_FILE_POWER_UW, O_RDONLY)) < 0) ||
          ((pz->enabled =
-            powercap_zone_file_open(buf, bsize, ct_name, zones, depth,
-                                    POWERCAP_ZONE_FILE_ENABLED, ro ? O_RDONLY : O_RDWR)) < 0) ||
+            maybe_open_zone_file(buf, bsize, ct_name, zones, depth,
+                                 POWERCAP_ZONE_FILE_ENABLED, ro ? O_RDONLY : O_RDWR)) < 0) ||
          ((pz->name =
-            powercap_zone_file_open(buf, bsize, ct_name, zones, depth,
-                                    POWERCAP_ZONE_FILE_NAME, O_RDONLY)) < 0)
+            maybe_open_zone_file(buf, bsize, ct_name, zones, depth,
+                                 POWERCAP_ZONE_FILE_NAME, O_RDONLY)) < 0)
          ? -1 : 0;
 }
 
 int powercap_constraint_open(powercap_constraint* pc, char* buf, size_t bsize, const char* ct_name,
                              const uint32_t* zones, uint32_t depth, uint32_t constraint, int ro) {
   return ((pc->power_limit_uw =
-            powercap_constraint_file_open(buf, bsize, ct_name, zones, depth, constraint,
-                                          POWERCAP_CONSTRAINT_FILE_POWER_LIMIT_UW, ro ? O_RDONLY : O_RDWR)) < 0) ||
+            maybe_open_constraint_file(buf, bsize, ct_name, zones, depth, constraint,
+                                       POWERCAP_CONSTRAINT_FILE_POWER_LIMIT_UW, ro ? O_RDONLY : O_RDWR)) < 0) ||
          ((pc->time_window_us =
-            powercap_constraint_file_open(buf, bsize, ct_name, zones, depth, constraint,
-                                          POWERCAP_CONSTRAINT_FILE_TIME_WINDOW_US, ro ? O_RDONLY : O_RDWR)) < 0) ||
+            maybe_open_constraint_file(buf, bsize, ct_name, zones, depth, constraint,
+                                       POWERCAP_CONSTRAINT_FILE_TIME_WINDOW_US, ro ? O_RDONLY : O_RDWR)) < 0) ||
          ((pc->max_power_uw =
-            powercap_constraint_file_open(buf, bsize, ct_name, zones, depth, constraint,
-                                          POWERCAP_CONSTRAINT_FILE_MAX_POWER_UW, O_RDONLY)) < 0) ||
+            maybe_open_constraint_file(buf, bsize, ct_name, zones, depth, constraint,
+                                       POWERCAP_CONSTRAINT_FILE_MAX_POWER_UW, O_RDONLY)) < 0) ||
          ((pc->min_power_uw =
-            powercap_constraint_file_open(buf, bsize, ct_name, zones, depth, constraint,
-                                          POWERCAP_CONSTRAINT_FILE_MIN_POWER_UW, O_RDONLY)) < 0) ||
+            maybe_open_constraint_file(buf, bsize, ct_name, zones, depth, constraint,
+                                       POWERCAP_CONSTRAINT_FILE_MIN_POWER_UW, O_RDONLY)) < 0) ||
          ((pc->max_time_window_us =
-            powercap_constraint_file_open(buf, bsize, ct_name, zones, depth, constraint,
-                                          POWERCAP_CONSTRAINT_FILE_MAX_TIME_WINDOW_US, O_RDONLY)) < 0) ||
+            maybe_open_constraint_file(buf, bsize, ct_name, zones, depth, constraint,
+                                       POWERCAP_CONSTRAINT_FILE_MAX_TIME_WINDOW_US, O_RDONLY)) < 0) ||
          ((pc->min_time_window_us =
-            powercap_constraint_file_open(buf, bsize, ct_name, zones, depth, constraint,
-                                          POWERCAP_CONSTRAINT_FILE_MIN_TIME_WINDOW_US, O_RDONLY)) < 0) ||
+            maybe_open_constraint_file(buf, bsize, ct_name, zones, depth, constraint,
+                                       POWERCAP_CONSTRAINT_FILE_MIN_TIME_WINDOW_US, O_RDONLY)) < 0) ||
          ((pc->name =
-            powercap_constraint_file_open(buf, bsize, ct_name, zones, depth, constraint,
-                                          POWERCAP_CONSTRAINT_FILE_NAME, O_RDONLY)) < 0)
+            maybe_open_constraint_file(buf, bsize, ct_name, zones, depth, constraint,
+                                       POWERCAP_CONSTRAINT_FILE_NAME, O_RDONLY)) < 0)
          ? -1 : 0;
 }
 

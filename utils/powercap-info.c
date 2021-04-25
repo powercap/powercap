@@ -142,7 +142,7 @@ static void print_num_constraints(const char* control_type, uint32_t* zones, uin
   printf("%"PRIu32"\n", n);
 }
 
-static const char short_options[] = "hvp:z:c:EnNjJwWexlsUuTty";
+static const char short_options[] = "-hvp:z:c:EnNjJwWexlsUuTty";
 
 static const struct option long_options[] = {
   {"help",                no_argument,        NULL, 'h'},
@@ -170,12 +170,14 @@ static const struct option long_options[] = {
 };
 
 static void print_usage(void) {
-  printf("Usage: powercap-info -p NAME [OPTION]...\n");
+  printf("Usage: powercap-info NAME [OPTION]...\n\n");
+  printf("Prints configurations for a powercap control type.\n");
+  printf("The control type NAME must not be empty or contain a '.' or '/'.\n\n");
   printf("Options:\n");
   printf("  -h, --help                   Print this message and exit\n");
-  printf("  -v, --verbose                Print errors when files are not available\n");
-  printf("  -p, --control-type=NAME      [REQUIRED] The powercap control type name\n");
-  printf("                               Must not be empty or contain a '.' or '/'\n");
+  printf("  -v, --verbose                Print errors when files cannot be read\n");
+  printf("  -p, --control-type=NAME      Deprecated, provide NAME as the first\n");
+  printf("                               positional argument instead\n");
   printf("  -z, --zone=ZONE(S)           The zone/subzone numbers in the control type's\n");
   printf("                               powercap tree (control type's root by default)\n");
   printf("                               Separate zones/subzones with a colon\n");
@@ -203,7 +205,8 @@ static void print_usage(void) {
   printf("  -T, --c-max-time-window      Print constraint maximum allowed time window\n");
   printf("  -t, --c-min-time-window      Print constraint minimum allowed time window\n");
   printf("  -y, --c-name                 Print constraint name\n");
-  printf("\nSome fields are optional and will only be printed if they are available unless -v/--verbose is set.\n");
+  printf("\nSome fields are optional and/or may require administrative (super-user) privileges to read.\n");
+  printf("Fields will only be printed if they are available and readable, unless -v/--verbose is set.\n");
   printf("If no zone/constraint-specific outputs are requested, all available zones and constraints will be shown.\n");
   printf("\nEnergy units: microjoules (uJ)\n");
   printf("Power units: microwatts (uW)\n");
@@ -244,6 +247,7 @@ int main(int argc, char** argv) {
     case 'v':
       verbose = 1;
       break;
+    case 1:
     case 'p':
       if (control_type) {
         cont = 0;
@@ -294,8 +298,8 @@ int main(int argc, char** argv) {
   if (ret) {
     fprintf(stderr, "Invalid arguments\n");
     ret = -EINVAL;
-  } else if (!is_valid_control_type(control_type)) {
-    fprintf(stderr, "Must specify -p/--control-type; value must not be empty or contain any '.' or '/' characters\n");
+  } else if (!is_valid_powercap_control_type(control_type)) {
+    fprintf(stderr, "Must specify control type NAME; value must not be empty or contain any '.' or '/' characters\n");
     ret = -EINVAL;
   } else if (unique_set) {
     switch (unique_set) {

@@ -26,11 +26,12 @@ int rapl_sysfs_zone_exists(uint32_t zone, uint32_t sz, int is_sz) {
 }
 
 int rapl_sysfs_pkg_exists(uint32_t zone) {
-  return rapl_sysfs_zone_exists(zone, 0, 0);
+  return powercap_sysfs_zone_exists(CONTROL_TYPE, &zone, 1);
 }
 
 int rapl_sysfs_sz_exists(uint32_t zone, uint32_t sz) {
-  return rapl_sysfs_zone_exists(zone, sz, 1);
+  DECL_ZONES();
+  return powercap_sysfs_zone_exists(CONTROL_TYPE, zones, 2);
 }
 
 int rapl_sysfs_constraint_exists(uint32_t zone, uint32_t sz, int is_sz, uint32_t constraint) {

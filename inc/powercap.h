@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * A simple interface for configuring powercaps using sysfs.
- * Parameters are never allowed to be NULL.
+ * Unless otherwise stated, parameters are never allowed to be NULL.
  * Unless otherwise stated, all functions return 0 on success or a negative value on error.
  *
  * These operations do basic file I/O.
@@ -88,21 +88,55 @@ typedef enum powercap_constraint_file {
 
 /**
  * Get the filename for a control type file type.
- * Returns the number of characters written excluding the terminating null byte, or a negative value in case of error.
+ * Return is like snprintf, except if the output was truncated due to the size limit, the return value is still > size,
+ * but not necessarily the number of characters (excluding the terminating null byte) which would have been written to
+ * the final string if enough space had been available.
+ * Returns a negative value in case of other error.
  */
 int powercap_control_type_file_get_name(powercap_control_type_file type, char* buf, size_t size);
 
 /**
  * Get the filename for a zone file type.
- * Returns the number of characters written excluding the terminating null byte, or a negative value in case of error.
+ * Return is like snprintf, except if the output was truncated due to the size limit, the return value is still > size,
+ * but not necessarily the number of characters (excluding the terminating null byte) which would have been written to
+ * the final string if enough space had been available.
+ * Returns a negative value in case of other error.
  */
 int powercap_zone_file_get_name(powercap_zone_file type, char* buf, size_t size);
 
 /**
  * Get the filename for a constraint file type.
- * Returns the number of characters written excluding the terminating null byte, or a negative value in case of error.
+ * Return is like snprintf, except if the output was truncated due to the size limit, the return value is still > size,
+ * but not necessarily the number of characters (excluding the terminating null byte) which would have been written to
+ * the final string if enough space had been available.
+ * Returns a negative value in case of other error.
  */
 int powercap_constraint_file_get_name(powercap_constraint_file type, uint32_t constraint, char* buf, size_t size);
+
+/**
+ * Open a control type file.
+ * Returns the file descriptor from the open function and assigns it to the powercap_control_type (if not NULL).
+ * Also returns a negative value in case of other errors, like bad parameters.
+ */
+int powercap_control_type_file_open(powercap_control_type* control, powercap_control_type_file type,
+                                    const char* control_type_name, int flags);
+
+/**
+ * Open a zone file.
+ * Returns the file descriptor from the open function and assigns it to the powercap_zone (if not NULL).
+ * Also returns a negative value in case of other errors, like bad parameters.
+ */
+int powercap_zone_file_open(powercap_zone* zone, powercap_zone_file type, const char* control_type_name,
+                            const uint32_t* zones, uint32_t depth, int flags);
+
+/**
+ * Open a constraint file.
+ * Returns the file descriptor from the open function and assigns it to the powercap_constraint (if not NULL).
+ * Also returns a negative value in case of other errors, like bad parameters.
+ */
+int powercap_constraint_file_open(powercap_constraint* constraint, powercap_constraint_file type,
+                                  const char* control_type_name, const uint32_t* zones, uint32_t depth,
+                                  uint32_t constraint_num, int flags);
 
 /**
  * Set the control type's enabled value.

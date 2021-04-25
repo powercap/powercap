@@ -1,14 +1,16 @@
-.TH "POWERCAP\-SET" "1" "2020-05-24" "powercap" "powercap\-set"
+.TH "POWERCAP\-SET" "1" "2021-03-14" "powercap" "powercap\-set"
 .SH "NAME"
 .LP
 powercap\-set \- manage power capping devices with the Linux power capping
 framework
 .SH "SYNPOSIS"
 .LP
-\fBpowercap\-set \-p\fP \fINAME\fP [\fIOPTION\fP]...
+\fBpowercap\-set\fP \fINAME\fP [\fIOPTION\fP]...
 .SH "DESCRIPTION"
 .LP
 Sets configurations for a powercap control type.
+.LP
+The control type \fINAME\fP must not be empty or contain a '.' or '/'.
 .SH "OPTIONS"
 .LP
 .TP
@@ -16,8 +18,7 @@ Sets configurations for a powercap control type.
 Prints the help screen
 .TP
 \fB\-p,\fR \fB\-\-control\-type\fR=\fINAME\fP
-[REQUIRED] The powercap control type name.
-Must not be empty or contain a '.' or '/'.
+Deprecated, provide \fINAME\fP as the first positional argument instead.
 .TP
 \fB\-z,\fR \fB\-\-zone=\fR\fIZONE(S)\fP
 The zone/subzone numbers in the control type's powercap tree.
@@ -54,16 +55,16 @@ Set constraint time window
 These examples use Intel RAPL, for which the control type is
 \fBintel\-rapl\fR.
 .TP
-\fBpowercap\-set \-p intel\-rapl \-z 0 \-e 1\fP
+\fBpowercap\-set intel\-rapl \-z 0 \-e 1\fP
 Enable zone 0.
 .TP
-\fBpowercap\-set \-p intel\-rapl \-z 0:1 \-e 1\fP
+\fBpowercap\-set intel\-rapl \-z 0:1 \-e 1\fP
 Enable zone 0, subzone 1.
 .TP
-\fBpowercap\-set \-p intel\-rapl \-z 0 \-c 1 \-l 25000000\fP
+\fBpowercap\-set intel\-rapl \-z 0 \-c 1 \-l 25000000\fP
 Set a power cap of 25 Watts (25000000 uW) on zone 0, constraint 1.
 .TP
-\fBpowercap\-set \-p intel\-rapl \-z 1:0 \-c 0 \-l 15000000 \-s 976\fP
+\fBpowercap\-set intel\-rapl \-z 1:0 \-c 0 \-l 15000000 \-s 976\fP
 Set a power cap of 15 Watts (15000000 uW) and time window of 976
 microseconds on zone 1, subzone 0, constraint 0.
 .SH "REMARKS"

@@ -301,10 +301,10 @@ int main(int argc, char** argv) {
   }
 
   // initialize
-  npackages = powercap_rapl_get_num_packages();
+  npackages = powercap_rapl_get_num_instances();
   if (npackages == 0) {
     if (errno) {
-      perror("powercap_rapl_get_num_packages");
+      perror("powercap_rapl_get_num_instances");
     } else {
       fprintf(stderr, "No RAPL zones found\n");
     }

@@ -42,6 +42,18 @@ extern "C" {
 #include <inttypes.h>
 #include <unistd.h>
 
+#if !defined(POWERCAP_DEPRECATED)
+#if defined(POWERCAP_ALLOW_DEPRECATED)
+#define POWERCAP_DEPRECATED(x)
+#elif defined(__GNUC__) || defined(__clang__)
+#define POWERCAP_DEPRECATED(x) __attribute__((deprecated(x)))
+#elif defined(_MSC_VER)
+#define POWERCAP_DEPRECATED(x) __declspec(deprecated(x))
+#else
+#define POWERCAP_DEPRECATED(x)
+#endif
+#endif
+
 /**
  * Determine if a zone or subzone exist.
  * It is _not_ assumed that a zone maps one-to-one with an particular physical component like a socket or die.
@@ -56,6 +68,7 @@ extern "C" {
  * @param is_sz
  * @return 0 if zone exists, a negative error code otherwise.
  */
+POWERCAP_DEPRECATED("Call powercap_sysfs_zone_exists() instead")
 int rapl_sysfs_zone_exists(uint32_t zone, uint32_t sz, int is_sz);
 
 /**
@@ -75,6 +88,7 @@ int rapl_sysfs_zone_exists(uint32_t zone, uint32_t sz, int is_sz);
  * @param zone
  * @return 0 if zone exists, a negative error code otherwise.
  */
+POWERCAP_DEPRECATED("Call powercap_sysfs_zone_exists() instead")
 int rapl_sysfs_pkg_exists(uint32_t zone);
 
 /**
@@ -86,6 +100,7 @@ int rapl_sysfs_pkg_exists(uint32_t zone);
  * @param sz
  * @return 0 if subzone exists, a negative error code otherwise.
  */
+POWERCAP_DEPRECATED("Call powercap_sysfs_zone_exists() instead")
 int rapl_sysfs_sz_exists(uint32_t zone, uint32_t sz);
 
 /**
@@ -97,6 +112,7 @@ int rapl_sysfs_sz_exists(uint32_t zone, uint32_t sz);
  * @param constraint
  * @return 0 if constraint exists, a negative error code otherwise.
  */
+POWERCAP_DEPRECATED("Call powercap_sysfs_constraint_exists() instead")
 int rapl_sysfs_constraint_exists(uint32_t zone, uint32_t sz, int is_sz, uint32_t constraint);
 
 /**
@@ -108,6 +124,7 @@ int rapl_sysfs_constraint_exists(uint32_t zone, uint32_t sz, int is_sz, uint32_t
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
+POWERCAP_DEPRECATED("Call powercap_sysfs_zone_get_max_energy_range_uj() instead")
 int rapl_sysfs_zone_get_max_energy_range_uj(uint32_t zone, uint32_t sz, int is_sz, uint64_t* val);
 
 /**
@@ -118,6 +135,7 @@ int rapl_sysfs_zone_get_max_energy_range_uj(uint32_t zone, uint32_t sz, int is_s
  * @param is_sz
  * @return 0 on success, a negative error code otherwise.
  */
+POWERCAP_DEPRECATED("Call powercap_sysfs_zone_reset_energy_uj() instead")
 int rapl_sysfs_zone_reset_energy_uj(uint32_t zone, uint32_t sz, int is_sz);
 
 /**
@@ -129,6 +147,7 @@ int rapl_sysfs_zone_reset_energy_uj(uint32_t zone, uint32_t sz, int is_sz);
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
+POWERCAP_DEPRECATED("Call powercap_sysfs_zone_get_energy_uj() instead")
 int rapl_sysfs_zone_get_energy_uj(uint32_t zone, uint32_t sz, int is_sz, uint64_t* val);
 
 /**
@@ -140,6 +159,7 @@ int rapl_sysfs_zone_get_energy_uj(uint32_t zone, uint32_t sz, int is_sz, uint64_
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
+POWERCAP_DEPRECATED("Call powercap_sysfs_zone_get_max_power_range_uw() instead")
 int rapl_sysfs_zone_get_max_power_range_uw(uint32_t zone, uint32_t sz, int is_sz, uint64_t* val);
 
 /**
@@ -151,6 +171,7 @@ int rapl_sysfs_zone_get_max_power_range_uw(uint32_t zone, uint32_t sz, int is_sz
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
+POWERCAP_DEPRECATED("Call powercap_sysfs_zone_get_power_uw() instead")
 int rapl_sysfs_zone_get_power_uw(uint32_t zone, uint32_t sz, int is_sz, uint64_t* val);
 
 /**
@@ -162,6 +183,7 @@ int rapl_sysfs_zone_get_power_uw(uint32_t zone, uint32_t sz, int is_sz, uint64_t
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
+POWERCAP_DEPRECATED("Call powercap_sysfs_zone_set_enabled() instead")
 int rapl_sysfs_zone_set_enabled(uint32_t zone, uint32_t sz, int is_sz, uint32_t val);
 
 /**
@@ -173,6 +195,7 @@ int rapl_sysfs_zone_set_enabled(uint32_t zone, uint32_t sz, int is_sz, uint32_t 
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
+POWERCAP_DEPRECATED("Call powercap_sysfs_zone_get_enabled() instead")
 int rapl_sysfs_zone_get_enabled(uint32_t zone, uint32_t sz, int is_sz, uint32_t* val);
 
 /**
@@ -185,6 +208,7 @@ int rapl_sysfs_zone_get_enabled(uint32_t zone, uint32_t sz, int is_sz, uint32_t*
  * @param size
  * @return number of bytes read, a negative error code otherwise.
  */
+POWERCAP_DEPRECATED("Call powercap_sysfs_zone_get_name() instead")
 ssize_t rapl_sysfs_zone_get_name(uint32_t zone, uint32_t sz, int is_sz, char* buf, size_t size);
 
 /**
@@ -197,6 +221,7 @@ ssize_t rapl_sysfs_zone_get_name(uint32_t zone, uint32_t sz, int is_sz, char* bu
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
+POWERCAP_DEPRECATED("Call powercap_sysfs_constraint_set_power_limit_uw() instead")
 int rapl_sysfs_constraint_set_power_limit_uw(uint32_t zone, uint32_t sz, int is_sz, uint32_t constraint, uint64_t val);
 
 /**
@@ -209,6 +234,7 @@ int rapl_sysfs_constraint_set_power_limit_uw(uint32_t zone, uint32_t sz, int is_
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
+POWERCAP_DEPRECATED("Call powercap_sysfs_constraint_get_power_limit_uw() instead")
 int rapl_sysfs_constraint_get_power_limit_uw(uint32_t zone, uint32_t sz, int is_sz, uint32_t constraint, uint64_t* val);
 
 /**
@@ -221,6 +247,7 @@ int rapl_sysfs_constraint_get_power_limit_uw(uint32_t zone, uint32_t sz, int is_
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
+POWERCAP_DEPRECATED("Call powercap_sysfs_constraint_set_time_window_us() instead")
 int rapl_sysfs_constraint_set_time_window_us(uint32_t zone, uint32_t sz, int is_sz, uint32_t constraint, uint64_t val);
 
 /**
@@ -233,6 +260,7 @@ int rapl_sysfs_constraint_set_time_window_us(uint32_t zone, uint32_t sz, int is_
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
+POWERCAP_DEPRECATED("Call powercap_sysfs_constraint_get_time_window_us() instead")
 int rapl_sysfs_constraint_get_time_window_us(uint32_t zone, uint32_t sz, int is_sz, uint32_t constraint, uint64_t* val);
 
 /**
@@ -245,6 +273,7 @@ int rapl_sysfs_constraint_get_time_window_us(uint32_t zone, uint32_t sz, int is_
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
+POWERCAP_DEPRECATED("Call powercap_sysfs_constraint_get_max_power_uw() instead")
 int rapl_sysfs_constraint_get_max_power_uw(uint32_t zone, uint32_t sz, int is_sz, uint32_t constraint, uint64_t* val);
 
 /**
@@ -257,6 +286,7 @@ int rapl_sysfs_constraint_get_max_power_uw(uint32_t zone, uint32_t sz, int is_sz
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
+POWERCAP_DEPRECATED("Call powercap_sysfs_constraint_get_min_power_uw() instead")
 int rapl_sysfs_constraint_get_min_power_uw(uint32_t zone, uint32_t sz, int is_sz, uint32_t constraint, uint64_t* val);
 
 /**
@@ -269,6 +299,7 @@ int rapl_sysfs_constraint_get_min_power_uw(uint32_t zone, uint32_t sz, int is_sz
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
+POWERCAP_DEPRECATED("Call powercap_sysfs_constraint_get_max_time_window_us() instead")
 int rapl_sysfs_constraint_get_max_time_window_us(uint32_t zone, uint32_t sz, int is_sz, uint32_t constraint, uint64_t* val);
 
 /**
@@ -281,6 +312,7 @@ int rapl_sysfs_constraint_get_max_time_window_us(uint32_t zone, uint32_t sz, int
  * @param val
  * @return 0 on success, a negative error code otherwise.
  */
+POWERCAP_DEPRECATED("Call powercap_sysfs_constraint_get_min_time_window_us() instead")
 int rapl_sysfs_constraint_get_min_time_window_us(uint32_t zone, uint32_t sz, int is_sz, uint32_t constraint, uint64_t* val);
 
 
@@ -295,6 +327,7 @@ int rapl_sysfs_constraint_get_min_time_window_us(uint32_t zone, uint32_t sz, int
  * @param size
  * @return number of bytes read, a negative error code otherwise.
  */
+POWERCAP_DEPRECATED("Call powercap_sysfs_constraint_get_name() instead")
 ssize_t rapl_sysfs_constraint_get_name(uint32_t zone, uint32_t sz, int is_sz, uint32_t constraint, char* buf, size_t size);
 
 #ifdef __cplusplus

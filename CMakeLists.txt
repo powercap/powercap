@@ -1,20 +1,22 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.1)
 
-project(powercap)
-set(VERSION_MAJOR 0)
-set(VERSION_MINOR 3)
-set(VERSION_PATCH 1)
-set(PROJECT_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
+project(powercap VERSION 0.4.0
+                 LANGUAGES C)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99 -D_GNU_SOURCE")
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS ON)
+add_compile_options(-Wall)
 
 include(GNUInstallDirs)
 
 # See powercap-common.h for enumeration
 set(POWERCAP_LOG_LEVEL 4 CACHE STRING "Set the log level: 0=DEBUG, 1=INFO, 2=WARN, 3=ERROR, 4=OFF (default)")
 
+enable_testing()
+add_subdirectory(test)
 add_subdirectory(utils)
 
 # Libraries
@@ -26,36 +28,12 @@ add_library(powercap src/powercap.c
                      src/powercap-common.c)
 target_include_directories(powercap PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
                                            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}>)
+set_target_properties(powercap PROPERTIES PUBLIC_HEADER "inc/powercap.h;inc/powercap-sysfs.h;inc/powercap-rapl.h;inc/powercap-rapl-sysfs.h")
 target_compile_definitions(powercap PRIVATE POWERCAP_LOG_LEVEL=${POWERCAP_LOG_LEVEL})
 if (BUILD_SHARED_LIBS)
   set_target_properties(powercap PROPERTIES VERSION ${PROJECT_VERSION}
-                                            SOVERSION ${VERSION_MAJOR})
+                                            SOVERSION ${PROJECT_VERSION_MAJOR})
 endif()
-
-# Tests
-
-add_executable(powercap-common-test test/powercap-common-test.c src/powercap-common.c)
-target_include_directories(powercap-common-test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/inc)
-
-add_executable(powercap-test test/powercap-test.c)
-target_link_libraries(powercap-test powercap)
-
-add_executable(powercap-rapl-test test/powercap-rapl-test.c)
-target_link_libraries(powercap-rapl-test powercap)
-
-add_executable(powercap-sysfs-test test/powercap-sysfs-test.c)
-target_link_libraries(powercap-sysfs-test powercap)
-
-enable_testing()
-macro(add_unit_test target)
-  add_test(${target} ${EXECUTABLE_OUTPUT_PATH}/${target})
-endmacro(add_unit_test)
-
-add_unit_test(powercap-common-test)
-add_unit_test(powercap-test)
-# Requires a real system with root privileges
-# add_unit_test(powercap-rapl-test)
-add_unit_test(powercap-sysfs-test)
 
 # pkg-config
 
@@ -94,17 +72,18 @@ write_basic_package_version_file(
 
 # Install
 
-set(POWERCAP_CMAKE_CONFIG_INSTALL OFF CACHE BOOL "Install cmake package helpers (experimental)")
-
-install(TARGETS powercap EXPORT PowercapTargets DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(FILES inc/powercap.h inc/powercap-sysfs.h inc/powercap-rapl.h inc/powercap-rapl-sysfs.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
-install(DIRECTORY ${CMAKE_BINARY_DIR}/pkgconfig/ DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-if(POWERCAP_CMAKE_CONFIG_INSTALL)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfig.cmake
-                ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfigVersion.cmake
-          DESTINATION ${POWERCAP_CMAKE_CONFIG_DIR})
-  install(EXPORT PowercapTargets FILE PowercapTargets.cmake DESTINATION ${POWERCAP_CMAKE_CONFIG_DIR})
-endif()
+install(TARGETS powercap
+        EXPORT PowercapTargets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/pkgconfig/ DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfig.cmake
+              ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfigVersion.cmake
+        DESTINATION ${POWERCAP_CMAKE_CONFIG_DIR})
+install(EXPORT PowercapTargets
+        DESTINATION ${POWERCAP_CMAKE_CONFIG_DIR}
+        NAMESPACE Powercap::)
 
 # Uninstall
 
