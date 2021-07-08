@@ -116,6 +116,8 @@ Furthermore, files may exist but always return an error code for some zones or c
 ## Building
 
 ### Compiling
+(In order to cross-compile for another architecture, please see section
+Cross-compiling below)
 
 This project uses CMake.
 
@@ -132,6 +134,20 @@ To create a shared object library as a release build, specify for cmake:
 
 ``` sh
 cmake .. -DBUILD_SHARED_LIBS=On -DCMAKE_BUILD_TYPE=Release
+```
+
+### Cross-Compiling
+
+This project uses CMake. A sample configuration to cross-compile for
+aarch64 on a x86-host is provided in aarch64.cmake.
+
+To build, run:
+
+``` sh
+mkdir _build
+cd _build
+cmake -DCMAKE_TOOLCHAIN_FILE=../aarch64.cmake ..
+make
 ```
 
 ### Installing
