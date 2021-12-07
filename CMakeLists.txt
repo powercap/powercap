@@ -15,10 +15,6 @@ include(GNUInstallDirs)
 # See powercap-common.h for enumeration
 set(POWERCAP_LOG_LEVEL 4 CACHE STRING "Set the log level: 0=DEBUG, 1=INFO, 2=WARN, 3=ERROR, 4=OFF (default)")
 
-enable_testing()
-add_subdirectory(test)
-add_subdirectory(utils)
-
 # Libraries
 
 add_library(powercap src/powercap.c
@@ -57,11 +53,16 @@ include(CMakePackageConfigHelpers)
 
 set(POWERCAP_CMAKE_CONFIG_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/powercap)
 set(CONFIG_TARGETS_FILE PowercapTargets.cmake)
+# While we (currently) always build and install utils, making their import optional makes downstream packaging easier.
+# E.g., cmake package configs belong in the Debian dev package, which depends on the lib---but not the utils---package.
+set(CONFIG_SUPPORTED_COMPONENTS Utils)
 
 configure_package_config_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfig.cmake
   INSTALL_DESTINATION ${POWERCAP_CMAKE_CONFIG_DIR}
+  NO_SET_AND_CHECK_MACRO
+  NO_CHECK_REQUIRED_COMPONENTS_MACRO
 )
 
 write_basic_package_version_file(
@@ -94,3 +95,9 @@ configure_file(
 )
 
 add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+
+# Tests and Utilities
+
+enable_testing()
+add_subdirectory(test)
+add_subdirectory(utils)
