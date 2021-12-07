@@ -8,6 +8,7 @@
 
 ### Changed
 
+* Increased minimum CMake version from 3.1 to 3.12
 * CMake package config now exports binaries in a 'Utils' component rather than parent package
 
 

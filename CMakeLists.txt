@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.12)
 
 project(powercap VERSION 0.4.0
                  LANGUAGES C)
@@ -36,6 +36,7 @@ install(TARGETS powercap
         EXPORT PowercapTargets
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
                 COMPONENT Powercap_Runtime
+                NAMELINK_COMPONENT Powercap_Development
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
                 COMPONENT Powercap_Development
         PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
