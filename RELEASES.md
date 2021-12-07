@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+* CMake installation components
+
 ### Changed
 
 * CMake package config now exports binaries in a 'Utils' component rather than parent package

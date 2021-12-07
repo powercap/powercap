@@ -10,11 +10,15 @@ target_link_libraries(powercap-set PRIVATE powercap)
 
 install(TARGETS powercap-info powercap-set
         EXPORT PowercapUtilsTargets
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        COMPONENT Powercap_Utils_Runtime)
 install(EXPORT PowercapUtilsTargets
         DESTINATION ${POWERCAP_CMAKE_CONFIG_INSTALL_DIR}
-        NAMESPACE Powercap::)
-install(FILES man/man1/powercap-info.1 man/man1/powercap-set.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+        NAMESPACE Powercap::
+        COMPONENT Powercap_Utils_Development)
+install(FILES man/man1/powercap-info.1 man/man1/powercap-set.1
+        DESTINATION ${CMAKE_INSTALL_MANDIR}/man1
+        COMPONENT Powercap_Utils_Runtime)
 
 # Deprecated Binaries
 
@@ -27,5 +31,9 @@ target_compile_definitions(rapl-set PRIVATE POWERCAP_ALLOW_DEPRECATED)
 target_link_libraries(rapl-set PRIVATE powercap)
 
 # Don't export deprecated targets
-install(TARGETS rapl-info rapl-set DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(FILES man/man1/rapl-info.1 man/man1/rapl-set.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+install(TARGETS rapl-info rapl-set
+        DESTINATION ${CMAKE_INSTALL_BINDIR}
+        COMPONENT Powercap_Utils_Runtime)
+install(FILES man/man1/rapl-info.1 man/man1/rapl-set.1
+        DESTINATION ${CMAKE_INSTALL_MANDIR}/man1
+        COMPONENT Powercap_Utils_Runtime)

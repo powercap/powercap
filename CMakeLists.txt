@@ -35,8 +35,11 @@ endif()
 install(TARGETS powercap
         EXPORT PowercapTargets
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+                COMPONENT Powercap_Runtime
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
+                COMPONENT Powercap_Development
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
+                      COMPONENT Powercap_Development)
 
 # pkg-config
 
@@ -53,7 +56,9 @@ configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/pkgconfig.in
   ${CMAKE_CURRENT_BINARY_DIR}/pkgconfig/powercap.pc
 )
-install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/pkgconfig/ DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/pkgconfig/
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+        COMPONENT Powercap_Development)
 
 # CMake package helper
 
@@ -80,10 +85,12 @@ write_basic_package_version_file(
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfig.cmake
               ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfigVersion.cmake
-        DESTINATION ${POWERCAP_CMAKE_CONFIG_INSTALL_DIR})
+        DESTINATION ${POWERCAP_CMAKE_CONFIG_INSTALL_DIR}
+        COMPONENT Powercap_Development)
 install(EXPORT PowercapTargets
         DESTINATION ${POWERCAP_CMAKE_CONFIG_INSTALL_DIR}
-        NAMESPACE Powercap::)
+        NAMESPACE Powercap::
+        COMPONENT Powercap_Development)
 
 # Uninstall
 
