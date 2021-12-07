@@ -15,7 +15,7 @@ include(GNUInstallDirs)
 # See powercap-common.h for enumeration
 set(POWERCAP_LOG_LEVEL 4 CACHE STRING "Set the log level: 0=DEBUG, 1=INFO, 2=WARN, 3=ERROR, 4=OFF (default)")
 
-set(POWERCAP_CMAKE_CONFIG_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/powercap)
+set(POWERCAP_CMAKE_CONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/powercap)
 
 # Libraries
 
@@ -67,7 +67,7 @@ set(CONFIG_SUPPORTED_COMPONENTS Utils)
 configure_package_config_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfig.cmake
-  INSTALL_DESTINATION ${POWERCAP_CMAKE_CONFIG_DIR}
+  INSTALL_DESTINATION ${POWERCAP_CMAKE_CONFIG_INSTALL_DIR}
   NO_SET_AND_CHECK_MACRO
   NO_CHECK_REQUIRED_COMPONENTS_MACRO
 )
@@ -80,9 +80,9 @@ write_basic_package_version_file(
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfig.cmake
               ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfigVersion.cmake
-        DESTINATION ${POWERCAP_CMAKE_CONFIG_DIR})
+        DESTINATION ${POWERCAP_CMAKE_CONFIG_INSTALL_DIR})
 install(EXPORT PowercapTargets
-        DESTINATION ${POWERCAP_CMAKE_CONFIG_DIR}
+        DESTINATION ${POWERCAP_CMAKE_CONFIG_INSTALL_DIR}
         NAMESPACE Powercap::)
 
 # Uninstall

@@ -12,7 +12,7 @@ install(TARGETS powercap-info powercap-set
         EXPORT PowercapUtilsTargets
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(EXPORT PowercapUtilsTargets
-        DESTINATION ${POWERCAP_CMAKE_CONFIG_DIR}
+        DESTINATION ${POWERCAP_CMAKE_CONFIG_INSTALL_DIR}
         NAMESPACE Powercap::)
 install(FILES man/man1/powercap-info.1 man/man1/powercap-set.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
