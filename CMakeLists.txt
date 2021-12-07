@@ -15,6 +15,8 @@ include(GNUInstallDirs)
 # See powercap-common.h for enumeration
 set(POWERCAP_LOG_LEVEL 4 CACHE STRING "Set the log level: 0=DEBUG, 1=INFO, 2=WARN, 3=ERROR, 4=OFF (default)")
 
+set(POWERCAP_CMAKE_CONFIG_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/powercap)
+
 # Libraries
 
 add_library(powercap src/powercap.c
@@ -30,6 +32,11 @@ if (BUILD_SHARED_LIBS)
   set_target_properties(powercap PROPERTIES VERSION ${PROJECT_VERSION}
                                             SOVERSION ${PROJECT_VERSION_MAJOR})
 endif()
+install(TARGETS powercap
+        EXPORT PowercapTargets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
 
 # pkg-config
 
@@ -46,12 +53,12 @@ configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/pkgconfig.in
   ${CMAKE_CURRENT_BINARY_DIR}/pkgconfig/powercap.pc
 )
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/pkgconfig/ DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
 # CMake package helper
 
 include(CMakePackageConfigHelpers)
 
-set(POWERCAP_CMAKE_CONFIG_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/powercap)
 set(CONFIG_TARGETS_FILE PowercapTargets.cmake)
 # While we (currently) always build and install utils, making their import optional makes downstream packaging easier.
 # E.g., cmake package configs belong in the Debian dev package, which depends on the lib---but not the utils---package.
@@ -71,14 +78,6 @@ write_basic_package_version_file(
   COMPATIBILITY SameMajorVersion
 )
 
-# Install
-
-install(TARGETS powercap
-        EXPORT PowercapTargets
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
-install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/pkgconfig/ DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfig.cmake
               ${CMAKE_CURRENT_BINARY_DIR}/PowercapConfigVersion.cmake
         DESTINATION ${POWERCAP_CMAKE_CONFIG_DIR})
