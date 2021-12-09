@@ -1,6 +1,8 @@
 os:
   - linux
 
+dist: focal
+
 arch:
   - amd64
   - arm64
@@ -10,14 +12,6 @@ arch:
 matrix:
   include:
     # Different distros and compilers on amd64
-    - dist: xenial
-      compiler: gcc
-    - dist: xenial
-      compiler: clang
-    - dist: bionic
-      compiler: gcc
-    - dist: bionic
-      compiler: clang
     - dist: focal
       compiler: gcc
     - dist: focal
