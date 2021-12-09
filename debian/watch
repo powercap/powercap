@@ -1,2 +1,3 @@
 version=4
-https://github.com/powercap/powercap/releases (?:.*?/)?v([\d.]+)\.tar\.gz
+opts=filenamemangle=s/.+\/v?(\d\S+)\.tar\.gz/powercap-$1\.tar\.gz/ \
+  https://github.com/powercap/powercap/tags .*/v?(\d\S+)\.tar\.gz
