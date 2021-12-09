@@ -1,5 +1,17 @@
 # Release Notes
 
+## [v0.5.0] - 2021-12-09
+
+### Added
+
+* CMake installation components
+
+### Changed
+
+* Increased minimum CMake version from 3.1 to 3.12
+* CMake package config now exports binaries in a 'Utils' component rather than parent package
+
+
 ## [v0.4.0] - 2021-04-25
 
 ### Fixed
@@ -126,6 +138,7 @@
 
 * Initial public release
 
+[v0.5.0]: https://github.com/powercap/powercap/compare/v0.4.0...v0.5.0
 [v0.4.0]: https://github.com/powercap/powercap/compare/v0.3.1...v0.4.0
 [v0.3.1]: https://github.com/powercap/powercap/compare/v0.3.0...v0.3.1
 [v0.3.0]: https://github.com/powercap/powercap/compare/v0.2.0...v0.3.0

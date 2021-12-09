@@ -14,6 +14,21 @@ See the RAPLCap project for a more general interface for managing RAPL power cap
 If using this project for other scientific works or publications, please reference:
 
 * Connor Imes, Huazhe Zhang, Kevin Zhao, Henry Hoffmann. "CoPPer: Soft Real-time Application Performance Using Hardware Power Capping". In: IEEE International Conference on Autonomic Computing (ICAC). 2019. DOI: https://doi.org/10.1109/ICAC.2019.00015
+  <details>
+  <summary>BibTex</summary>
+
+  ```BibTex
+  @inproceedings{imes2019copper,
+    author={Imes, Connor and Zhang, Huazhe and Zhao, Kevin and Hoffmann, Henry},
+    booktitle={2019 IEEE International Conference on Autonomic Computing (ICAC)},
+    title={{CoPPer}: Soft Real-Time Application Performance Using Hardware Power Capping},
+    year={2019},
+    pages={31-41},
+    doi={10.1109/ICAC.2019.00015}
+  }
+  ```
+
+  </details>
 
 
 ## Prerequisites
