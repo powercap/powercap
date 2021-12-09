@@ -1,3 +1,5 @@
 usr/include/*
 usr/lib/*/*.so
 usr/lib/*/pkgconfig/*
+usr/lib/*/cmake/*/PowercapConfig*
+usr/lib/*/cmake/*/PowercapTargets*

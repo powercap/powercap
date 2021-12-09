@@ -4,7 +4,7 @@ Section: admin
 Priority: optional
 Build-Depends: debhelper-compat (= 13),
                cmake
-Standards-Version: 4.5.1
+Standards-Version: 4.6.0
 Vcs-Browser: https://github.com/connorimes/powercap/tree/debian
 Vcs-Git: https://github.com/connorimes/powercap.git -b debian
 Homepage: https://github.com/powercap/powercap
@@ -38,8 +38,7 @@ Package: libpowercap-dev
 Architecture: linux-any
 Multi-Arch: same
 Section: libdevel
-Depends: ${shlibs:Depends},
-         ${misc:Depends},
+Depends: ${misc:Depends},
          libpowercap0 (= ${binary:Version})
 Description: Development files for libpowercap
  This package provides everything needed to develop other programs and

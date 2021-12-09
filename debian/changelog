@@ -1,3 +1,11 @@
+powercap (0.5.0-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Update standards version to 4.6.0, no changes needed.
+  * Remove unnecessary ${shlibs:Depends} from libpowercap-dev dependencies.
+
+ -- Connor Imes <ckimes@ubuntu.com>  Thu, 09 Dec 2021 16:24:12 -0500
+
 powercap (0.4.0-1) unstable; urgency=medium
 
   * New upstream release.
