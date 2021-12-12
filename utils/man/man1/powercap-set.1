@@ -1,4 +1,4 @@
-.TH "POWERCAP\-SET" "1" "2021-03-14" "powercap" "powercap\-set"
+.TH "POWERCAP\-SET" "1" "2021-12-12" "powercap" "powercap\-set"
 .SH "NAME"
 .LP
 powercap\-set \- manage power capping devices with the Linux power capping
@@ -51,22 +51,21 @@ Set constraint power limit
 \fB\-s,\fR \fB\-\-c\-time\-window=US\fR
 Set constraint time window
 .SH "EXAMPLES"
-.LP
-These examples use Intel RAPL, for which the control type is
-\fBintel\-rapl\fR.
 .TP
 \fBpowercap\-set intel\-rapl \-z 0 \-e 1\fP
-Enable zone 0.
+Enable zone 0 for the \fIintel\-rapl\fR control type.
 .TP
 \fBpowercap\-set intel\-rapl \-z 0:1 \-e 1\fP
-Enable zone 0, subzone 1.
+Enable zone 0, subzone 1 for the \fIintel\-rapl\fR control type.
 .TP
 \fBpowercap\-set intel\-rapl \-z 0 \-c 1 \-l 25000000\fP
-Set a power cap of 25 Watts (25000000 uW) on zone 0, constraint 1.
+Set a power cap of 25 Watts (25000000 uW) on zone 0, constraint 1 for the
+\fIintel\-rapl\fR control type.
 .TP
 \fBpowercap\-set intel\-rapl \-z 1:0 \-c 0 \-l 15000000 \-s 976\fP
 Set a power cap of 15 Watts (15000000 uW) and time window of 976
-microseconds on zone 1, subzone 0, constraint 0.
+microseconds on zone 1, subzone 0, constraint 0 for the \fIintel\-rapl\fR
+control type.
 .SH "REMARKS"
 .LP
 Administrative (root) privileges are usually needed to use
