@@ -14,11 +14,11 @@
 #include "powercap-sysfs.h"
 #include "util-common.h"
 
-static void print_parent_headers(const uint32_t* zones, uint32_t depth_start, uint32_t depth) {
+static void print_parent_headers(const uint32_t* zones, uint32_t depth_start, uint32_t depth, uint32_t indnt) {
   uint32_t i;
   uint32_t j;
   for (i = depth_start; i <= depth; i++) {
-    indent(i - 1);
+    indent(indnt + i - 1);
     printf("Zone %"PRIu32, zones[0]);
     for (j = 1; j < i; j++) {
       printf(":%"PRIu32, zones[j]);
@@ -27,101 +27,101 @@ static void print_parent_headers(const uint32_t* zones, uint32_t depth_start, ui
   }
 }
 
-static void analyze_constraint(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint, int verbose) {
+static void analyze_constraint(const char* control_type, const uint32_t* zones, uint32_t depth, uint32_t constraint, int verbose, uint32_t indnt) {
   char name[MAX_NAME_SIZE];
   uint64_t val64;
   ssize_t sret;
   int ret;
 
-  indent(depth);
+  indent(indnt + depth);
   printf("Constraint %"PRIu32"\n", constraint);
 
   sret = powercap_sysfs_constraint_get_name(control_type, zones, depth, constraint, name, sizeof(name));
   ret = sret > 0 ? 0 : (int) sret;
-  str_or_verbose(verbose, depth + 1, "name", name, ret);
+  str_or_verbose(verbose, indnt + depth + 1, "name", name, ret);
 
   ret = powercap_sysfs_constraint_get_power_limit_uw(control_type, zones, depth, constraint, &val64);
-  u64_or_verbose(verbose, depth + 1, "power_limit_uw", val64, ret);
+  u64_or_verbose(verbose, indnt + depth + 1, "power_limit_uw", val64, ret);
 
   ret = powercap_sysfs_constraint_get_time_window_us(control_type, zones, depth, constraint, &val64);
-  u64_or_verbose(verbose, depth + 1, "time_window_us", val64, ret);
+  u64_or_verbose(verbose, indnt + depth + 1, "time_window_us", val64, ret);
 
   ret = powercap_sysfs_constraint_get_min_power_uw(control_type, zones, depth, constraint, &val64);
-  u64_or_verbose(verbose, depth + 1, "min_power_uw", val64, ret);
+  u64_or_verbose(verbose, indnt + depth + 1, "min_power_uw", val64, ret);
 
   ret = powercap_sysfs_constraint_get_max_power_uw(control_type, zones, depth, constraint, &val64);
-  u64_or_verbose(verbose, depth + 1, "max_power_uw", val64, ret);
+  u64_or_verbose(verbose, indnt + depth + 1, "max_power_uw", val64, ret);
 
   ret = powercap_sysfs_constraint_get_min_time_window_us(control_type, zones, depth, constraint, &val64);
-  u64_or_verbose(verbose, depth + 1, "min_time_window_us", val64, ret);
+  u64_or_verbose(verbose, indnt + depth + 1, "min_time_window_us", val64, ret);
 
   ret = powercap_sysfs_constraint_get_max_time_window_us(control_type, zones, depth, constraint, &val64);
-  u64_or_verbose(verbose, depth + 1, "max_time_window_us", val64, ret);
+  u64_or_verbose(verbose, indnt + depth + 1, "max_time_window_us", val64, ret);
 }
 
-static void analyze_zone(const char* control_type, const uint32_t* zones, uint32_t depth, int verbose) {
+static void analyze_zone(const char* control_type, const uint32_t* zones, uint32_t depth, int verbose, uint32_t indnt) {
   char name[MAX_NAME_SIZE];
   uint64_t val64;
   uint32_t val32;
   ssize_t sret;
   int ret;
 
-  print_parent_headers(zones, depth, depth);
+  print_parent_headers(zones, depth, depth, indnt);
 
   sret = powercap_sysfs_zone_get_name(control_type, zones, depth, name, sizeof(name));
   ret = sret > 0 ? 0 : (int) sret;
-  str_or_verbose(verbose, depth, "name", name, ret);
+  str_or_verbose(verbose, indnt + depth, "name", name, ret);
 
   ret = powercap_sysfs_zone_get_enabled(control_type, zones, depth, &val32);
-  u64_or_verbose(verbose, depth, "enabled", (uint64_t) val32, ret);
+  u64_or_verbose(verbose, indnt + depth, "enabled", (uint64_t) val32, ret);
 
   ret = powercap_sysfs_zone_get_max_energy_range_uj(control_type, zones, depth, &val64);
-  u64_or_verbose(verbose, depth, "max_energy_range_uj", val64, ret);
+  u64_or_verbose(verbose, indnt + depth, "max_energy_range_uj", val64, ret);
 
   ret = powercap_sysfs_zone_get_energy_uj(control_type, zones, depth, &val64);
-  u64_or_verbose(verbose, depth, "energy_uj", val64, ret);
+  u64_or_verbose(verbose, indnt + depth, "energy_uj", val64, ret);
 
   ret = powercap_sysfs_zone_get_max_power_range_uw(control_type, zones, depth, &val64);
-  u64_or_verbose(verbose, depth, "max_power_range_uw", val64, ret);
+  u64_or_verbose(verbose, indnt + depth, "max_power_range_uw", val64, ret);
 
   ret = powercap_sysfs_zone_get_power_uw(control_type, zones, depth, &val64);
-  u64_or_verbose(verbose, depth, "power_uw", val64, ret);
+  u64_or_verbose(verbose, indnt + depth, "power_uw", val64, ret);
 
   for (val32 = 0; !powercap_sysfs_constraint_exists(control_type, zones, depth, val32); val32++) {
-    analyze_constraint(control_type, zones, depth, val32, verbose);
+    analyze_constraint(control_type, zones, depth, val32, verbose, indnt);
   }
 }
 
-static void analyze_control_type(const char* control_type, int verbose) {
+static void analyze_control_type(const char* control_type, int verbose, uint32_t indnt) {
   uint32_t val32;
   int ret = powercap_sysfs_control_type_get_enabled(control_type, &val32);
-  u64_or_verbose(verbose, 0, "enabled", (uint64_t) val32, ret);
+  u64_or_verbose(verbose, indnt, "enabled", (uint64_t) val32, ret);
 }
 
 /* depth must be > 0 */
-static void analyze_all_zones_recurse(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t max_depth, int verbose) {
+static void analyze_all_zones_recurse(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t max_depth, int verbose, uint32_t indnt) {
   if (!powercap_sysfs_zone_exists(control_type, zones, depth)) {
     /* Analyze this zone */
-    analyze_zone(control_type, zones, depth, verbose);
+    analyze_zone(control_type, zones, depth, verbose, indnt);
     if (depth < max_depth) {
       /* Analyze subzones */
       zones[depth] = 0;
-      analyze_all_zones_recurse(control_type, zones, depth + 1, max_depth, verbose);
+      analyze_all_zones_recurse(control_type, zones, depth + 1, max_depth, verbose, indnt);
     }
     /* Analyze next sibling zone */
     zones[depth - 1]++;
-    analyze_all_zones_recurse(control_type, zones, depth, max_depth, verbose);
+    analyze_all_zones_recurse(control_type, zones, depth, max_depth, verbose, indnt);
   }
 }
 
-static void analyze_zone_recurse(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t max_depth, int verbose) {
+static void analyze_zone_recurse(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t max_depth, int verbose, uint32_t indnt) {
   if (!powercap_sysfs_zone_exists(control_type, zones, depth)) {
     /* Analyze this zone */
-    analyze_zone(control_type, zones, depth, verbose);
+    analyze_zone(control_type, zones, depth, verbose, indnt);
     if (depth < max_depth) {
       /* Analyze subzones */
       zones[depth] = 0;
-      analyze_all_zones_recurse(control_type, zones, depth + 1, max_depth, verbose);
+      analyze_all_zones_recurse(control_type, zones, depth + 1, max_depth, verbose, indnt);
     }
   }
 }
@@ -498,21 +498,21 @@ int main(int argc, char** argv) {
     /* Print summary of zone or constraint */
     if (constraint.set) {
       /* print constraint */
-      print_parent_headers(zones, 1, depth);
-      analyze_constraint(control_type, zones, depth, constraint.val, verbose);
+      print_parent_headers(zones, 1, depth, 0);
+      analyze_constraint(control_type, zones, depth, constraint.val, verbose, 0);
     } else {
       /* print zone */
-      print_parent_headers(zones, 1, depth - 1);
+      print_parent_headers(zones, 1, depth - 1, 0);
       if (recurse) {
-        analyze_zone_recurse(control_type, zones, depth, MAX_ZONE_DEPTH, verbose);
+        analyze_zone_recurse(control_type, zones, depth, MAX_ZONE_DEPTH, verbose, 0);
       } else {
-        analyze_zone(control_type, zones, depth, verbose);
+        analyze_zone(control_type, zones, depth, verbose, 0);
       }
     }
   } else {
-    analyze_control_type(control_type, verbose);
+    analyze_control_type(control_type, verbose, 0);
     /* print all zones */
-    analyze_all_zones_recurse(control_type, zones, 1, MAX_ZONE_DEPTH, verbose);
+    analyze_all_zones_recurse(control_type, zones, 1, MAX_ZONE_DEPTH, verbose, 0);
   }
   if (ret) {
     print_common_help();
