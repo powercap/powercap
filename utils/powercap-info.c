@@ -219,98 +219,21 @@ static void print_common_help(void) {
   printf("- Some files may simply not exist\n");
 }
 
-int main(int argc, char** argv) {
-  const char* control_type = NULL;
-  uint32_t zones[MAX_ZONE_DEPTH] = { 0 };
-  u32_param constraint = {0, 0};
-  uint32_t depth = 0;
-  int recurse = 1;
-  int verbose = 0;
-  int unique_set = 0;
-  int c;
-  int cont = 1;
+static int verify_control_type_args(const char* control_type, uint32_t depth, u32_param* constraint, int unique_set) {
   int ret = 0;
-  uint64_t val64;
-  uint32_t val32;
-  char name[MAX_NAME_SIZE];
-
-  /* Parse command-line arguments */
-  while (cont) {
-    c = getopt_long(argc, argv, short_options, long_options, NULL);
-    switch (c) {
-    case -1:
-      cont = 0;
-      break;
-    case 'h':
-      print_usage();
-      return EXIT_SUCCESS;
-    case 'v':
-      verbose = 1;
-      break;
-    case 1:
-    case 'p':
-      if (control_type) {
-        cont = 0;
-        ret = -EINVAL;
-      }
-      control_type = optarg;
-      break;
-    case 'z':
-      recurse = get_recurse(optarg);
-      ret = parse_zones(optarg, zones, MAX_ZONE_DEPTH, &depth, &cont);
-      break;
-    case 'c':
-      ret = set_u32_param(&constraint, optarg, &cont);
-      break;
-    case 'E':
-    case 'n':
-    case 'N':
-    case 'j':
-    case 'J':
-    case 'w':
-    case 'W':
-    case 'e':
-    case 'x':
-    case 'l':
-    case 's':
-    case 'U':
-    case 'u':
-    case 'T':
-    case 't':
-    case 'y':
-      if (unique_set) {
-        fprintf(stderr, "Must not specify multiple mutually exclusive arguments\n");
-        cont = 0;
-        ret = -EINVAL;
-        break;
-      }
-      unique_set = c;
-      break;
-    case '?':
-    default:
-      cont = 0;
-      ret = -EINVAL;
-      break;
-    }
-  }
-
-  /* Verify argument combinations */
-  if (ret) {
-    fprintf(stderr, "Invalid arguments\n");
-    ret = -EINVAL;
-  } else if (!is_valid_powercap_control_type(control_type)) {
+  if (!is_valid_powercap_control_type(control_type)) {
     fprintf(stderr, "Must specify control type NAME; value must not be empty or contain any '.' or '/' characters\n");
     ret = -EINVAL;
   } else if (unique_set) {
     switch (unique_set) {
     case 'E':
-      if (depth || constraint.set) {
+      if (depth || constraint->set) {
         fprintf(stderr, "Must not specify -z/--zone or -c/--constraint with -E/--enabled\n");
         ret = -EINVAL;
       }
       break;
     case 'n':
-      if (constraint.set) {
+      if (constraint->set) {
         fprintf(stderr, "Must not specify -c/--constraint with -n/--nzones\n");
         ret = -EINVAL;
       }
@@ -325,7 +248,7 @@ int main(int argc, char** argv) {
       if (!depth) {
         fprintf(stderr, "Must specify -z/--zone with zone-level argument\n");
         ret = -EINVAL;
-      } else if (constraint.set) {
+      } else if (constraint->set) {
         fprintf(stderr, "Must not specify -c/--constraint with zone-level argument\n");
         ret = -EINVAL;
       }
@@ -337,35 +260,36 @@ int main(int argc, char** argv) {
     case 'T':
     case 't':
     case 'y':
-      if (!depth || !constraint.set) {
+      if (!depth || !constraint->set) {
         fprintf(stderr, "Must specify -z/--zone and -c/--constraint with constraint-level argument\n");
         ret = -EINVAL;
       }
       break;
     }
-  } else if (constraint.set && !depth) {
+  } else if (constraint->set && !depth) {
     fprintf(stderr, "Must specify -z/--zone with -c/--constraint\n");
     ret = -EINVAL;
   }
-  if (ret) {
-    print_usage();
-    return EXIT_FAILURE;
-  }
+  return ret;
+}
+
+static int print_control_type(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t max_depth,
+                              u32_param* constraint, int recurse, int verbose, int unique_set, uint32_t indnt) {
+  uint64_t val64;
+  uint32_t val32;
+  char name[MAX_NAME_SIZE];
+  int ret = 0;
 
   /* Check if control type/zones/constraint exist */
   if (powercap_sysfs_control_type_exists(control_type)) {
     fprintf(stderr, "Control type does not exist\n");
-    ret = -EINVAL;
+    return -EINVAL;
   } else if (depth && powercap_sysfs_zone_exists(control_type, zones, depth)) {
     fprintf(stderr, "Zone does not exist\n");
-    ret = -EINVAL;
-  } else if (constraint.set && powercap_sysfs_constraint_exists(control_type, zones, depth, constraint.val)) {
+    return -EINVAL;
+  } else if (constraint->set && powercap_sysfs_constraint_exists(control_type, zones, depth, constraint->val)) {
     fprintf(stderr, "Constraint does not exist\n");
-    ret = -EINVAL;
-  }
-  if (ret) {
-    print_common_help();
-    return EXIT_FAILURE;
+    return -EINVAL;
   }
 
   /* Perform requested action */
@@ -438,7 +362,7 @@ int main(int argc, char** argv) {
       break;
     case 'l':
       /* Get constraint power limit */
-      if (!(ret = powercap_sysfs_constraint_get_power_limit_uw(control_type, zones, depth, constraint.val, &val64))) {
+      if (!(ret = powercap_sysfs_constraint_get_power_limit_uw(control_type, zones, depth, constraint->val, &val64))) {
         printf("%"PRIu64"\n", val64);
       } else {
         perror("Failed to get constraint power limit");
@@ -446,7 +370,7 @@ int main(int argc, char** argv) {
       break;
     case 's':
       /* Get constraint time window */
-      if (!(ret = powercap_sysfs_constraint_get_time_window_us(control_type, zones, depth, constraint.val, &val64))) {
+      if (!(ret = powercap_sysfs_constraint_get_time_window_us(control_type, zones, depth, constraint->val, &val64))) {
         printf("%"PRIu64"\n", val64);
       } else {
         perror("Failed to get constraint time window");
@@ -454,7 +378,7 @@ int main(int argc, char** argv) {
       break;
     case 'U':
       /* Get constraint max power */
-      if (!(ret = powercap_sysfs_constraint_get_max_power_uw(control_type, zones, depth, constraint.val, &val64))) {
+      if (!(ret = powercap_sysfs_constraint_get_max_power_uw(control_type, zones, depth, constraint->val, &val64))) {
         printf("%"PRIu64"\n", val64);
       } else {
         perror("Failed to get constraint max power");
@@ -462,7 +386,7 @@ int main(int argc, char** argv) {
       break;
     case 'u':
       /* Get constraint min power */
-      if (!(ret = powercap_sysfs_constraint_get_min_power_uw(control_type, zones, depth, constraint.val, &val64))) {
+      if (!(ret = powercap_sysfs_constraint_get_min_power_uw(control_type, zones, depth, constraint->val, &val64))) {
         printf("%"PRIu64"\n", val64);
       } else {
         perror("Failed to get constraint min power");
@@ -470,7 +394,7 @@ int main(int argc, char** argv) {
       break;
     case 'T':
       /* Get constraint max time window */
-      if (!(ret = powercap_sysfs_constraint_get_max_time_window_us(control_type, zones, depth, constraint.val, &val64))) {
+      if (!(ret = powercap_sysfs_constraint_get_max_time_window_us(control_type, zones, depth, constraint->val, &val64))) {
         printf("%"PRIu64"\n", val64);
       } else {
         perror("Failed to get constraint max time window");
@@ -478,7 +402,7 @@ int main(int argc, char** argv) {
       break;
     case 't':
       /* Get constraint min time window */
-      if (!(ret = powercap_sysfs_constraint_get_min_time_window_us(control_type, zones, depth, constraint.val, &val64))) {
+      if (!(ret = powercap_sysfs_constraint_get_min_time_window_us(control_type, zones, depth, constraint->val, &val64))) {
         printf("%"PRIu64"\n", val64);
       } else {
         perror("Failed to get constraint min time window");
@@ -486,7 +410,7 @@ int main(int argc, char** argv) {
       break;
     case 'y':
       /* Get constraint name */
-      if (powercap_sysfs_constraint_get_name(control_type, zones, depth, constraint.val, name, sizeof(name)) > 0) {
+      if (powercap_sysfs_constraint_get_name(control_type, zones, depth, constraint->val, name, sizeof(name)) > 0) {
         printf("%s\n", name);
       } else {
         ret = -errno;
@@ -496,15 +420,15 @@ int main(int argc, char** argv) {
     }
   } else if (depth > 0) {
     /* Print summary of zone or constraint */
-    if (constraint.set) {
+    if (constraint->set) {
       /* print constraint */
       print_parent_headers(zones, 1, depth, 0);
-      analyze_constraint(control_type, zones, depth, constraint.val, verbose, 0);
+      analyze_constraint(control_type, zones, depth, constraint->val, verbose, 0);
     } else {
       /* print zone */
       print_parent_headers(zones, 1, depth - 1, 0);
       if (recurse) {
-        analyze_zone_recurse(control_type, zones, depth, MAX_ZONE_DEPTH, verbose, 0);
+        analyze_zone_recurse(control_type, zones, depth, max_depth, verbose, 0);
       } else {
         analyze_zone(control_type, zones, depth, verbose, 0);
       }
@@ -512,8 +436,96 @@ int main(int argc, char** argv) {
   } else {
     analyze_control_type(control_type, verbose, 0);
     /* print all zones */
-    analyze_all_zones_recurse(control_type, zones, 1, MAX_ZONE_DEPTH, verbose, 0);
+    analyze_all_zones_recurse(control_type, zones, 1, max_depth, verbose, 0);
   }
+  return ret;
+}
+
+int main(int argc, char** argv) {
+  const char* control_type = NULL;
+  uint32_t zones[MAX_ZONE_DEPTH] = { 0 };
+  u32_param constraint = {0, 0};
+  uint32_t depth = 0;
+  int recurse = 1;
+  int verbose = 0;
+  int unique_set = 0;
+  int c;
+  int cont = 1;
+  int ret = 0;
+
+  /* Parse command-line arguments */
+  while (cont) {
+    c = getopt_long(argc, argv, short_options, long_options, NULL);
+    switch (c) {
+    case -1:
+      cont = 0;
+      break;
+    case 'h':
+      print_usage();
+      return EXIT_SUCCESS;
+    case 'v':
+      verbose = 1;
+      break;
+    case 1:
+    case 'p':
+      if (control_type) {
+        cont = 0;
+        ret = -EINVAL;
+      }
+      control_type = optarg;
+      break;
+    case 'z':
+      recurse = get_recurse(optarg);
+      ret = parse_zones(optarg, zones, MAX_ZONE_DEPTH, &depth, &cont);
+      break;
+    case 'c':
+      ret = set_u32_param(&constraint, optarg, &cont);
+      break;
+    case 'E':
+    case 'n':
+    case 'N':
+    case 'j':
+    case 'J':
+    case 'w':
+    case 'W':
+    case 'e':
+    case 'x':
+    case 'l':
+    case 's':
+    case 'U':
+    case 'u':
+    case 'T':
+    case 't':
+    case 'y':
+      if (unique_set) {
+        fprintf(stderr, "Must not specify multiple mutually exclusive arguments\n");
+        cont = 0;
+        ret = -EINVAL;
+        break;
+      }
+      unique_set = c;
+      break;
+    case '?':
+    default:
+      cont = 0;
+      ret = -EINVAL;
+      break;
+    }
+  }
+
+  /* Verify argument combinations */
+  if (ret) {
+    fprintf(stderr, "Invalid arguments\n");
+  } else {
+    ret = verify_control_type_args(control_type, depth, &constraint, unique_set);
+  }
+  if (ret) {
+    print_usage();
+    return EXIT_FAILURE;
+  }
+
+  /* Print requested info */
+  ret = print_control_type(control_type, zones, depth, MAX_ZONE_DEPTH, &constraint, recurse, verbose, unique_set, 0);
   if (ret) {
     print_common_help();
   }
