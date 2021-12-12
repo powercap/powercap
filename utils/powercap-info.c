@@ -114,6 +114,11 @@ static void analyze_all_zones_recurse(const char* control_type, uint32_t* zones,
   }
 }
 
+static void analyze_control_type_recurse(const char* control_type, uint32_t* zones, uint32_t max_depth, int verbose, uint32_t indnt) {
+  analyze_control_type(control_type, verbose, indnt);
+  analyze_all_zones_recurse(control_type, zones, 1, max_depth, verbose, indnt);
+}
+
 static void analyze_zone_recurse(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t max_depth, int verbose, uint32_t indnt) {
   if (!powercap_sysfs_zone_exists(control_type, zones, depth)) {
     /* Analyze this zone */
@@ -434,9 +439,8 @@ static int print_control_type(const char* control_type, uint32_t* zones, uint32_
       }
     }
   } else {
-    analyze_control_type(control_type, verbose, 0);
-    /* print all zones */
-    analyze_all_zones_recurse(control_type, zones, 1, max_depth, verbose, 0);
+    /* print control type and all zones */
+    analyze_control_type_recurse(control_type, zones, max_depth, verbose, 0);
   }
   return ret;
 }
