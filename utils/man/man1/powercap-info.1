@@ -1,15 +1,18 @@
-.TH "POWERCAP-INFO" "1" "2021-04-24" "powercap" "powercap\-info"
+.TH "POWERCAP-INFO" "1" "2021-12-12" "powercap" "powercap\-info"
 .SH "NAME"
 .LP
 powercap\-info \- get information from the Linux power capping framework
 .SH "SYNPOSIS"
 .LP
-\fBpowercap\-info\fP \fINAME\fP [\fIOPTION\fP]...
+\fBpowercap\-info\fP [\fINAME\fP [\fIOPTION\fP]...] [\fB\-hv\fP]
 .SH "DESCRIPTION"
 .LP
-Prints configurations for a powercap control type.
+Prints configurations for powercap control types.
 .LP
-The control type \fINAME\fP must not be empty or contain a '.' or '/'.
+Output can be filtered by specifying a control type \fINAME\fP and
+\fIOPTION\fP flags.
+.LP
+A control type \fINAME\fP must not be empty or contain a '.' or '/'.
 .SH "OPTIONS"
 .LP
 .TP
@@ -21,6 +24,8 @@ Print errors when files cannot be read
 .TP
 \fB\-p,\fR \fB\-\-control\-type\fR=\fINAME\fP
 Deprecated, provide \fINAME\fP as the first positional argument instead.
+.LP
+All remaining options below require a control type \fINAME\fP:
 .TP
 \fB\-z,\fR \fB\-\-zone=\fR\fIZONE(S)\fP
 The zone/subzone numbers in the control type's powercap tree (control
@@ -94,27 +99,28 @@ Print constraint minimum allowed time window
 \fB\-y,\fR \fB\-\-c\-name\fR
 Print constraint name
 .SH "EXAMPLES"
-.LP
-These examples use Intel RAPL, for which the control type is
-\fBintel\-rapl\fR.
+.TP
+\fBpowercap\-info\fP
+Print all zones for all control types.
 .TP
 \fBpowercap\-info intel\-rapl\fP
-Print all zones.
+Print all zones for the \fIintel\-rapl\fR control type.
 .TP
 \fBpowercap\-info intel\-rapl \-z 0\fP
-Print only zone 0.
+Print only zone 0 for the \fIintel\-rapl\fR control type.
 .TP
 \fBpowercap\-info intel\-rapl \-z 0:1\fP
-Print zone 0, subzone 1.
+Print zone 0, subzone 1 for the \fIintel\-rapl\fR control type.
 .TP
 \fBpowercap\-info intel\-rapl \-z 0 \-c 1\fP
-Print zone 0, constraint 1.
+Print zone 0, constraint 1 for the \fIintel\-rapl\fR control type.
 .TP
 \fBpowercap\-info intel\-rapl \-z 0 \-j\fP
-Print the energy counter for zone 0.
+Print the energy counter for zone 0 for the \fIintel\-rapl\fR control type.
 .TP
 \fBpowercap\-info intel\-rapl \-z 1:0 \-c 0 \-l\fP
-Print the power limit for zone 1, subzone 0, constraint 0.
+Print the power limit for zone 1, subzone 0, constraint 0 for the
+\fIintel\-rapl\fR control type.
 .SH "REMARKS"
 .LP
 Some fields are optional and/or may require administrative (super\-user)

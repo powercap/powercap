@@ -6,13 +6,18 @@
  * @author Connor Imes
  * @date 2017-08-24
  */
+#include <dirent.h>
 #include <errno.h>
 #include <getopt.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
 #include "powercap-sysfs.h"
 #include "util-common.h"
+
+#define POWERCAP_PATH "/sys/class/powercap"
 
 static void print_parent_headers(const uint32_t* zones, uint32_t depth_start, uint32_t depth, uint32_t indnt) {
   uint32_t i;
@@ -119,6 +124,27 @@ static void analyze_control_type_recurse(const char* control_type, uint32_t* zon
   analyze_all_zones_recurse(control_type, zones, 1, max_depth, verbose, indnt);
 }
 
+static int analyze_powercap(uint32_t* zones, uint32_t max_depth, int verbose) {
+  struct dirent *dp;
+  DIR *dfd;
+  if ((dfd = opendir(POWERCAP_PATH)) == NULL) {
+    perror(POWERCAP_PATH);
+    return -errno;
+  }
+  while ((dp = readdir(dfd)) != NULL) {
+    if (dp->d_name && !strstr(dp->d_name, ".") && !strstr(dp->d_name, ":")) {
+      memset(zones, 0, max_depth * sizeof(*zones));
+      printf("%s\n", dp->d_name);
+      analyze_control_type_recurse(dp->d_name, zones, max_depth, verbose, 1);
+    }
+  }
+  if (closedir(dfd)) {
+    perror(POWERCAP_PATH);
+    return -errno;
+  }
+  return 0;
+}
+
 static void analyze_zone_recurse(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t max_depth, int verbose, uint32_t indnt) {
   if (!powercap_sysfs_zone_exists(control_type, zones, depth)) {
     /* Analyze this zone */
@@ -175,14 +201,16 @@ static const struct option long_options[] = {
 };
 
 static void print_usage(void) {
-  printf("Usage: powercap-info NAME [OPTION]...\n\n");
-  printf("Prints configurations for a powercap control type.\n");
-  printf("The control type NAME must not be empty or contain a '.' or '/'.\n\n");
+  printf("Usage: powercap-info [NAME [OPTION]...] [-hv]\n\n");
+  printf("Prints configurations for powercap control types.\n");
+  printf("Output can be filtered by specifying a control type NAME and OPTION flags.\n");
+  printf("A control type NAME must not be empty or contain a '.' or '/'.\n\n");
   printf("Options:\n");
   printf("  -h, --help                   Print this message and exit\n");
   printf("  -v, --verbose                Print errors when files cannot be read\n");
   printf("  -p, --control-type=NAME      Deprecated, provide NAME as the first\n");
   printf("                               positional argument instead\n");
+  printf("All remaining options below require a control type NAME:\n");
   printf("  -z, --zone=ZONE(S)           The zone/subzone numbers in the control type's\n");
   printf("                               powercap tree (control type's root by default)\n");
   printf("                               Separate zones/subzones with a colon\n");
@@ -520,8 +548,11 @@ int main(int argc, char** argv) {
   /* Verify argument combinations */
   if (ret) {
     fprintf(stderr, "Invalid arguments\n");
-  } else {
+  } else if (control_type) {
     ret = verify_control_type_args(control_type, depth, &constraint, unique_set);
+  } else if (depth || constraint.set || unique_set) {
+    fprintf(stderr, "Must not specify control type options without NAME\n");
+    ret = -EINVAL;
   }
   if (ret) {
     print_usage();
@@ -529,7 +560,11 @@ int main(int argc, char** argv) {
   }
 
   /* Print requested info */
-  ret = print_control_type(control_type, zones, depth, MAX_ZONE_DEPTH, &constraint, recurse, verbose, unique_set, 0);
+  if (control_type) {
+    ret = print_control_type(control_type, zones, depth, MAX_ZONE_DEPTH, &constraint, recurse, verbose, unique_set, 0);
+  } else {
+    ret = analyze_powercap(zones, MAX_ZONE_DEPTH, verbose);
+  }
   if (ret) {
     print_common_help();
   }
