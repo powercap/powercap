@@ -6,6 +6,11 @@
 
 * powercap-info: control type name no longer required - will print info for all control types if not set
 
+### Changed
+
+* Powercap CMake package config helper now uses package-specific name for global components variable.
+See [CMake Issue #23112] and [CMake Merge Request #6975] for reasoning and technical details.
+
 
 ## [v0.5.0] - 2021-12-09
 
@@ -155,3 +160,5 @@
 [#6]: https://github.com/powercap/powercap/issues/6
 [#4]: https://github.com/powercap/powercap/issues/4
 [#1]: https://github.com/powercap/powercap/issues/1
+[CMake Issue #23112]: https://gitlab.kitware.com/cmake/cmake/-/issues/23112
+[CMake Merge Request #6975]: https://gitlab.kitware.com/cmake/cmake/-/merge_requests/6975
