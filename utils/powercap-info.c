@@ -132,7 +132,7 @@ static int analyze_powercap(uint32_t* zones, uint32_t max_depth, int verbose) {
     return -errno;
   }
   while ((dp = readdir(dfd)) != NULL) {
-    if (dp->d_name && !strstr(dp->d_name, ".") && !strstr(dp->d_name, ":")) {
+    if (!strstr(dp->d_name, ".") && !strstr(dp->d_name, ":")) {
       memset(zones, 0, max_depth * sizeof(*zones));
       printf("%s\n", dp->d_name);
       analyze_control_type_recurse(dp->d_name, zones, max_depth, verbose, 1);
