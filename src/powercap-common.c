@@ -189,7 +189,7 @@ int snprintf_zone_file_path(char* path, size_t size, const char* control_type, c
   if ((size_t) tot >= size) {
     return size + 1; // strictly > size since there was still more work to do
   }
-  if ((w = snprintf_zone_file(path + tot, size - tot, type)) < 0) {
+  if ((w = snprintf_zone_file(path + (size_t) tot, size - (size_t) tot, type)) < 0) {
     return w;
   }
   return tot + w;
@@ -205,7 +205,7 @@ int snprintf_constraint_file_path(char* path, size_t size, const char* control_t
   if ((size_t) tot >= size) {
     return size + 1; // strictly > size since there was still more work to do
   }
-  if ((w = snprintf_constraint_file(path + tot, size - tot, type, constraint)) < 0) {
+  if ((w = snprintf_constraint_file(path + tot, size - (size_t) tot, type, constraint)) < 0) {
     return w;
   }
   return tot + w;
