@@ -307,7 +307,7 @@ static int verify_control_type_args(const char* control_type, uint32_t depth, u3
 }
 
 static int print_control_type(const char* control_type, uint32_t* zones, uint32_t depth, uint32_t max_depth,
-                              u32_param* constraint, int recurse, int verbose, int unique_set, uint32_t indnt) {
+                              u32_param* constraint, int recurse, int verbose, int unique_set) {
   uint64_t val64;
   uint32_t val32;
   char name[MAX_NAME_SIZE];
@@ -561,7 +561,7 @@ int main(int argc, char** argv) {
 
   /* Print requested info */
   if (control_type) {
-    ret = print_control_type(control_type, zones, depth, MAX_ZONE_DEPTH, &constraint, recurse, verbose, unique_set, 0);
+    ret = print_control_type(control_type, zones, depth, MAX_ZONE_DEPTH, &constraint, recurse, verbose, unique_set);
   } else {
     ret = analyze_powercap(zones, MAX_ZONE_DEPTH, verbose);
   }
