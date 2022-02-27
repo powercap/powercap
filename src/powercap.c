@@ -124,7 +124,7 @@ int powercap_control_type_file_open(powercap_control_type* control, powercap_con
   if (control) {
     switch (type) {
       case POWERCAP_CONTROL_TYPE_FILE_ENABLED:
-        control->enabled = fd;;
+        control->enabled = fd;
         break;
       default:
         // unreachable
