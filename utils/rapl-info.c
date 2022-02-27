@@ -30,30 +30,30 @@ static void analyze_constraint(uint32_t zone, uint32_t sz, int is_sz, uint32_t c
   ssize_t sret;
   int ret;
 
-  indent(is_sz + 1);
+  indent((uint32_t) is_sz + 1);
   printf("Constraint %"PRIu32"\n", constraint);
 
   sret = rapl_sysfs_constraint_get_name(zone, sz, is_sz, constraint, name, sizeof(name));
   ret = sret > 0 ? 0 : (int) sret;
-  str_or_verbose(verbose, is_sz + 2, "name", name, ret);
+  str_or_verbose(verbose, (uint32_t) is_sz + 2, "name", name, ret);
 
   ret = rapl_sysfs_constraint_get_power_limit_uw(zone, sz, is_sz, constraint, &val64);
-  u64_or_verbose(verbose, is_sz + 2, "power_limit_uw", val64, ret);
+  u64_or_verbose(verbose, (uint32_t) is_sz + 2, "power_limit_uw", val64, ret);
 
   ret = rapl_sysfs_constraint_get_time_window_us(zone, sz, is_sz, constraint, &val64);
-  u64_or_verbose(verbose, is_sz + 2, "time_window_us", val64, ret);
+  u64_or_verbose(verbose, (uint32_t) is_sz + 2, "time_window_us", val64, ret);
 
   ret = rapl_sysfs_constraint_get_min_power_uw(zone, sz, is_sz, constraint, &val64);
-  u64_or_verbose(verbose, is_sz + 2, "min_power_uw", val64, ret);
+  u64_or_verbose(verbose, (uint32_t) is_sz + 2, "min_power_uw", val64, ret);
 
   ret = rapl_sysfs_constraint_get_max_power_uw(zone, sz, is_sz, constraint, &val64);
-  u64_or_verbose(verbose, is_sz + 2, "max_power_uw", val64, ret);
+  u64_or_verbose(verbose, (uint32_t) is_sz + 2, "max_power_uw", val64, ret);
 
   ret = rapl_sysfs_constraint_get_min_time_window_us(zone, sz, is_sz, constraint, &val64);
-  u64_or_verbose(verbose, is_sz + 2, "min_time_window_us", val64, ret);
+  u64_or_verbose(verbose, (uint32_t) is_sz + 2, "min_time_window_us", val64, ret);
 
   ret = rapl_sysfs_constraint_get_max_time_window_us(zone, sz, is_sz, constraint, &val64);
-  u64_or_verbose(verbose, is_sz + 2, "max_time_window_us", val64, ret);
+  u64_or_verbose(verbose, (uint32_t) is_sz + 2, "max_time_window_us", val64, ret);
 }
 
 static void analyze_zone(uint32_t zone, uint32_t sz, int is_sz, int verbose) {
@@ -67,22 +67,22 @@ static void analyze_zone(uint32_t zone, uint32_t sz, int is_sz, int verbose) {
 
   sret = rapl_sysfs_zone_get_name(zone, sz, is_sz, name, sizeof(name));
   ret = sret > 0 ? 0 : (int) sret;
-  str_or_verbose(verbose, is_sz + 1, "name", name, ret);
+  str_or_verbose(verbose, (uint32_t) is_sz + 1, "name", name, ret);
 
   ret = rapl_sysfs_zone_get_enabled(zone, sz, is_sz, &val32);
-  u64_or_verbose(verbose, is_sz + 1, "enabled", (uint64_t) val32, ret);
+  u64_or_verbose(verbose, (uint32_t) is_sz + 1, "enabled", (uint64_t) val32, ret);
 
   ret = rapl_sysfs_zone_get_max_energy_range_uj(zone, sz, is_sz, &val64);
-  u64_or_verbose(verbose, is_sz + 1, "max_energy_range_uj", val64, ret);
+  u64_or_verbose(verbose, (uint32_t) is_sz + 1, "max_energy_range_uj", val64, ret);
 
   ret = rapl_sysfs_zone_get_energy_uj(zone, sz, is_sz, &val64);
-  u64_or_verbose(verbose, is_sz + 1, "energy_uj", val64, ret);
+  u64_or_verbose(verbose, (uint32_t) is_sz + 1, "energy_uj", val64, ret);
 
   ret = rapl_sysfs_zone_get_max_power_range_uw(zone, sz, is_sz, &val64);
-  u64_or_verbose(verbose, is_sz + 1, "max_power_range_uw", val64, ret);
+  u64_or_verbose(verbose, (uint32_t) is_sz + 1, "max_power_range_uw", val64, ret);
 
   ret = rapl_sysfs_zone_get_power_uw(zone, sz, is_sz, &val64);
-  u64_or_verbose(verbose, is_sz + 1, "power_uw", val64, ret);
+  u64_or_verbose(verbose, (uint32_t) is_sz + 1, "power_uw", val64, ret);
 
   for (val32 = 0; !rapl_sysfs_constraint_exists(zone, sz, is_sz, val32); val32++) {
     analyze_constraint(zone, sz, is_sz, val32, verbose);
