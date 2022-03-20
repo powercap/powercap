@@ -28,10 +28,10 @@ script:
   - mkdir _build
   - cd _build
   # Test build with stricter flags
-  - export CFLAGS="-D_FORTIFY_SOURCE=2 -fstack-protector -g3 -pedantic -W -Wall -Wbad-function-cast -Wcast-align
+  - export CFLAGS="-D_FORTIFY_SOURCE=2 -fstack-protector -g3 -pedantic -Wall -Wextra -Wbad-function-cast -Wcast-align
       -Wcast-qual -Wdisabled-optimization -Wendif-labels -Wfloat-conversion -Wfloat-equal -Wformat=2 -Wformat-nonliteral
       -Winline -Wmissing-declarations -Wmissing-noreturn -Wmissing-prototypes -Wnested-externs -Wpointer-arith -Wshadow
-      -Wsign-conversion -Wstrict-prototypes -Wstack-protector -Wswitch -Wundef -Wunused-parameter -Wwrite-strings
+      -Wsign-conversion -Wstrict-prototypes -Wstack-protector -Wundef -Wwrite-strings
       -Werror"
   - cmake .. -DCMAKE_C_FLAGS="$CFLAGS"
   - cmake --build .
