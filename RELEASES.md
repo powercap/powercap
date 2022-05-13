@@ -10,6 +10,7 @@
 
 * Powercap CMake package config helper now uses package-specific name for global components variable.
 See [CMake Issue #23112] and [CMake Merge Request #6975] for reasoning and technical details.
+* Internal tweaks based on testing with additional compiler flags
 
 
 ## [v0.5.0] - 2021-12-09
