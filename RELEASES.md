@@ -1,5 +1,12 @@
 # Release Notes
 
+## [Unreleased]
+
+### Fixed
+
+* [#8] pkg-config file is broken when CMAKE_INSTALL_{INCLUDE,LIB}DIR is absolute (Alex Shpilkin)
+
+
 ## [v0.6.0] - 2022-05-13
 
 ### Added
@@ -151,6 +158,7 @@ See [CMake Issue #23112] and [CMake Merge Request #6975] for reasoning and techn
 
 * Initial public release
 
+[Unreleased]: https://github.com/powercap/powercap/compare/v0.6.0...HEAD
 [v0.6.0]: https://github.com/powercap/powercap/compare/v0.5.0...v0.6.0
 [v0.5.0]: https://github.com/powercap/powercap/compare/v0.4.0...v0.5.0
 [v0.4.0]: https://github.com/powercap/powercap/compare/v0.3.1...v0.4.0
@@ -158,6 +166,7 @@ See [CMake Issue #23112] and [CMake Merge Request #6975] for reasoning and techn
 [v0.3.0]: https://github.com/powercap/powercap/compare/v0.2.0...v0.3.0
 [v0.2.0]: https://github.com/powercap/powercap/compare/v0.1.1...v0.2.0
 [v0.1.1]: https://github.com/powercap/powercap/compare/v0.1.0...v0.1.1
+[#8]: https://github.com/powercap/powercap/issues/8
 [#6]: https://github.com/powercap/powercap/issues/6
 [#4]: https://github.com/powercap/powercap/issues/4
 [#1]: https://github.com/powercap/powercap/issues/1
