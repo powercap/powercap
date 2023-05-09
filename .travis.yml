@@ -1,7 +1,7 @@
 os:
   - linux
 
-dist: focal
+dist: jammy
 
 arch:
   - amd64
@@ -12,6 +12,10 @@ arch:
 matrix:
   include:
     # Different distros and compilers on amd64
+    - dist: jammy
+      compiler: gcc
+    - dist: jammy
+      compiler: clang
     - dist: focal
       compiler: gcc
     - dist: focal
