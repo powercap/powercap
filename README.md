@@ -169,6 +169,17 @@ To uninstall, run with proper privileges:
 make uninstall
 ```
 
+### Cross Compiling
+
+To cross-compile for different systems/architectures, use standard CMake toolchain files.
+See [Mastering CMake](https://cmake.org/cmake/help/book/mastering-cmake/) for reference.
+
+For example, modify the cmake command from the build directory to use your own `toolchain.cmake` file:
+
+``` sh
+cmake -DCMAKE_TOOLCHAIN_FILE=/path/to/toolchain.cmake ..
+```
+
 
 ## Project Source
 
