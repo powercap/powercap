@@ -1,15 +1,13 @@
 # Powercap Sysfs C Bindings and Utilities
 
 This project provides the `powercap` library -- a generic C interface to the Linux power capping framework (sysfs interface).
-It includes an implementation for working with Intel Running Average Power Limit (RAPL).
-
 It also provides the following applications:
 
 * `powercap-info` - view powercap control type hierarchies or zone/constraint-specific configurations
 * `powercap-set` - set powercap control type zone/constraint-specific configurations
 
-These bindings were originally created for use with [RAPLCap](https://github.com/powercap/raplcap), but can be used independently.
-See the RAPLCap project for a more general interface for managing RAPL power caps, including other command line utilities.
+The aforementioned library and applications should be compatible with all Linux powercap drivers.
+The library also includes an API, originally created for use with [RAPLCap](https://github.com/powercap/raplcap), specifically for managing Intel Running Average Power Limit (RAPL).
 
 If using this project for other scientific works or publications, please reference:
 
@@ -33,8 +31,8 @@ If using this project for other scientific works or publications, please referen
 
 ## Prerequisites
 
-Powercap (with the RAPL implementation) was released with Linux kernel 3.13.
-You must be running this kernel or newer with the configs `CONFIG_POWERCAP` and `CONFIG_INTEL_RAPL` enabled.
+The Linux power capping framework was released with Linux kernel 3.13.
+You must be running this kernel or newer with the configs `CONFIG_POWERCAP` and `CONFIG_INTEL_RAPL` enabled to use the Intel RAPL driver.
 
 To use the `intel-rapl` control type, ensure that the appropriate kernel module is loaded.
 Run with proper privileges:
