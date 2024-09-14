@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.12...3.30)
 
 project(powercap VERSION 0.6.1
                  LANGUAGES C)
