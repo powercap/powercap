@@ -5,6 +5,7 @@
 ### Fixed
 
 * [#8] pkg-config file is broken when CMAKE_INSTALL_{INCLUDE,LIB}DIR is absolute (Alex Shpilkin)
+* CMake: uninstall script: CMP0153 developer warning about using `exec_program`.
 
 
 ## [v0.6.0] - 2022-05-13
